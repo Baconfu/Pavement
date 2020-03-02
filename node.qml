@@ -10,6 +10,13 @@ Item {
     property int absX
     property int absY
 
+    onNameChanged: {
+        textInput.text = name
+    }
+    onTypeChanged: {
+        typeInput.text = type
+    }
+
     z:0
 
     property bool highlighted: false

@@ -18,12 +18,7 @@ void Node::typeInputAccepted(QString s)
 {
     Body * b = Body::getInstance();
     setType(b->getNodeByName(s));
-    if(getType()){
-        obj()->findChild<QObject*>("typeName")->setProperty("italic",true);
-
-    }else{
-        obj()->findChild<QObject*>("typeName")->setProperty("italic",false);
-    }
+    qDebug()<<b->getNodeByName(s);
     b->setFocusWindow();
 }
 
@@ -56,28 +51,71 @@ void Node::setName(QString name)
     obj()->setProperty("name",name);
 }
 
-void Node::setParent(Node *n)
+int Node::addParent(Node *n)
 {
-    m_parent = n;
-    if(n){
-        n->registerChild(this);
+    if(parentExists(n)){
+        return 1;
+    }
+    m_parents.append(n);
+    n->addChild(this);
+    structural * s = newStructural();
+    s->setParentNode(n);
+    s->update();
+    return 0;
+}
+
+
+void Node::removeParent(Node * n)
+{
+    n->removeChild(this);
+    for(int i=0; i<getParents().length(); i++){
+        if(getParents()[i] == n){
+            m_parents.removeAt(i);
+            break;
+        }
     }
 }
 
-void Node::unParent()
+bool Node::parentExists(Node *n)
 {
-    getParent()->unRegisterChild(this);
-    m_parent = nullptr;
+    for(int i=0; i<getParents().length(); i++){
+        if(n->ID() == getParents()[i]->ID()){
+            return true;
+        }
+    }
+    return false;
 }
 
-void Node::registerChild(Node *n)
+int Node::addChild(Node *n)
 {
+    if(childExists(n)){
+        return 1;
+    }
     m_children.append(n);
+    n->addParent(this);
+    structural * s = n->newStructural();
+    s->setParentNode(this);
+    s->update();
+    return 0;
 }
 
-void Node::unRegisterChild(Node *n)
+void Node::removeChild(Node *n)
 {
-    m_children.removeAt(findChildLocalIDByObject(n));
+    for(int i=0; i<m_children.length(); i++){
+        if(n == m_children[i]){
+            m_children.removeAt(i);
+        }
+    }
+}
+
+bool Node::childExists(Node *n)
+{
+    for(int i=0; i<getChildren().length(); i++){
+        if(n->ID() == getChildren()[i]->ID()){
+            return true;
+        }
+    }
+    return false;
 }
 
 void Node::setType(Node *n)
@@ -87,35 +125,56 @@ void Node::setType(Node *n)
         m_type = n->name();
         m_style = n->getStyle();
         obj()->setProperty("type",m_type);
+        obj()->findChild<QObject*>("typeName")->setProperty("italic",true);
+
+
+        n->registerMember(this);
     }else{
         Body * b = Body::getInstance();
+        if(m_typeNode){
+            n->removeMember(m_typeNode);
+        }
         m_typeNode = nullptr;
         m_type = "";
         m_style = b->defaultStyle();
         obj()->setProperty("type",m_type);
+        obj()->findChild<QObject*>("typeName")->setProperty("italic",false);
     }
 
 }
 
-Node *Node::findChildByObject(Node *n)
+int Node::registerMember(Node *n)
 {
-    Node * child = nullptr;
-    for(int i=0; i<getChildren().length(); i++){
-        if(n == getChildren()[i]){
-            child = getChildren()[i];
-        }
+    if(!n){
+        return 1;
     }
-    return child;
-}
-
-int Node::findChildLocalIDByObject(Node *n)
-{
-    for(int i=0; i<getChildren().length(); i++){
-        if(n == getChildren()[i]){
-            return i;
-        }
+    if(memberExists(n)){
+        return 1;
     }
+    m_members.append(n);
+    n->setType(this);
     return 0;
+}
+
+void Node::removeMember(Node *n)
+{
+    for(int i=0; i<members().length(); i++){
+        if(n->ID() == members()[i]->ID()){
+            Node * nll = nullptr;
+            n->setType(nll);
+            members().removeAt(i);
+        }
+    }
+}
+
+bool Node::memberExists(Node *n)
+{
+    for(int i=0; i<m_members.length(); i++){
+        if(n == m_members[i]){
+            return true;
+        }
+    }
+    return false;
 }
 
 void Node::deleteObj()
@@ -124,79 +183,15 @@ void Node::deleteObj()
     m_obj = nullptr;
 }
 
-void Node::initializeStructural()
+void Node::setVisibility(bool visibility)
 {
-    Body * body = Body::getInstance();
-    QQuickItem * object;
-
-    QQmlComponent component(body->engine(),QUrl("qrc:/structural.qml"));
-    object = qobject_cast<QQuickItem*>(component.create());
-    QQuickItem * item = body->getRoot();
-    object->setParentItem(item);
-    object->setParent(body->engine());
-    m_structural = object;
-}
-
-void Node::updateStructural()
-{
-
-
-    if(hoveringStructural()){
-        Body * b = Body::getInstance();
-        setStructuralOrigin(b->mousePosition());
-        setStructuralDestination(centerPosition());
-        setStructuralCutoff();
-    }else{
-        setStructuralOrigin(getParent()->centerPosition());
-        setStructuralDestination(centerPosition());
-        setStructuralCutoff();
+    m_visible = visibility;
+    obj()->setProperty("visible",visibility);
+    QVector<Relation*> relations = getAllRelations();
+    for(int i=0; i<relations.length(); i++){
+        relations[i]->setVisibility(visibility);
     }
-}
 
-void Node::setStructuralOrigin(Body::coordinate c)
-{
-    getStructural()->setX(c.x);
-    getStructural()->setY(c.y);
-    m_structuralOrigin = c;
-}
-
-void Node::setStructuralDestination(Body::coordinate c)
-{
-    m_structuralDestination = c;
-    c = c.subtract(structuralOrigin());
-    m_structural->setProperty("width",c.x);
-    m_structural->setProperty("height",c.y);
-
-
-}
-
-void Node::setStructuralCutoff()
-{
-    Body::coordinate Vector = structuralOrigin().subtract(structuralDestination());
-    double radius;
-    if(width() > height()){
-        radius = width();
-    }else{
-        radius = height();
-    }
-    radius -= 13;
-
-    double angle = Vector.getAngle();
-
-
-    double intersectionX = cos(angle) * radius;
-    double intersectionY = sin(angle) * radius;
-
-    intersectionX += structuralDestination().subtract(structuralOrigin()).x;
-    intersectionY += structuralDestination().subtract(structuralOrigin()).y;
-
-    m_structural->findChild<QObject*>("line")->setProperty("p1",QPointF(intersectionX,intersectionY));
-
-}
-
-void Node::setHoveringStructural(bool b)
-{
-    m_hoveringStructural = b;
 }
 
 QVector<Relation*> Node::getAllRelations()
@@ -233,6 +228,15 @@ void Node::registerIncomingRelation(Relation *r)
     }
 }
 
+structural * Node::newStructural()
+{
+    structural * s =  new structural;
+    s->initializeObj();
+    s->setChildNode(this);
+    toParent.append(s);
+    return s;
+}
+
 void Node::updateRelations()
 {
     QVector<Relation*> v = getAllRelations();
@@ -267,7 +271,7 @@ void Node::initializeObj()
     QQmlComponent component(body->engine(),QUrl("qrc:/node.qml"));
     object = qobject_cast<QQuickItem*>(component.create());
     QQuickItem * item = body->getRoot();
-    object->setParentItem(item);
+    object->setParentItem(item->findChild<QQuickItem*>("layer"));
     object->setParent(body->engine());
     connect(object,SIGNAL(widthChanged()),this,SLOT(getWidthFromObj()));
     connect(object,SIGNAL(heightChanged()),this,SLOT(getHeightFromObj()));

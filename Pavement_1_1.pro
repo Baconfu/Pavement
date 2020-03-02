@@ -14,12 +14,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         body.cpp \
+        fileexplorer.cpp \
         main.cpp \
         node.cpp \
         paintnode.cpp \
         paintrelation.cpp \
         paintstructural.cpp \
-        relation.cpp
+        relation.cpp \
+        structural.cpp
 
 RESOURCES += qml.qrc
 
@@ -36,8 +38,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     body.h \
+    fileexplorer.h \
     node.h \
     paintnode.h \
     paintrelation.h \
     paintstructural.h \
-    relation.h
+    relation.h \
+    structural.h

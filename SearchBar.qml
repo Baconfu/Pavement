@@ -70,10 +70,16 @@ Item {
                 searching(text)
             }
             onAccepted: {
-                if(item.optionHighlighted>-1)
+                if(text.length == 0){
+                    optionSelected(-1)
+                }
+                if(item.optionHighlighted>-1){
                     optionSelected(item.optionHighlighted)
-                if(item.optionHighlighted==-1 && text.length>0)
+                }
+                if(item.optionHighlighted==-1 && text.length>0){
                     optionSelected(0)
+                }
+
 
             }
         }

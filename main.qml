@@ -4,54 +4,48 @@ import Paint 1.0
 
 
 Window {
+    id: win
     visible: true
     width: 640
     height: 480
     title: qsTr("Pavement 1.1")
 
     Item {
+        anchors.fill:parent
         objectName: "item"
         id: myItem
-        anchors.fill: parent
-        focus:true
         signal tabPressed()
         signal enterPressed()
-
-
+        focus: true
         Keys.onTabPressed: {
-            tabPressed()
+            myItem.tabPressed()
 
         }
 
         Keys.onReturnPressed: {
-            enterPressed()
+            myItem.enterPressed()
         }
-
-        Item {
-            objectName: "map"
-            id:map
-            anchors.fill:parent
-
-        }
-
-
-
         MouseArea {
             objectName: "mouseArea"
             anchors.fill: parent
-            signal mouseTransform(int x,int y)
+            signal mouseTransform(int x,int y,int offsetX,int offsetY)
             hoverEnabled: true
             onMouseXChanged: {
-                mouseTransform(mouseX,mouseY)
+                mouseTransform(mouseX,mouseY,layer.x,layer.y)
             }
             onMouseYChanged: {
-                mouseTransform(mouseX,mouseY)
+                mouseTransform(mouseX,mouseY,layer.x,layer.y)
             }
         }
+        Item {
+            id: layer
+            objectName: "layer"
+            x:0
+            y:0
+            width:win.width
+            height:win.height
 
-
-
-
+        }
     }
 
 }
