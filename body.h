@@ -6,12 +6,18 @@
 #include <QQuickItem>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
+#include <QTimer>
 #include <QDebug>
 #include <QQmlComponent>
+#include <QStringList>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <math.h>
+#include <dirent.h>
+
+
+
 
 class Node;
 class Relation;
@@ -33,6 +39,9 @@ public:
     void initialize();
     void saveFile(QString path);
     void openFile(QString path);
+
+    QStringList * getSaves(QString path);
+
 
     enum cellStyle{
         minimal = 0,
@@ -94,25 +103,53 @@ public:
     coordinate tabPosition(){return m_tabPosition;}
 
     Node * getNodePointerByID(int id);
+    Node * getNodePointerByID(int id,QVector<Node*> pool);
     Node * getNodeByName(QString name);
     QVector<Node*> getNodeByType(QString type);
     QVector<Node*> getNodeByType(Node * typeNode);
 
     Relation * getRelationPointerByID(int id);
+    Relation * getRelationPointerByID(int id,QVector<Relation*> pool);
 
+    coordinate getDisplayDimensions();
 
 
     int context(){return m_context;}
     void setContext(int c){m_context = c;}
 
 private:
+    QTimer timer;
+    void startTimer();
+    void stopTimer();
+
+    int tally = 0;
+
+    Body::coordinate m_velocity;
+    double velocityMagnitude(int x,int y);
+    coordinate padding(int screenWidth, int screenHeight);
+    coordinate padding(coordinate c);
+    bool inBounds(int x,int y);
+    void pan(int x, int y);
+
+
+    /*
+     * idea: compound context system
+     * context stored in linked list. mix and match of context numbers creates new emergent contexts.
+     * pros: less typing, less clutter, potential for more specific contexts
+     * cons: more complicated.
+     */
+
+
     enum Context{
         all = 0,
         node_selected = 1,
         relation_selected = 2,
         nothing_selected = 3,
         creating_relation = 4,
-        parenting = 5
+        parenting = 5,
+        tab_searching = 6,
+        node_tab_searching = 7,
+        loading_file = 8
     };
 
     int m_context = 0;
@@ -121,6 +158,7 @@ private:
     Relation * hoveringRelation(){return m_hoveringRelation;}
     void setHoveringRelation(Relation * r);
 
+    coordinate m_mouseLocalPosition;
     coordinate m_mousePosition;
     coordinate m_tabPosition;
 
@@ -190,9 +228,11 @@ private:
 public slots:
     void tab();
     void enterPressed();
-    void mouseTransform(int x,int y);
+    void mouseTransform(int x,int y,int offsetX,int offsetY);
     int searching(QString input);
-    void acceptedSelection(int n);
+    int acceptedSelection(int n);
+    void timeOut();
+
 };
 
 #endif // BODY_H

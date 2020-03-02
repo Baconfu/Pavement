@@ -4,6 +4,7 @@
 #include <QObject>
 #include <relation.h>
 #include <body.h>
+#include <structural.h>
 
 
 class Node: public QObject
@@ -14,20 +15,33 @@ class Node: public QObject
 public:
     Node(QObject * parent = nullptr);
 
-
+    int ID(){return m_id;}
     void setID(int id);
+
+    QString name(){
+        m_name = obj()->findChild<QObject*>("textInput")->property("text").toString();
+        return m_name;
+    }
     void setName(QString name);
+
+    int absX() {return m_absX;}
     void setAbsX(int x) {
         m_absX = x;
         obj()->setProperty("absX",x);
         updateRelations();
     }
+
+    int absY() {return m_absY;}
     void setAbsY(int y){
         m_absY = y;
         obj()->setProperty("absY",y);
         updateRelations();
     }
 
+    Body::coordinate centerPosition(){
+        setCenterPosition();
+        return m_centerPosition;
+    }
     void setCenterPosition(Body::coordinate c){
         m_centerPosition = c;
     }
@@ -37,53 +51,57 @@ public:
 
     }
 
+    QVector<Node*> getParents(){return m_parents;}
+    int addParent(Node * n);
+    void removeParent(Node * n);
+    bool parentExists(Node * n);
 
-    void setParent(Node * n);
-    void unParent();
 
-    void registerChild(Node * n);
-    void unRegisterChild(Node * n);
+    QVector<Node*> getChildren(){return m_children;}
+    int addChild(Node * n);
+    void removeChild(Node * n);
+    bool childExists(Node * n);
 
+
+    QString typeName(){return m_type;}
+
+    Node * getType(){return m_typeNode;}
     void setType(Node * n);
-    void findType(QString s);
 
-
-    int ID(){return m_id;}
-    QString name(){
-        m_name = obj()->findChild<QObject*>("textInput")->property("text").toString();
-        return m_name;
-    }
-    int absX() {return m_absX;}
-    int absY() {return m_absY;}
     void refreshWidthHeight(){
+
         m_width = obj()->property("width").toInt();
         m_height = obj()->property("height").toInt();
     }
     int width(){refreshWidthHeight(); return m_width;}
     int height(){refreshWidthHeight(); return m_height;}
 
-    Node * getParent(){return m_parent;}
 
-    QVector<Node*> getChildren(){return m_children;}
-    Node * findChildByID(int id);
-    Node * findChildByObject(Node * n);
-    int findChildLocalIDByObject(Node * n);
 
-    Node * getType(){return m_typeNode;}
-    QString type(){return m_type;}
 
-    Body::coordinate centerPosition(){
-        setCenterPosition();
-        return m_centerPosition;
-    }
+
+
+
+
+
+    QVector<Node*> members(){return m_members;}
+    int registerMember(Node * n);
+    void removeMember(Node * n);
+    bool memberExists(Node * n);
+
+
 
     QVector<Relation*> getAllRelations();
     void registerRelation(Relation * r);
     void registerIncomingRelation(Relation * r);
 
-    void deleteRelationByLocalID(int id);
     void deleteRelationByTarget(Node * n);
     void deleteAllRelations();
+
+    QVector<structural*> getAllStructurals(){return toParent;}
+    structural * newStructural();
+    structural * hoveringStructural(){return m_hoveringStructural;}
+    void setHoveringStructural(structural * s){m_hoveringStructural = s;}
 
     void giveInputFocus();
     void giveTypeInputFocus();
@@ -93,19 +111,8 @@ public:
     void deleteObj();
     QQuickItem * obj(){return m_obj;}
 
-    void initializeStructural();
-    void deleteStructural();
-    QQuickItem * getStructural(){return m_structural;}
-    void updateStructural();
-    void setStructuralOrigin(Body::coordinate c);
-    void setStructuralDestination(Body::coordinate c);
-    Body::coordinate structuralOrigin(){return m_structuralOrigin;}
-    Body::coordinate structuralDestination(){return m_structuralDestination;}
-    void setStructuralCutoff();
-
-    void setHoveringStructural(bool b);
-    bool hoveringStructural(){return m_hoveringStructural;}
-
+    bool isVisible(){return m_visible;}
+    void setVisibility(bool visibility);
 
     void highlight(bool visible);
 
@@ -150,20 +157,22 @@ private:
     int m_height;
     Body::coordinate m_centerPosition;
 
-    Node * m_parent = nullptr;
+    QVector<Node*> m_parents;
     QVector<Node*> m_children;
+    QVector<structural*> toParent;
+
+    structural * m_hoveringStructural = nullptr;
+
 
     QString m_type;
     Node * m_typeNode = nullptr;
+    QVector<Node*> m_members;
 
     Body::style m_style;
 
-    QQuickItem * m_obj = nullptr;
+    bool m_visible = true;
 
-    QQuickItem * m_structural = nullptr;
-    bool m_hoveringStructural = false;
-    Body::coordinate m_structuralOrigin;
-    Body::coordinate m_structuralDestination;
+    QQuickItem * m_obj = nullptr;
 
     bool m_preventFocus = false;
 

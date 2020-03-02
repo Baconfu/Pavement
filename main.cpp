@@ -6,6 +6,7 @@
 #include <paintnode.h>
 #include <paintrelation.h>
 #include <paintstructural.h>
+#include <fileexplorer.h>
 
 extern QQmlApplicationEngine * enginePtr;
 extern QQuickWindow * windowPtr;
@@ -37,6 +38,7 @@ int main(int argc, char *argv[])
 
     Body * body = Body::getInstance();
     qDebug()<<"initial instance"<<body;
+
 
 
 
