@@ -182,6 +182,11 @@ void Relation::updateSelf()
 
 
 }
+
+void Relation::setVisibility(bool visibility)
+{
+
+}
 void Relation::updateRelations(){
 
 }
@@ -233,7 +238,7 @@ void Relation::initializeObj()
     QQmlComponent component(body->engine(),QUrl("qrc:/relation.qml"));
     object = qobject_cast<QQuickItem*>(component.create());
     QQuickItem * item = body->getRoot();
-    object->setParentItem(item);
+    object->setParentItem(item->findChild<QQuickItem*>("layer"));
     object->setParent(body->engine());
 
     m_obj = object;

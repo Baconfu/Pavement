@@ -42,6 +42,7 @@ private:
 
     int m_id;
 
+    bool m_visible = true;
     bool m_hovering = false;
 
     QVector<Relation*> toRelation;
@@ -106,6 +107,9 @@ public:
     Relation * originRelation(){return m_origin_relation;}
     Node * destinationNode(){return m_destination_node;}
     Relation * destinationRelation(){return m_destination_relation;}
+
+    bool isVisible(){return m_visible;}
+    void setVisibility(bool visibility);
     bool hovering(){return m_hovering;}
 
 
