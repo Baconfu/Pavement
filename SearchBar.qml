@@ -5,6 +5,7 @@ Item {
     x:0
     y:0
     z:1
+    property bool selectFirst: true
     property int optionCount: 0
     onOptionCountChanged: rectangle.displayCount = optionCount
     width: rectangle.width
@@ -77,7 +78,13 @@ Item {
                     optionSelected(item.optionHighlighted)
                 }
                 if(item.optionHighlighted==-1 && text.length>0){
-                    optionSelected(0)
+                    if(selectFirst){
+                        optionSelected(0)
+                    }else{
+                        optionSelected(-1)
+                    }
+
+
                 }
 
 

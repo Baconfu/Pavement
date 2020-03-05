@@ -7,6 +7,7 @@
 #include <QSizeF>
 #include <QSGGeometryNode>
 #include <QSGFlatColorMaterial>
+#include <QSGMaterial>
 #include <math.h>
 #include <QPointF>
 

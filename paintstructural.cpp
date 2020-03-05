@@ -75,7 +75,6 @@ QSGNode * PaintStructural::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData
     QPointF armP = QPointF(p1().x() - armX,p1().y() - armY);
     QPointF arm2P = QPointF(p1().x() - arm2X,p1().y() - arm2Y);
 
-
     QSGGeometry::Point2D * vertices = geometry->vertexDataAsPoint2D();
 
     vertices[0].set(origin.x(),origin.y());

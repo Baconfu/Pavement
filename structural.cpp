@@ -92,3 +92,10 @@ void structural::setHovering(bool b)
 {
     m_hovering = b;
 }
+
+void structural::setVisibility(bool b)
+{
+    obj()->setProperty("visible",b);
+    m_visible = b;
+
+}

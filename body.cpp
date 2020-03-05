@@ -3,6 +3,7 @@
 
 using namespace std;
 
+
 extern QQmlApplicationEngine * enginePtr;
 extern QQuickWindow * windowPtr;
 
@@ -14,6 +15,7 @@ Body::Body(QObject * parent):
 
 Body * Body::getInstance()
 {
+
     if(!instance){
         instance  = new Body;
     }
@@ -80,6 +82,11 @@ void Body::initialize()
     f.alias = QStringList{"save file"};
     f.commonShorthand = "sf";
     functions.append(f);
+    f.name = "frame";
+    f.alias = QStringList{"frame view","reset view","frame camera"};
+    f.commonShorthand = "f";
+    functions.append(f);
+
 
 }
 
@@ -99,6 +106,26 @@ QQuickWindow * Body::window(){
 void Body::setFocusWindow()
 {
     getRoot()->setProperty("focus",true);
+}
+
+void Body::frameView()
+{
+    int sumX = 0;
+    int sumY = 0;
+    int n =  nodeMap.length();
+    for(int i=0; i<n; i++){
+        sumX += nodeMap[i]->absX();
+        sumY += nodeMap[i]->absY();
+
+    }
+
+    double x = double(sumX) / double(n);
+    double y = double(sumY) / double(n);
+
+    getRoot()->findChild<QObject*>("layer")->setProperty("x",-1 * x + getRoot()->property("width").toReal() / 2);
+
+    getRoot()->findChild<QObject*>("layer")->setProperty("y",-1 * y + getRoot()->property("height").toReal() / 2);
+
 }
 void Body::saveFile(QString path)
 {
@@ -165,7 +192,7 @@ void Body::openFile(QString path)
 {
     ifstream myfile;
     myfile.open(path.toStdString());
-    qDebug()<<"hi";
+
     string str;
     if(myfile.is_open()){
         QVector<Node*> nodePool;
@@ -274,16 +301,20 @@ void Body::openFile(QString path)
     }
 }
 
-QStringList * Body::getSaves(QString path)
+QStringList Body::getSaves(QString path)
 {
-    QStringList * s = {};
+
+    QStringList s;
     struct dirent * entry;
     DIR *dir = opendir(path.toUtf8());
     if(dir == nullptr){
-        return nullptr;
+        return s;
     }
     while((entry = readdir(dir)) != nullptr){
-        s->append(QString::fromStdString(entry->d_name));
+        if(entry->d_type == 8){
+            s.append(QString::fromStdString(entry->d_name));
+        }
+
     }
     closedir(dir);
     return s;
@@ -432,6 +463,7 @@ void Body::tab()
     m_searchBar->setProperty("x",p.x);
     m_searchBar->setProperty("y",p.y);
     m_searchBar->findChild<QObject*>("textInput")->setProperty("focus",true);
+    qDebug()<<latestContext();
     setContext(Context::tab_searching);
 
 }
@@ -439,7 +471,7 @@ void Body::tab()
 void Body::enterPressed()
 {
 
-    if(context() == Context::creating_relation){
+    if(latestContext() == Context::creating_relation){
         if(highlightedNode()){
 
             hoveringRelation()->setDestinationObject(highlightedNode());
@@ -448,22 +480,22 @@ void Body::enterPressed()
 
             Relation * r = nullptr;
             setHoveringRelation(r);
+            contextResolved();
         }else{
             qDebug()<<"error, no destination selected";
 
         }
+
     }
-    qDebug()<<9;
-    if(context() == Context::parenting){
-        qDebug()<<10;
+    if(latestContext() == Context::parenting){
         if(highlightedNode()){
-            qDebug()<<11;
+
             for(int i=0; i<nodeMap.length(); i++){
 
                 QVector<structural*> s = nodeMap[i]->getAllStructurals();
                 for(int j=0; j<s.length(); j++){
                     if(s[j]->hovering()){
-                        qDebug()<<12;
+
 
                         nodeMap[i]->addParent(highlightedNode());
                         s[j]->setParentNode(highlightedNode());
@@ -473,6 +505,7 @@ void Body::enterPressed()
 
                         structural * s = nullptr;
                         nodeMap[i]->setHoveringStructural(s);
+                        contextResolved();
                     }
                 }
 
@@ -571,34 +604,63 @@ void Body::setHighlightedNode(Node *n)
 int Body::searching(QString input)
 {
     if(input == "" || input == " " || input.length()==0){
-        m_searchBar->setProperty("optionCount",0);
-        m_searchBar->setProperty("optionHighlighted",-1);
-        m_searchBar->findChild<QObject*>("textInput")->setProperty("text","");
-        for(int i=0; i<5; i++){
-            QString t = "option" + QString::number(i);
-            m_searchBar->findChild<QObject*>(t)->setProperty("text","");
-        }
+        clearSearch();
         return 0;
     }
-    if(input[input.length()-1]==" "){
+    if(input[input.length()-1]==" "){ // maybe make getter and setter functions for option highlighted.
         int n = m_searchBar->property("optionHighlighted").toInt();
         m_searchBar->setProperty("optionHighlighted",n+1);
     }
-    while(input[input.length()-1] == " "){
-        input.remove(input.length()-1,1);
 
-        m_searchBar->findChild<QObject*>("textInput")->setProperty("text",input);
+    input = Utility::trimString(input," ");
+    m_searchBar->findChild<QObject*>("textInput")->setProperty("text",input);
+
+
+    QVector<function> pool;
+
+    pool = functions;
+    if(latestContext() == opening_file){
+        pool.clear();
+        QStringList saves = getSaves("/home/chuan/qt_projects/Pavement_1_1/saves");
+
+        for(int i=0; i<saves.length(); i++){
+            function f;
+            f.name = saves[i];
+            f.alias = QStringList();
+            f.commonShorthand = "NULL";
+            pool.append(f);
+        }
+    }
+    if(latestContext() == saving_file){
+        pool.clear();
+        QStringList saves = getSaves("/home/chuan/qt_projects/Pavement_1_1/saves");
+
+        for(int i=0; i<saves.length(); i++){
+            function f;
+            f.name = saves[i];
+            f.alias = QStringList();
+            f.commonShorthand = "NULL";
+            pool.append(f);
+        }
+
     }
 
-    for(int i=0; i<functions.length(); i++){
-        functions[i].match = match(&functions[i],input);
+    if(pool.length()==0){
+
+        return 0;
+    }
+
+    for(int i=0; i<pool.length(); i++){
+        pool[i].match = match(&pool[i],input);
 
     }
 
-    QVector<function> temp = functions;
+
+
+    QVector<function> temp = pool;
     displayFunctions.clear();
 
-    while(displayFunctions.length()<5){
+    while(displayFunctions.length()<5 && temp.length()>0){
         function largest;
         largest.match = -1;
         int large = 0;
@@ -628,16 +690,49 @@ int Body::searching(QString input)
 
 int Body::acceptedSelection(int n)
 {
-    if(context() == Context::node_tab_searching){
-        setContext(Context::node_selected);
+    if(latestContext() == opening_file){
+
+        QString g;
+        g = displayFunctions[n].name;
+        openFile(defaultPath + "/" + g);
+        contextResolved();
+        setFocusWindow();
+        m_searchBar->setProperty("visible",false);
+        return 0;
     }
-    setContext(Context::all);
+    if(latestContext() == saving_file){
+        QString g;
+        if(n == -1){
+            g = m_searchBar->findChild<QObject*>("textInput")->property("text").toString();
+        }else{
+            g = displayFunctions[n].name;
+        }
+        saveFile(defaultPath + "/" + g);
+        contextResolved();
+        setFocusWindow();
+        m_searchBar->setProperty("visible",false);
+        return 0;
+    }
+
 
     m_searchBar->setProperty("visible",false);
     if(n == -1){
         return 0;
     }
-    QString f = displayFunctions[n].name;
+
+
+    QString f = "";
+    if(latestContext() != opening_file && latestContext() != saving_file){
+        f = displayFunctions[n].name;
+
+    }
+
+    contextResolved();
+
+    if(f == "frame"){
+        frameView();
+    }
+
 
     if(f=="new node"){
         int id = allocateNewID("node");
@@ -648,22 +743,19 @@ int Body::acceptedSelection(int n)
     }
     if(f=="new relation"){
         int id = allocateNewID("relation");
-        if(context() == Context::nothing_selected){
-            qDebug()<<"error: no node selected";
-        }
-        if(selectedNode()){
+        if(latestContext() == Context::node_selected){
             Node * n = nullptr;
             newRelation(id,selectedNode(),n);
             setSelected(n);
             setFocusWindow();
         }
-    }
-    if(f == "parent"){
-        if(context() == Context::nothing_selected){
+        else{
             qDebug()<<"error: no node selected";
         }
 
-        if(selectedNode()){
+    }
+    if(f == "parent"){
+        if(latestContext() == Context::node_selected){
             Node * n = nullptr;
             setContext(Context::parenting);
 
@@ -674,23 +766,29 @@ int Body::acceptedSelection(int n)
             setFocusWindow();
 
         }
+        else{
+            qDebug()<<"error: no node selected";
+        }
+
+
     }
     if(f == "save"){
         saveFile("/home/chuan/qt_projects/Pavement_1_1/saves/data.txt");
     }
     if(f == "open"){
-
-        openFile("/home/chuan/qt_projects/Pavement_1_1/saves/data.txt");
+        qDebug()<<10;
+        autoTab(opening_file);
     }
     if(f == "save as"){
-
+        autoTab(saving_file);
     }
+
     return 0;
 }
 
 void Body::timeOut()
 {
-    if(context() != Context::tab_searching){
+    if(latestContext() != Context::tab_searching){
         pan(m_velocity.x,m_velocity.y);
     }
 
@@ -763,6 +861,24 @@ int Body::allocateNewID(QString type)
     return -1;
 }
 
+void Body::autoTab(int context)
+{
+    m_searchBar->setProperty("visible",true);
+    coordinate p = mousePosition();
+    m_tabPosition = p;
+    m_searchBar->setProperty("x",p.x);
+    m_searchBar->setProperty("y",p.y);
+    m_searchBar->findChild<QObject*>("textInput")->setProperty("focus",true);
+    setContext(context);
+
+    if(context == 8){
+        m_searchBar->setProperty("selectFirst",false);
+    }else{
+        m_searchBar->setProperty("selectFirst",true);
+    }
+
+}
+
 int Body::match(function * f,QString input)
 {
     int match = 0;
@@ -828,6 +944,17 @@ int Body::matchString(QString s, QString input)
 
     return match;
 
+}
+
+void Body::clearSearch()
+{
+    m_searchBar->setProperty("optionCount",0);
+    m_searchBar->setProperty("optionHighlighted",-1);
+    m_searchBar->findChild<QObject*>("textInput")->setProperty("text","");
+    for(int i=0; i<5; i++){
+        QString t = "option" + QString::number(i);
+        m_searchBar->findChild<QObject*>(t)->setProperty("text","");
+    }
 }
 
 

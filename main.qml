@@ -39,7 +39,9 @@ Window {
         }
         Item {
             id: layer
+
             objectName: "layer"
+            scale:1
             x:0
             y:0
             width:win.width

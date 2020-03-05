@@ -16,6 +16,9 @@
 #include <math.h>
 #include <dirent.h>
 
+#include <utility.h>
+
+
 
 
 
@@ -36,11 +39,16 @@ public:
     QQmlApplicationEngine * engine();
     QQuickWindow * window();
     void setFocusWindow();
+    void frameView();
+
+    void zoomIn();
+    void zoomOut();
+
     void initialize();
     void saveFile(QString path);
     void openFile(QString path);
 
-    QStringList * getSaves(QString path);
+    QStringList getSaves(QString path);
 
 
     enum cellStyle{
@@ -114,10 +122,26 @@ public:
     coordinate getDisplayDimensions();
 
 
-    int context(){return m_context;}
-    void setContext(int c){m_context = c;}
+    QVector<int> context(){return m_context;}
+    int latestContext(){
+        if(m_context.length()==0){
+            return -1;
+        }
+        return m_context[m_context.length()-1];
+    }
+    void contextResolved(){m_context.pop_back();}
+    void setContext(int c){
+        if(latestContext() != c){
+
+            m_context.append(c);
+            qDebug()<<"setting context: "<<m_context;
+        }
+
+    }
 
 private:
+    QString defaultPath = "/home/chuan/qt_projects/Pavement_1_1/saves";
+
     QTimer timer;
     void startTimer();
     void stopTimer();
@@ -141,18 +165,20 @@ private:
 
 
     enum Context{
-        all = 0,
+        neutral = 0,
         node_selected = 1,
         relation_selected = 2,
         nothing_selected = 3,
         creating_relation = 4,
         parenting = 5,
         tab_searching = 6,
-        node_tab_searching = 7,
-        loading_file = 8
+        opening_file = 7,
+        saving_file = 8
+
+
     };
 
-    int m_context = 0;
+    QVector<int> m_context;
 
     Relation * m_hoveringRelation = nullptr;
     Relation * hoveringRelation(){return m_hoveringRelation;}
@@ -215,6 +241,7 @@ private:
 
     QQuickItem * m_searchBar = nullptr;
     void updateSearchBar(QStringList topMatches);
+    void clearSearch();
 
     void newNode(int id, QString name,int x, int y,Node * parent, Node * typeNode);
     void newRelation(int id, Node * origin, Node * destination);
@@ -226,6 +253,7 @@ private:
     int allocateNewID(QString type);
 
 public slots:
+    void autoTab(int context);
     void tab();
     void enterPressed();
     void mouseTransform(int x,int y,int offsetX,int offsetY);

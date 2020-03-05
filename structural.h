@@ -31,12 +31,15 @@ public:
     bool hovering(){return m_hovering;}
 
 
+    void setVisibility(bool b);
+    bool visible(){return m_visible;}
+
     QQuickItem * obj(){return m_obj;}
     void initializeObj();
     void deleteObj();
 
 private:
-
+    bool m_visible = true;
     bool m_hovering = false;
 
     Body::coordinate m_origin;

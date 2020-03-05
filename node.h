@@ -57,6 +57,7 @@ public:
     bool parentExists(Node * n);
 
 
+
     QVector<Node*> getChildren(){return m_children;}
     int addChild(Node * n);
     void removeChild(Node * n);
@@ -75,12 +76,6 @@ public:
     }
     int width(){refreshWidthHeight(); return m_width;}
     int height(){refreshWidthHeight(); return m_height;}
-
-
-
-
-
-
 
 
 
@@ -113,6 +108,14 @@ public:
 
     bool isVisible(){return m_visible;}
     void setVisibility(bool visibility);
+
+    bool hidden(){return m_hidden;}
+    void setHidden(bool b);
+
+    bool isDissolved(){return m_dissolve;}
+    void dissolve();
+    void unDissolve();
+
 
     void highlight(bool visible);
 
@@ -171,6 +174,9 @@ private:
     Body::style m_style;
 
     bool m_visible = true;
+
+    bool m_hidden = false;
+    bool m_dissolve = false;
 
     QQuickItem * m_obj = nullptr;
 

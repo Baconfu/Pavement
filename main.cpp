@@ -2,11 +2,11 @@
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QQmlContext>
+#include <QSurfaceFormat>
 #include <body.h>
 #include <paintnode.h>
 #include <paintrelation.h>
 #include <paintstructural.h>
-#include <fileexplorer.h>
 
 extern QQmlApplicationEngine * enginePtr;
 extern QQuickWindow * windowPtr;
@@ -53,7 +53,11 @@ int main(int argc, char *argv[])
     enginePtr->rootContext()->setContextObject(body);
     windowPtr = qobject_cast<QQuickWindow*>(enginePtr->rootObjects().at(0));
     body->initialize();
+
     windowPtr->show();
+
+
+
 
 
     return app.exec();

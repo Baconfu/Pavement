@@ -20,7 +20,8 @@ SOURCES += \
         paintrelation.cpp \
         paintstructural.cpp \
         relation.cpp \
-        structural.cpp
+        structural.cpp \
+        utility.cpp
 
 RESOURCES += qml.qrc
 
@@ -42,4 +43,5 @@ HEADERS += \
     paintrelation.h \
     paintstructural.h \
     relation.h \
-    structural.h
+    structural.h \
+    utility.h
