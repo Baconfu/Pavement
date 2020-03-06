@@ -86,6 +86,30 @@ bool Node::parentExists(Node *n)
     return false;
 }
 
+QVector<Node *> Node::ancestorPath(Node *target)
+{
+    QVector<Node*> null;
+    if(this == target){
+        QVector<Node*> path;
+        path.insert(0,this);
+        return path;
+    }
+    QVector<Node*> parents = getParents();
+    if(parents.length()==0){
+        return null;
+    }
+    for(int i=0; i<parents.length(); i++){
+        QVector<Node*> path;
+        path = parents[i]->ancestorPath(target);
+        if(!path.isEmpty()){
+            path.insert(0,this);
+            return path;
+        }
+    }
+
+    return null;
+}
+
 int Node::addChild(Node *n)
 {
     if(childExists(n)){
@@ -207,7 +231,13 @@ void Node::dissolve()
 {
     m_dissolve = true;
     setVisibility(false);
+    QVector<Node*> children = getChildren();
+    QVector<Node*> parents = getParents();
+    for(int i=0; i<children.length(); i++){
+        if(children[i]->ancestryContains(parents[i])){
 
+        }
+    }
 
 }
 

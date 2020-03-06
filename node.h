@@ -56,6 +56,9 @@ public:
     void removeParent(Node * n);
     bool parentExists(Node * n);
 
+    bool ancestryContains(Node * n);
+    QVector<Node*> ancestorPath(Node * target);
+
 
 
     QVector<Node*> getChildren(){return m_children;}
@@ -163,6 +166,7 @@ private:
     QVector<Node*> m_parents;
     QVector<Node*> m_children;
     QVector<structural*> toParent;
+    QVector<structural*> toParent_proxy;
 
     structural * m_hoveringStructural = nullptr;
 
