@@ -18,9 +18,17 @@ public:
     void setChildNode(Node * n);
     void setParentNode(Node * n);
 
+    Node * displayChildNode(){return m_displayChildNode;}
+    Node * displayParentNode(){return m_displayParentNode;}
+    void setDisplayChildNode(Node * n);
+    void setDisplayParentNode(Node * n);
+
+    Node * findDisplayParentNode();
+    Node * findDisplayChildNode();
 
 
-    void update();
+
+
     void setOrigin(Body::coordinate c);
     void setDestination(Body::coordinate c);
     Body::coordinate origin(){return m_origin;}
@@ -39,6 +47,8 @@ public:
     void deleteObj();
 
 private:
+    QVector<Node*> parentAncestorPath();
+    QVector<Node*> childAncestorPath();
     bool m_visible = true;
     bool m_hovering = false;
 
@@ -48,8 +58,12 @@ private:
     Node * m_childNode;
     Node * m_parentNode;
 
-    QQuickItem * m_obj = nullptr;
+    Node * m_displayChildNode;
+    Node * m_displayParentNode;
 
+    QQuickItem * m_obj = nullptr;
+public slots:
+    void update();
 };
 
 #endif // STRUCTURAL_H

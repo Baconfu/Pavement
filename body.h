@@ -41,8 +41,7 @@ public:
     void setFocusWindow();
     void frameView();
 
-    void zoomIn();
-    void zoomOut();
+
 
     void initialize();
     void saveFile(QString path);
@@ -134,7 +133,7 @@ public:
         if(latestContext() != c){
 
             m_context.append(c);
-            qDebug()<<"setting context: "<<m_context;
+            //qDebug()<<"setting context: "<<m_context;
         }
 
     }
@@ -173,9 +172,8 @@ private:
         parenting = 5,
         tab_searching = 6,
         opening_file = 7,
-        saving_file = 8
-
-
+        saving_file = 8,
+        including = 9
     };
 
     QVector<int> m_context;

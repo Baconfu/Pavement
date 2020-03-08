@@ -60,8 +60,16 @@ int Node::addParent(Node *n)
     n->addChild(this);
     structural * s = newStructural();
     s->setParentNode(n);
+    s->setDisplayParentNode(n);
+    connect(this,SIGNAL(updateStructural()),s,SLOT(update()),Qt::UniqueConnection);
     s->update();
     return 0;
+}
+
+void Node::registerParent(Node *n)
+{
+    m_parents.append(n);
+
 }
 
 
@@ -110,6 +118,40 @@ QVector<Node *> Node::ancestorPath(Node *target)
     return null;
 }
 
+QVector<Node *> Node::ancestorPathSet(Node *target)
+{
+    QVector<Node*> null;
+    if(this == target){
+        QVector<Node*> path;
+        path.insert(0,this);
+        return path;
+    }
+    QVector<Node*> parents = getParents();
+    if(parents.length()==0){
+        return null;
+    }
+    for(int i=0; i<parents.length(); i++){
+        QVector<Node*> path;
+        path = parents[i]->ancestorPathSet(target);
+        if(!path.isEmpty()){
+            setIncludes(path);
+            qDebug()<<"from:"<<name()<<path;
+
+            path.insert(0,this);
+            return path;
+        }
+    }
+
+    return null;
+
+}
+
+void Node::include(Node *n)
+{
+    ancestorPathSet(n);
+    return;
+}
+
 int Node::addChild(Node *n)
 {
     if(childExists(n)){
@@ -121,6 +163,11 @@ int Node::addChild(Node *n)
     s->setParentNode(this);
     s->update();
     return 0;
+}
+
+void Node::registerChild(Node *n)
+{
+    m_children.append(n);
 }
 
 void Node::removeChild(Node *n)
@@ -231,14 +278,15 @@ void Node::dissolve()
 {
     m_dissolve = true;
     setVisibility(false);
-    QVector<Node*> children = getChildren();
-    QVector<Node*> parents = getParents();
-    for(int i=0; i<children.length(); i++){
-        if(children[i]->ancestryContains(parents[i])){
+    updateRelations();
 
-        }
-    }
+}
 
+void Node::distill()
+{
+    m_dissolve = false;
+    setVisibility(true);
+    updateRelations();
 }
 
 QVector<Relation*> Node::getAllRelations()
@@ -277,9 +325,13 @@ void Node::registerIncomingRelation(Relation *r)
 
 structural * Node::newStructural()
 {
+
     structural * s =  new structural;
     s->initializeObj();
     s->setChildNode(this);
+    s->setDisplayChildNode(this);
+
+    connect(this,SIGNAL(updateStructural()),s,SLOT(update()),Qt::UniqueConnection);
     toParent.append(s);
     return s;
 }
@@ -290,6 +342,8 @@ void Node::updateRelations()
     for(int i=0; i<v.length(); i++){
         v[i]->updateSelf();
     }
+
+    updateStructural();
 }
 
 void Node::setStyle()
@@ -330,16 +384,11 @@ void Node::initializeObj()
 
 void Node::createObj()
 {
-
-
     setAbsX(m_absX);
     setAbsY(m_absY);
     setID(m_id);
     setName(m_name);
     setType(m_typeNode);
-
-
-
 
 }
 

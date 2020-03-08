@@ -9,12 +9,64 @@ structural::structural(QObject * parent):
 
 void structural::setChildNode(Node * n)
 {
+    if(!m_childNode){
+        setDisplayChildNode(n);
+    }
     m_childNode = n;
+    connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
 }
 
 void structural::setParentNode(Node *n)
 {
+    if(!m_parentNode){
+        setDisplayParentNode(n);
+    }
     m_parentNode = n;
+    connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
+}
+
+void structural::setDisplayChildNode(Node *n)
+{
+    m_displayChildNode = n;
+    connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
+}
+
+void structural::setDisplayParentNode(Node *n)
+{
+    m_displayParentNode = n;
+    connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
+}
+
+Node *structural::findDisplayParentNode()
+{
+    QVector<Node*> path = parentNode()->getIncludes();
+    qDebug()<<"finding display parent from path:"<<path;
+    if(path.isEmpty()){
+        Node * n = parentNode();
+        return n;
+    }
+    int i=0;
+    while(!path[i]->isVisible()){
+        i+=1;
+    }
+    qDebug()<<"found display parent: "<<path[i]->name();
+    return path[i];
+
+}
+
+Node *structural::findDisplayChildNode()
+{
+    //invalid concept for function
+    QVector<Node*> path = childNode()->getIncludes();
+    if(path.isEmpty()){
+        Node * n = childNode();
+        return n;
+    }
+    int i=0;
+    while(!path[i]->isVisible()){
+        i+=1;
+    }
+    return path[i];
 }
 
 
@@ -31,26 +83,43 @@ void structural::initializeObj()
     m_obj = object;
 }
 
+
+
 void structural::update()
 {
+
 
 
     if(hovering()){
         Body * b = Body::getInstance();
         setOrigin(b->mousePosition());
-        setDestination(childNode()->centerPosition());
+        setDestination(displayChildNode()->centerPosition());
         setStructuralCutoff();
     }else{
-        setOrigin(parentNode()->centerPosition());
-        setDestination(childNode()->centerPosition());
+        qDebug()<<"triggered update"<<this<<":"<<parentNode()->name()<<childNode()->name();
+        if(childNode()->isVisible()){
+            setVisibility(true);
+            setDisplayChildNode(childNode());
+        }else{
+            setVisibility(false);
+
+        }
+        setDisplayParentNode(findDisplayParentNode());
+
+
+        qDebug()<<destination().x<<destination().y;
+        qDebug()<<displayParentNode()->centerPosition().x<<displayParentNode()->centerPosition().y;
+
+        setOrigin(displayParentNode()->centerPosition());
+        setDestination(displayChildNode()->centerPosition());
         setStructuralCutoff();
     }
 }
 
 void structural::setOrigin(Body::coordinate c)
 {
-    obj()->setX(c.x);
-    obj()->setY(c.y);
+    obj()->setProperty("x",c.x);
+    obj()->setProperty("y",c.y);
     m_origin = c;
 }
 

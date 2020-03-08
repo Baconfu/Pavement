@@ -86,6 +86,14 @@ void Body::initialize()
     f.alias = QStringList{"frame view","reset view","frame camera"};
     f.commonShorthand = "f";
     functions.append(f);
+    f.name = "dissolve";
+    f.alias = QStringList{"dissolve node"};
+    f.commonShorthand = "d";
+    functions.append(f);
+    f.name = "include";
+    f.alias = QStringList{"add include","include node"};
+    f.commonShorthand = "inc";
+    functions.append(f);
 
 
 }
@@ -433,7 +441,7 @@ Body::coordinate Body::padding(int screenWidth, int screenHeight)
     coordinate c;
     c.x = screenWidth / 3;
     c.y = screenHeight / 3;
-    qDebug()<<c.x<<c.y;
+    //qDebug()<<c.x<<c.y;
     return c;
 }
 Body::coordinate Body::padding(coordinate c)
@@ -463,7 +471,7 @@ void Body::tab()
     m_searchBar->setProperty("x",p.x);
     m_searchBar->setProperty("y",p.y);
     m_searchBar->findChild<QObject*>("textInput")->setProperty("focus",true);
-    qDebug()<<latestContext();
+    //qDebug()<<latestContext();
     setContext(Context::tab_searching);
 
 }
@@ -497,7 +505,8 @@ void Body::enterPressed()
                     if(s[j]->hovering()){
 
 
-                        nodeMap[i]->addParent(highlightedNode());
+                        nodeMap[i]->registerParent(highlightedNode());
+                        highlightedNode()->registerChild(nodeMap[i]);
                         s[j]->setParentNode(highlightedNode());
 
                         s[j]->setHovering(false);
@@ -510,6 +519,19 @@ void Body::enterPressed()
                 }
 
             }
+        }
+    }
+    if(latestContext() == including){
+        if(highlightedNode()){
+            QVector<Node*> path = selectedNode()->ancestorPathSet(highlightedNode());
+
+            qDebug()<<path;
+            for(int i=0; i<path.length()-1; i++){
+
+                qDebug()<<selectedNode()->getIncludes()[i]->name();
+            }
+
+            contextResolved();
         }
     }
 }
@@ -562,7 +584,7 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 
         if(nodeMap[i]->isInside(mousePosition().x,mousePosition().y)){
 
-            if(hoveringRelation() || hoveringStructuralExists){
+            if(hoveringRelation() || hoveringStructuralExists || latestContext() == including){
                 setHighlightedNode(nodeMap[i]);
             }else{
                 nodeMap[i]->hoverSelect(mousePosition().y);
@@ -642,9 +664,7 @@ int Body::searching(QString input)
             f.commonShorthand = "NULL";
             pool.append(f);
         }
-
     }
-
     if(pool.length()==0){
 
         return 0;
@@ -690,6 +710,7 @@ int Body::searching(QString input)
 
 int Body::acceptedSelection(int n)
 {
+
     if(latestContext() == opening_file){
 
         QString g;
@@ -707,6 +728,7 @@ int Body::acceptedSelection(int n)
         }else{
             g = displayFunctions[n].name;
         }
+        qDebug()<<defaultPath+"/"+g;
         saveFile(defaultPath + "/" + g);
         contextResolved();
         setFocusWindow();
@@ -719,7 +741,6 @@ int Body::acceptedSelection(int n)
     if(n == -1){
         return 0;
     }
-
 
     QString f = "";
     if(latestContext() != opening_file && latestContext() != saving_file){
@@ -769,14 +790,24 @@ int Body::acceptedSelection(int n)
         else{
             qDebug()<<"error: no node selected";
         }
+    }
+    if(f == "include"){
+        if(latestContext() == node_selected){
+            setContext(including);
 
 
+        }
+    }
+    if(f == "dissolve"){
+        if(latestContext() == node_selected){
+            selectedNode()->dissolve();
+        }
     }
     if(f == "save"){
         saveFile("/home/chuan/qt_projects/Pavement_1_1/saves/data.txt");
     }
     if(f == "open"){
-        qDebug()<<10;
+        //qDebug()<<10;
         autoTab(opening_file);
     }
     if(f == "save as"){
@@ -836,7 +867,7 @@ void Body::newRelation(int id, Node *origin, Node *destination)
     r->createObj();
     r->updateSelf();
     relationArchive.append(r);
-    qDebug()<<r->obj();
+    //qDebug()<<r->obj();
     r=nullptr;
 }
 

@@ -53,16 +53,23 @@ public:
 
     QVector<Node*> getParents(){return m_parents;}
     int addParent(Node * n);
+    void registerParent(Node * n);
     void removeParent(Node * n);
     bool parentExists(Node * n);
 
-    bool ancestryContains(Node * n);
+
     QVector<Node*> ancestorPath(Node * target);
+    QVector<Node*> ancestorPathSet(Node * target);
+
+    QVector<Node*> getIncludes(){return includes;}
+    void setIncludes(QVector<Node*> path){includes = path;}
+    void include(Node * n);
 
 
 
     QVector<Node*> getChildren(){return m_children;}
     int addChild(Node * n);
+    void registerChild(Node * n);
     void removeChild(Node * n);
     bool childExists(Node * n);
 
@@ -117,7 +124,7 @@ public:
 
     bool isDissolved(){return m_dissolve;}
     void dissolve();
-    void unDissolve();
+    void distill();
 
 
     void highlight(bool visible);
@@ -166,7 +173,8 @@ private:
     QVector<Node*> m_parents;
     QVector<Node*> m_children;
     QVector<structural*> toParent;
-    QVector<structural*> toParent_proxy;
+
+    QVector<Node*> includes;
 
     structural * m_hoveringStructural = nullptr;
 
@@ -194,6 +202,8 @@ public:
 signals:
     void absXChanged();
     void absYChanged();
+
+    void updateStructural();
 public slots:
     void getWidthFromObj(){
         m_width = obj()->property("width").toInt();
