@@ -16,7 +16,7 @@ class PaintStructural: public QQuickItem
     Q_OBJECT
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
     Q_PROPERTY(QPointF p1 READ p1 WRITE setP1 NOTIFY p1Changed)
-
+    Q_PROPERTY(bool expandable READ expandable WRITE setExpandable NOTIFY expandableChanged)
 public:
     PaintStructural(QQuickItem * parent = nullptr);
     ~PaintStructural();
@@ -29,14 +29,19 @@ public:
     QPointF p1(){return m_p1;}
     void setP1(QPointF point){m_p1 = point;}
 
+    bool expandable(){return m_expandable;}
+    void setExpandable(bool b){m_expandable = b;}
+
 private:
     QColor m_color;
     QPointF m_p1;
+    bool m_expandable = false;
 
 signals:
 
     void colorChanged();
     void p1Changed();
+    void expandableChanged();
 };
 
 #endif // PAINTSTRUCTURAL_H

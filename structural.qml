@@ -16,5 +16,7 @@ Item {
         color: "grey"
         anchors.fill: parent
         p1:Qt.point(container.width,container.height)
+        expandable: false
     }
+
 }

@@ -37,7 +37,11 @@ QSGNode * PaintStructural::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData
         node = static_cast<QSGGeometryNode *>(oldNode);
         geometry = node->geometry();
         geometry->setLineWidth(1);
-        geometry->allocate(6);
+        if(expandable()){
+            geometry->allocate(16);
+        }else{
+            geometry->allocate(6);
+        }
         node->setMaterial(material);
     }
 
@@ -77,12 +81,13 @@ QSGNode * PaintStructural::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData
 
     QSGGeometry::Point2D * vertices = geometry->vertexDataAsPoint2D();
 
-    vertices[0].set(origin.x(),origin.y());
-    vertices[1].set(destination.x(),destination.y());
-    vertices[2].set(destination.x(),destination.y());
-    vertices[3].set(armP.x(),armP.y());
-    vertices[4].set(destination.x(),destination.y());
-    vertices[5].set(arm2P.x(),arm2P.y());
+    vertices[0].set(float(origin.x()),float(origin.y()));
+    vertices[1].set(float(destination.x()),float(destination.y()));
+    vertices[2].set(float(destination.x()),float(destination.y()));
+    vertices[3].set(float(armP.x()),float(armP.y()));
+    vertices[4].set(float(destination.x()),float(destination.y()));
+    vertices[5].set(float(arm2P.x()),float(arm2P.y()));
+
 
     node->markDirty(QSGNode::DirtyGeometry);
     return node;

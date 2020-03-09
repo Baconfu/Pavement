@@ -525,10 +525,10 @@ void Body::enterPressed()
         if(highlightedNode()){
             QVector<Node*> path = selectedNode()->ancestorPathSet(highlightedNode());
 
-            qDebug()<<path;
+
             for(int i=0; i<path.length()-1; i++){
 
-                qDebug()<<selectedNode()->getIncludes()[i]->name();
+
             }
 
             contextResolved();
@@ -728,7 +728,7 @@ int Body::acceptedSelection(int n)
         }else{
             g = displayFunctions[n].name;
         }
-        qDebug()<<defaultPath+"/"+g;
+
         saveFile(defaultPath + "/" + g);
         contextResolved();
         setFocusWindow();

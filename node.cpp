@@ -135,7 +135,7 @@ QVector<Node *> Node::ancestorPathSet(Node *target)
         path = parents[i]->ancestorPathSet(target);
         if(!path.isEmpty()){
             setIncludes(path);
-            qDebug()<<"from:"<<name()<<path;
+
 
             path.insert(0,this);
             return path;

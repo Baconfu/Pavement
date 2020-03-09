@@ -40,7 +40,7 @@ void structural::setDisplayParentNode(Node *n)
 Node *structural::findDisplayParentNode()
 {
     QVector<Node*> path = parentNode()->getIncludes();
-    qDebug()<<"finding display parent from path:"<<path;
+
     if(path.isEmpty()){
         Node * n = parentNode();
         return n;
@@ -49,7 +49,7 @@ Node *structural::findDisplayParentNode()
     while(!path[i]->isVisible()){
         i+=1;
     }
-    qDebug()<<"found display parent: "<<path[i]->name();
+
     return path[i];
 
 }
@@ -96,7 +96,7 @@ void structural::update()
         setDestination(displayChildNode()->centerPosition());
         setStructuralCutoff();
     }else{
-        qDebug()<<"triggered update"<<this<<":"<<parentNode()->name()<<childNode()->name();
+
         if(childNode()->isVisible()){
             setVisibility(true);
             setDisplayChildNode(childNode());
@@ -105,10 +105,6 @@ void structural::update()
 
         }
         setDisplayParentNode(findDisplayParentNode());
-
-
-        qDebug()<<destination().x<<destination().y;
-        qDebug()<<displayParentNode()->centerPosition().x<<displayParentNode()->centerPosition().y;
 
         setOrigin(displayParentNode()->centerPosition());
         setDestination(displayChildNode()->centerPosition());
