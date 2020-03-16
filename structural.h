@@ -26,7 +26,7 @@ public:
     Node * findDisplayParentNode();
     Node * findDisplayChildNode();
 
-
+    bool isInside(int x,int y);
 
 
     void setOrigin(Body::coordinate c);
@@ -38,6 +38,8 @@ public:
     void setHovering(bool b);
     bool hovering(){return m_hovering;}
 
+    void setHighlighted(bool b);
+    bool highlighted(){return m_highlighted;}
 
     void setVisibility(bool b);
     bool visible(){return m_visible;}
@@ -52,6 +54,8 @@ private:
     bool m_visible = true;
     bool m_hovering = false;
 
+    bool m_highlighted = false;
+
     Body::coordinate m_origin;
     Body::coordinate m_destination;
 
@@ -62,6 +66,8 @@ private:
     Node * m_displayParentNode;
 
     QQuickItem * m_obj = nullptr;
+
+    int tally = 0;
 public slots:
     void update();
 };

@@ -7,6 +7,7 @@
 #include <paintnode.h>
 #include <paintrelation.h>
 #include <paintstructural.h>
+#include <expandicon.h>
 
 extern QQmlApplicationEngine * enginePtr;
 extern QQuickWindow * windowPtr;
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<PaintNode>("Paint",1,0,"PaintNode");
     qmlRegisterType<PaintRelation>("Paint",1,0,"PaintRelation");
     qmlRegisterType<PaintStructural>("Paint",1,0,"PaintStructural");
+    qmlRegisterType<ExpandIcon>("Paint",1,0,"ExpandIcon");
 
     Body * body = Body::getInstance();
     qDebug()<<"initial instance"<<body;

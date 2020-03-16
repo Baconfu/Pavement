@@ -112,7 +112,7 @@ public:
     void giveTypeInputFocus();
 
     void initializeObj(); //just creates the obj and sets it to m_obj
-    void createObj(); //sets all attributes of m_obj based on Node
+
     void deleteObj();
     QQuickItem * obj(){return m_obj;}
 
@@ -158,7 +158,7 @@ private:
 
 
 
-    void updateRelations();
+
     void setStyle();
     Body::style getStyle(){return m_style;}
     int m_id;
@@ -204,6 +204,7 @@ signals:
     void absYChanged();
 
     void updateStructural();
+    void updateRelation();
 public slots:
     void getWidthFromObj(){
         m_width = obj()->property("width").toInt();
@@ -214,6 +215,7 @@ public slots:
 
     void inputAccepted();
     void typeInputAccepted(QString s);
+    void updateRelations();
 };
 
 #endif // NODE_H

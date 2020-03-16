@@ -1,7 +1,8 @@
 #include "paintstructural.h"
 
 PaintStructural::PaintStructural(QQuickItem * parent):
-    QQuickItem (parent)
+    QQuickItem (parent),
+    m_lineWidth(1)
 {
     setFlag(ItemHasContents,true);
 }
@@ -14,6 +15,7 @@ PaintStructural::~PaintStructural()
 QSGNode * PaintStructural::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData *)
 {
 
+
     QSGGeometryNode *node = nullptr;
     QSGGeometry * geometry = nullptr;
 
@@ -21,7 +23,7 @@ QSGNode * PaintStructural::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData
 
         node = new QSGGeometryNode;
         geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(),6);
-        geometry->setLineWidth(1);
+        geometry->setLineWidth(m_lineWidth);
         geometry->setDrawingMode(QSGGeometry::DrawLines);
         node->setGeometry(geometry);
         node->setFlag(QSGNode::OwnsGeometry);
@@ -36,9 +38,9 @@ QSGNode * PaintStructural::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData
 
         node = static_cast<QSGGeometryNode *>(oldNode);
         geometry = node->geometry();
-        geometry->setLineWidth(1);
+        geometry->setLineWidth(m_lineWidth);
         if(expandable()){
-            geometry->allocate(16);
+            geometry->allocate(6);
         }else{
             geometry->allocate(6);
         }
@@ -50,6 +52,7 @@ QSGNode * PaintStructural::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData
 
     double gradient = s.height() / s.width();
     double angle = atan(gradient);
+
 
     //quartiles
     bool top = false;
@@ -81,6 +84,7 @@ QSGNode * PaintStructural::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData
 
     QSGGeometry::Point2D * vertices = geometry->vertexDataAsPoint2D();
 
+
     vertices[0].set(float(origin.x()),float(origin.y()));
     vertices[1].set(float(destination.x()),float(destination.y()));
     vertices[2].set(float(destination.x()),float(destination.y()));
@@ -90,6 +94,19 @@ QSGNode * PaintStructural::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData
 
 
     node->markDirty(QSGNode::DirtyGeometry);
+
     return node;
+}
+
+void PaintStructural::setLineWidth(int n)
+{
+    if(m_lineWidth != n){
+
+        m_lineWidth = n;
+        lineWidthChanged();
+        update();
+
+    }
+
 }
 

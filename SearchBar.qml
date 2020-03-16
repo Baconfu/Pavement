@@ -58,7 +58,16 @@ Item {
             objectName:"textInput"
             x: 13
             y: 7
-            width: 80
+            width: contentWidth
+            onWidthChanged: {
+                if(width>166){
+                    rectangle.width = width + 20
+                }
+                else{
+                    rectangle.width = 186
+                }
+            }
+
             height: 20
 
 

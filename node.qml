@@ -22,6 +22,7 @@ Item {
     property bool highlighted: false
 
     signal typeAccepted(string s)
+    signal update()
 
     onAbsXChanged: {
         x = absX
@@ -42,6 +43,20 @@ Item {
     y:0
     width:10
     height: nameContainer.height + typeInput.height
+
+    onWidthChanged: {
+        update()
+    }
+    onHeightChanged: {
+        update()
+    }
+    onXChanged: {
+        update()
+    }
+    onYChanged:{
+        update()
+    }
+
     Rectangle{
         id: highlight
         visible: false
@@ -108,8 +123,14 @@ Item {
             onAccepted: {
                 typeAccepted(typeInput.text)
             }
-
         }
+    }
+    ExpandIcon {
+        visible:false
+        x:container.width + 2
+        y:4
+        width:12
+        height:12
 
     }
 

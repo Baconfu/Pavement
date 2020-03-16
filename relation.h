@@ -57,8 +57,8 @@ private:
     Node * m_destination_node = nullptr;
     Relation * m_destination_relation = nullptr;
 
-    Node * m_proxyOrigin = nullptr;
-    Node * m_proxyDestination = nullptr;
+    Node * m_displayOrigin = nullptr;
+    Node * m_displayDestination = nullptr;
 
     Body::coordinate m_origin;
     Body::coordinate m_destination;
@@ -104,15 +104,18 @@ public:
         return "";
     }
 
-    void updateSelf();
-
     Node * originNode(){return m_origin_node;}
     Relation * originRelation(){return m_origin_relation;}
     Node * destinationNode(){return m_destination_node;}
     Relation * destinationRelation(){return m_destination_relation;}
 
-    Node * proxyOrigin(){return m_proxyOrigin;}
-    Node * proxyDestination(){return m_proxyDestination;}
+    Node * findDisplayDestination();
+    Node * findDisplayOrigin();
+    Node * getDisplayOrigin();
+    Node * getDisplayDestination();
+    void setDisplayOrigin(Node * n);
+    void setDisplayDestination(Node * n);
+
 
     bool isVisible(){return m_visible;}
     void setVisibility(bool visibility);
@@ -143,7 +146,8 @@ public:
     void createObj();
     void deleteObj();
     QQuickItem * obj(){return m_obj;}
-
+public slots:
+    void updateSelf();
 };
 
 #endif // RELATION_H

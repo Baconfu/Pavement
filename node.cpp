@@ -57,7 +57,6 @@ int Node::addParent(Node *n)
         return 1;
     }
     m_parents.append(n);
-    n->addChild(this);
     structural * s = newStructural();
     s->setParentNode(n);
     s->setDisplayParentNode(n);
@@ -158,7 +157,6 @@ int Node::addChild(Node *n)
         return 1;
     }
     m_children.append(n);
-    n->addParent(this);
     structural * s = n->newStructural();
     s->setParentNode(this);
     s->update();
@@ -342,7 +340,7 @@ void Node::updateRelations()
     for(int i=0; i<v.length(); i++){
         v[i]->updateSelf();
     }
-
+    updateRelation();
     updateStructural();
 }
 
@@ -379,18 +377,11 @@ void Node::initializeObj()
     QObject * textObj = object->findChild<QObject*>("textInput");
     connect(textObj,SIGNAL(accepted()),this,SLOT(inputAccepted()));
     connect(object,SIGNAL(typeAccepted(QString)),this,SLOT(typeInputAccepted(QString)));
+    connect(object,SIGNAL(update()),this,SLOT(updateRelations()));
     m_obj = object;
 }
 
-void Node::createObj()
-{
-    setAbsX(m_absX);
-    setAbsY(m_absY);
-    setID(m_id);
-    setName(m_name);
-    setType(m_typeNode);
 
-}
 
 bool Node::isInside(int x, int y)
 {

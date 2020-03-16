@@ -23,41 +23,41 @@ int Relation::setRelationCutoff()
     double angle = inverseVector.getAngle();
 
 
-    if(destinationObjectType() == "node"){
+    if(getDisplayDestination()){
+        Node * destinationNode = m_displayDestination;
+        Node * originNode = m_displayOrigin;
         double pi = 3.1415926;
-        double a1 = atan(double(destinationNode()->height()) / double(destinationNode()->width()));
+        double a1 = atan(double(destinationNode->height()) / double(destinationNode->width()));
 
         int targetEdge_gradient = 0;
         double targetEdge_b = 0;
 
         if(angle>=a1 && angle < pi - a1){
             targetEdge_gradient = 0;
-            targetEdge_b = destinationNode()->absY() + destinationNode()->height() - originNode()->centerPosition().y;
+            targetEdge_b = destinationNode->absY() + destinationNode->height() - originNode->centerPosition().y;
 
         }
         if(angle >= pi - a1 && angle < pi + a1){
             targetEdge_gradient = 1;
-            targetEdge_b = destinationNode()->absX() - originNode()->centerPosition().x - 5;
+            targetEdge_b = destinationNode->absX() - originNode->centerPosition().x - 5;
 
         }
         if(angle >= pi + a1 && angle < 2 * pi - a1){
             targetEdge_gradient = 0;
-            targetEdge_b = destinationNode()->absY() - originNode()->centerPosition().y;
+            targetEdge_b = destinationNode->absY() - originNode->centerPosition().y;
 
         }
         if(angle >= 2 * pi - a1 || angle < a1){
             targetEdge_gradient = 1;
-            targetEdge_b = destinationNode()->absX() + destinationNode()->width() - originNode()->centerPosition().x + 5;
+            targetEdge_b = destinationNode->absX() + destinationNode->width() - originNode->centerPosition().x + 5;
 
         }
 
         int intersectionY = 0;
         int intersectionX = 0;
         if(targetEdge_gradient){
-            qDebug()<<10;
             intersectionX = int(targetEdge_b);
             intersectionY = int((double(localVector.y) / double(localVector.x)) * targetEdge_b);
-
 
         }else{
             intersectionX = int(targetEdge_b / (double(localVector.y) / double(localVector.x)));
@@ -160,20 +160,31 @@ Body::coordinate Relation::localMidPoint(){
 
 void Relation::updateSelf()
 {
-    if(originObjectType()=="node"){
-        setOrigin(m_origin_node->centerPosition());
+    if(getDisplayOrigin()){
+        setOrigin(m_displayOrigin->centerPosition());
         setRelationCutoff();
+    }else{
+        if(originObjectType()=="node"){
+            setOrigin(m_origin_node->centerPosition());
+            setRelationCutoff();
+        }
+        if(originObjectType()=="relation"){
+            setOrigin(m_origin_relation->worldMidPoint());
+        }
     }
-    if(originObjectType()=="relation"){
-        setOrigin(m_origin_relation->worldMidPoint());
-    }
-    if(destinationObjectType()=="node"){
-        setDestination(m_destination_node->centerPosition());
+    if(getDisplayDestination()){
+        setDestination(m_displayDestination->centerPosition());
         setRelationCutoff();
+    }else{
+        if(destinationObjectType()=="node"){
+            setDestination(m_destination_node->centerPosition());
+            setRelationCutoff();
+        }
+        if(destinationObjectType()=="relation"){
+            setDestination(m_destination_relation->worldMidPoint());
+        }
     }
-    if(destinationObjectType()=="relation"){
-        setDestination(m_destination_relation->worldMidPoint());
-    }
+
     if(hovering()){
         Body * b = Body::getInstance();
 
@@ -183,9 +194,62 @@ void Relation::updateSelf()
 
 }
 
+Node *Relation::findDisplayOrigin()
+{
+    if(originObjectType() == "node"){
+        if(originNode()->isVisible()){
+            return originNode();
+        }
+        QVector<Node*> path = originNode()->getIncludes();
+        int i=0;
+        while(!path[i]->isVisible()){
+            i+=1;
+        }
+        return path[i];
+    }
+    if(originObjectType() == "relation"){
+
+    }
+}
+
+Node *Relation::findDisplayDestination()
+{
+    if(destinationObjectType() == "node"){
+        if(destinationNode()->isVisible()){
+            return destinationNode();
+        }
+        QVector<Node*> path = destinationNode()->getIncludes();
+        int i=0;
+        while(!path[i]->isVisible()){
+            i+=1;
+        }
+        return path[i];
+    }
+    if(destinationObjectType() == "relation"){
+
+    }
+    Node * n = nullptr;
+    return n;
+}
+
+
+
+Node *Relation::getDisplayOrigin()
+{
+    m_displayOrigin = findDisplayOrigin();
+    return m_displayOrigin;
+}
+
+Node *Relation::getDisplayDestination()
+{
+    m_displayDestination = findDisplayDestination();
+    return m_displayDestination;
+}
+
 void Relation::setVisibility(bool visibility)
 {
-
+    m_obj->setProperty("visible",visibility);
+    m_visible = visibility;
 }
 void Relation::updateRelations(){
 
@@ -218,12 +282,14 @@ void Relation::finalizeSelf()
 {
     if(originNode()){
         originNode()->registerRelation(this);
+        connect(originNode(),SIGNAL(updateRelation()),this,SLOT(updateSelf()));
     }
     if(originRelation()){
         originRelation()->registerRelation(this);
     }
     if(destinationNode()){
         destinationNode()->registerIncomingRelation(this);
+        connect(destinationNode(),SIGNAL(updateRelation()),this,SLOT(updateSelf()));
     }
     if(destinationRelation()){
         destinationRelation()->registerIncomingRelation(this);

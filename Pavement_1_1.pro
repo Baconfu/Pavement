@@ -14,11 +14,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         body.cpp \
+        expandicon.cpp \
+        file.cpp \
         main.cpp \
         node.cpp \
         paintnode.cpp \
         paintrelation.cpp \
         paintstructural.cpp \
+        pavementfile.cpp \
         relation.cpp \
         structural.cpp \
         utility.cpp
@@ -38,10 +41,13 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     body.h \
+    expandicon.h \
+    file.h \
     node.h \
     paintnode.h \
     paintrelation.h \
     paintstructural.h \
+    pavementfile.h \
     relation.h \
     structural.h \
     utility.h

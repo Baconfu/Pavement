@@ -15,7 +15,7 @@
 #include <string>
 #include <math.h>
 #include <dirent.h>
-
+#include <QElapsedTimer>
 #include <utility.h>
 
 
@@ -24,7 +24,7 @@
 
 class Node;
 class Relation;
-
+class structural;
 
 class Body: public QObject
 {
@@ -146,6 +146,7 @@ private:
     void stopTimer();
 
     int tally = 0;
+    int debugTally = 1;
 
     Body::coordinate m_velocity;
     double velocityMagnitude(int x,int y);
@@ -188,6 +189,12 @@ private:
 
     QVector<Node*> nodeMap;
     QVector<Relation*> relationArchive;
+    QVector<structural*> structuralMap;
+
+    QVector<structural*> getAllStructurals();
+    void updateStructuralMap();
+
+
 
     Node * m_previousNode = nullptr;
     Node * m_selectedNode = nullptr;
@@ -234,6 +241,8 @@ private:
     QVector<function> functions;
     QVector<function> displayFunctions;
 
+    QVector<function> functionFromList(QStringList l);
+
     int match(function * f, QString input);
     int matchString(QString s, QString input);
 
@@ -249,7 +258,8 @@ private:
 
 
     int allocateNewID(QString type);
-
+signals:
+    void mouseMoved();
 public slots:
     void autoTab(int context);
     void tab();

@@ -9,18 +9,17 @@ structural::structural(QObject * parent):
 
 void structural::setChildNode(Node * n)
 {
-    if(!m_childNode){
-        setDisplayChildNode(n);
-    }
+
+    setDisplayChildNode(n);
     m_childNode = n;
     connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
 }
 
 void structural::setParentNode(Node *n)
 {
-    if(!m_parentNode){
-        setDisplayParentNode(n);
-    }
+
+    setDisplayParentNode(n);
+
     m_parentNode = n;
     connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
 }
@@ -28,12 +27,14 @@ void structural::setParentNode(Node *n)
 void structural::setDisplayChildNode(Node *n)
 {
     m_displayChildNode = n;
+    disconnect();
     connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
 }
 
 void structural::setDisplayParentNode(Node *n)
 {
     m_displayParentNode = n;
+    disconnect();
     connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
 }
 
@@ -69,6 +70,16 @@ Node *structural::findDisplayChildNode()
     return path[i];
 }
 
+bool structural::isInside(int x, int y)
+{
+    int tx = (origin().x + destination().x) / 2;
+    int ty = (origin().y + destination().y) / 2;
+    if(x > tx-20 && x < tx + 20 && y > ty - 20 && y < ty + 20){
+        return true;
+    }
+    return false;
+}
+
 
 void structural::initializeObj()
 {
@@ -88,8 +99,7 @@ void structural::initializeObj()
 void structural::update()
 {
 
-
-
+    setHighlighted(false);
     if(hovering()){
         Body * b = Body::getInstance();
         setOrigin(b->mousePosition());
@@ -131,31 +141,78 @@ void structural::setDestination(Body::coordinate c)
 
 void structural::setStructuralCutoff()
 {
-    Body::coordinate Vector = origin().subtract(destination());
-    double radius;
-    if(childNode()->width() > childNode()->height()){
-        radius = childNode()->width();
-    }else{
-        radius = childNode()->height();
+    if(hovering()){
+        return;
     }
-    radius -= 13;
+    Body::coordinate localVector = destination().subtract(origin());
+    Body::coordinate inverseVector = origin().subtract(destination());
 
-    double angle = Vector.getAngle();
+    double angle = inverseVector.getAngle();
 
 
-    double intersectionX = cos(angle) * radius;
-    double intersectionY = sin(angle) * radius;
+    if(displayChildNode()){
+        Node * destinationNode = displayChildNode();
+        Node * originNode = displayParentNode();
+        double pi = 3.1415926;
+        double a1 = atan(double(destinationNode->height()) / double(destinationNode->width()));
 
-    intersectionX += destination().subtract(origin()).x;
-    intersectionY += destination().subtract(origin()).y;
+        int targetEdge_gradient = 0;
+        double targetEdge_b = 0;
 
-    obj()->findChild<QObject*>("line")->setProperty("p1",QPointF(intersectionX,intersectionY));
+        if(angle>=a1 && angle < pi - a1){
+            targetEdge_gradient = 0;
+            targetEdge_b = destinationNode->absY() + destinationNode->height() - originNode->centerPosition().y;
+
+        }
+        if(angle >= pi - a1 && angle < pi + a1){
+            targetEdge_gradient = 1;
+            targetEdge_b = destinationNode->absX() - originNode->centerPosition().x - 5;
+
+        }
+        if(angle >= pi + a1 && angle < 2 * pi - a1){
+            targetEdge_gradient = 0;
+            targetEdge_b = destinationNode->absY() - originNode->centerPosition().y;
+
+        }
+        if(angle >= 2 * pi - a1 || angle < a1){
+            targetEdge_gradient = 1;
+            targetEdge_b = destinationNode->absX() + destinationNode->width() - originNode->centerPosition().x + 5;
+
+        }
+
+        int intersectionY = 0;
+        int intersectionX = 0;
+        if(targetEdge_gradient){
+            intersectionX = int(targetEdge_b);
+            intersectionY = int((double(localVector.y) / double(localVector.x)) * targetEdge_b);
+
+        }else{
+            intersectionX = int(targetEdge_b / (double(localVector.y) / double(localVector.x)));
+            intersectionY = int(targetEdge_b);
+        }
+
+        obj()->findChild<QObject*>("line")->setProperty("p1",QPointF(intersectionX,intersectionY));
+    }
 
 }
 
 void structural::setHovering(bool b)
 {
     m_hovering = b;
+}
+
+void structural::setHighlighted(bool b)
+{
+    if(b != m_highlighted){
+        m_highlighted = b;
+        if(b){
+            obj()->setProperty("focus",true);
+            obj()->setProperty("lineWidth",2);
+        }else{
+            obj()->setProperty("focus",true);
+            obj()->setProperty("lineWidth",1);
+        }
+    }
 }
 
 void structural::setVisibility(bool b)

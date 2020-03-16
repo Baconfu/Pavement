@@ -10,13 +10,33 @@ Item {
     z:-3
 
 
+    property int lineWidth: 1
+    property int cutoffX
+    property int cutoffY
     PaintStructural{
+
         id: line
         objectName: "line"
         color: "grey"
         anchors.fill: parent
         p1:Qt.point(container.width,container.height)
-        expandable: false
+
+
+
+        lineWidth: container.lineWidth
+
+
+
+    }
+    ExpandIcon {
+
+        x: container.width / 2 - 6
+        y: container.height / 2 - 6
+        width:12
+        height:12
+
+
+
     }
 
 }

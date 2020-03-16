@@ -37,6 +37,13 @@ Window {
                 mouseTransform(mouseX,mouseY,layer.x,layer.y)
             }
         }
+
+        TextInput{
+            x:0
+            y:-50
+            objectName: "debug"
+        }
+
         Item {
             id: layer
 
