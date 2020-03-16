@@ -1,5 +1,6 @@
 #include "paintstructural.h"
 
+
 PaintStructural::PaintStructural(QQuickItem * parent):
     QQuickItem (parent),
     m_lineWidth(1)

@@ -599,7 +599,7 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 
             structuralMap[i]->setHighlighted(true);
 
-            //getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
+            getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
             if(i==structuralMap.length()-1){
                 break;
             }
@@ -872,10 +872,7 @@ int Body::acceptedSelection(int n)
     }
     if(f == "debug"){
         getRoot()->findChild<QObject*>("line"+QString::number(debugTally))->setProperty("lineWidth",2);
-        debugTally += 1;
         getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
-
-
     }
 
     return 0;
