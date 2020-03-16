@@ -38,12 +38,6 @@ Window {
             }
         }
 
-        TextInput{
-            x:0
-            y:-50
-            objectName: "debug"
-        }
-
         Item {
             id: layer
 
@@ -53,7 +47,57 @@ Window {
             y:0
             width:win.width
             height:win.height
+            Item{
+                x: 0
+                y: 0
+                width: 200
+                height : 200
+                PaintStructural {
+                    anchors.fill: parent
+                    p1: Qt.point(180,180)
+                    id: line
+                    objectName: "line1"
+                    color: "grey"
+                    lineWidth: 1
+                    TextInput{
+                        objectName:"debug"
+                        anchors.fill:parent
+                    }
+                }
+                PaintStructural {
+                    anchors.fill: parent
+                    p1: Qt.point(150,180)
+                    id: line2
+                    objectName: "line2"
+                    color: "grey"
+                    lineWidth: 1
+                }
+                PaintStructural {
+                    anchors.fill: parent
+                    p1: Qt.point(180,150)
+                    id: line3
+                    objectName: "line3"
+                    color: "grey"
+                    lineWidth: 1
+                }
+                PaintStructural {
+                    anchors.fill: parent
+                    p1: Qt.point(180,170)
+                    id: line4
+                    objectName: "line4"
+                    color: "grey"
+                    lineWidth: 1
+                }
+                PaintStructural {
+                    anchors.fill: parent
+                    p1: Qt.point(180,30)
+                    id: line5
+                    objectName: "line5"
+                    color: "grey"
+                    lineWidth: 1
+                }
 
+            }
         }
     }
 
