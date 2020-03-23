@@ -57,15 +57,7 @@ public:
     void removeParent(Node * n);
     bool parentExists(Node * n);
 
-
     QVector<Node*> ancestorPath(Node * target);
-    QVector<Node*> ancestorPathSet(Node * target);
-
-    QVector<Node*> getIncludes(){return includes;}
-    void setIncludes(QVector<Node*> path){includes = path;}
-    void include(Node * n);
-
-
 
     QVector<Node*> getChildren(){return m_children;}
     int addChild(Node * n);
@@ -173,8 +165,6 @@ private:
     QVector<Node*> m_parents;
     QVector<Node*> m_children;
     QVector<structural*> toParent;
-
-    QVector<Node*> includes;
 
     structural * m_hoveringStructural = nullptr;
 

@@ -21,7 +21,7 @@ QSGNode * PaintRelation::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData *
 
         node = new QSGGeometryNode;
         geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(),6);
-        geometry->setLineWidth(1);
+        geometry->setLineWidth(m_lineWidth);
         geometry->setDrawingMode(QSGGeometry::DrawLines);
         node->setGeometry(geometry);
         node->setFlag(QSGNode::OwnsGeometry);
@@ -36,7 +36,7 @@ QSGNode * PaintRelation::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData *
 
         node = static_cast<QSGGeometryNode *>(oldNode);
         geometry = node->geometry();
-        geometry->setLineWidth(1);
+        geometry->setLineWidth(m_lineWidth);
         geometry->allocate(6);
         node->setMaterial(material);
     }

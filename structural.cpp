@@ -40,6 +40,7 @@ void structural::setDisplayParentNode(Node *n)
 
 Node *structural::findDisplayParentNode()
 {
+    /*
     QVector<Node*> path = parentNode()->getIncludes();
 
     if(path.isEmpty()){
@@ -52,11 +53,14 @@ Node *structural::findDisplayParentNode()
     }
 
     return path[i];
+    */
+    return parentNode();
 
 }
 
 Node *structural::findDisplayChildNode()
 {
+    /*
     //invalid concept for function
     QVector<Node*> path = childNode()->getIncludes();
     if(path.isEmpty()){
@@ -65,9 +69,11 @@ Node *structural::findDisplayChildNode()
     }
     int i=0;
     while(!path[i]->isVisible()){
-        i+=1;
+        i+=1;qDebug()<<i;
     }
     return path[i];
+    */
+    return childNode();
 }
 
 bool structural::isInside(int x, int y)
@@ -205,12 +211,15 @@ void structural::setHighlighted(bool b)
 {
     if(b != m_highlighted){
         m_highlighted = b;
+        qDebug()<<parentNode()->name()<<tally;
+        tally+=1;
         if(b){
+
             obj()->setProperty("focus",true);
-            obj()->setProperty("lineWidth",2);
+            obj()->setProperty("highlighted",true);
         }else{
             obj()->setProperty("focus",true);
-            obj()->setProperty("lineWidth",1);
+            obj()->setProperty("highlighted",false);
         }
     }
 }

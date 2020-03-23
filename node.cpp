@@ -117,40 +117,6 @@ QVector<Node *> Node::ancestorPath(Node *target)
     return null;
 }
 
-QVector<Node *> Node::ancestorPathSet(Node *target)
-{
-    QVector<Node*> null;
-    if(this == target){
-        QVector<Node*> path;
-        path.insert(0,this);
-        return path;
-    }
-    QVector<Node*> parents = getParents();
-    if(parents.length()==0){
-        return null;
-    }
-    for(int i=0; i<parents.length(); i++){
-        QVector<Node*> path;
-        path = parents[i]->ancestorPathSet(target);
-        if(!path.isEmpty()){
-            setIncludes(path);
-
-
-            path.insert(0,this);
-            return path;
-        }
-    }
-
-    return null;
-
-}
-
-void Node::include(Node *n)
-{
-    ancestorPathSet(n);
-    return;
-}
-
 int Node::addChild(Node *n)
 {
     if(childExists(n)){

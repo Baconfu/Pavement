@@ -10,11 +10,20 @@ Item {
     height:100
     z:-3
 
+    property bool highlighted: false
+    onHighlightedChanged: {
+        if(highlighted)
+            line.lineWidth = 2
+        else
+            line.lineWidth = 1
+    }
+
     PaintRelation {
         id: line
         objectName: "line"
         color:"grey"
         anchors.fill:parent
+        lineWidth: 1
 
         p1:Qt.point(container.width,container.height)
         onP1Changed: {

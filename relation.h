@@ -15,35 +15,18 @@ public:
     int ID(){return m_id;}
     void setID(int n){m_id = n;}
 
-    void isTouching(int x,int y);
+    bool isInside(int x,int y);
 
 private:
-    enum cellStyle{
-        minimal = 0,
-        closed = 1,
-        noBorder = 2
-    };
-    enum relationType{
-        type_outGoing = 1,
-        type_incoming = 0,
-        type_toRelation = 2,
-        type_toNode = 3
-    };
 
-    struct style{
-        QColor textColor;
-        QColor fillColor;
-        QColor borderColor;
+    int tally = 0;
 
-        int fontSize;
-        int cellStyle;
-
-    };
 
     int m_id;
 
     bool m_visible = true;
     bool m_hovering = false;
+    bool m_highlighted = false;
 
     QVector<Relation*> toRelation;
     QVector<Relation*> toRelation_relation;
@@ -140,6 +123,8 @@ public:
     void updateRelations();
     void registerRelation(Relation * r);
     void registerIncomingRelation(Relation * r);
+
+    void setHighlighted(bool b);
 
     void finalizeSelf();
     void initializeObj();

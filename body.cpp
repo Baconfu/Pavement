@@ -1,6 +1,7 @@
 #include "body.h"
 #include <node.h>
 #include <structural.h>
+#include <pavementfile.h>
 
 using namespace std;
 
@@ -142,12 +143,14 @@ void Body::frameView()
 }
 void Body::saveFile(QString path)
 {
+    PavementFile file = PavementFile("/home/chuan/qt_projects/Pavement_1_1/saves/jsonTest.json");
+
     ofstream myfile;
     myfile.open(path.toStdString());
     if(myfile.is_open()){
         myfile<<nodeMap.length()<<"\n";
-
         for(int i=0; i<nodeMap.length(); i++){
+            file.saveNode(nodeMap[i]);
             Node * n = nodeMap[i];
             myfile<<n->ID()<<"\n";
             myfile<<n->name().toStdString()<<"\n";
@@ -177,6 +180,7 @@ void Body::saveFile(QString path)
 
 
         }
+        file.writeJson();
         myfile<<relationArchive.length()<<"\n";
 
         for(int i=0; i<relationArchive.length(); i++){
@@ -509,9 +513,6 @@ void Body::enterPressed()
             Relation * r = nullptr;
             setHoveringRelation(r);
             contextResolved();
-        }else{
-            qDebug()<<"error, no destination selected";
-
         }
 
     }
@@ -539,19 +540,6 @@ void Body::enterPressed()
                 }
 
             }
-        }
-    }
-    if(latestContext() == including){
-        if(highlightedNode()){
-            QVector<Node*> path = selectedNode()->ancestorPathSet(highlightedNode());
-
-
-            for(int i=0; i<path.length()-1; i++){
-
-
-            }
-
-            contextResolved();
         }
     }
 }
@@ -616,6 +604,20 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 
         }
 
+    }
+
+
+
+    for(int i=0; i<relationArchive.length(); i++){
+        if(relationArchive[i]->isInside(m_mousePosition.x,m_mousePosition.y)){
+
+            relationArchive[i]->setHighlighted(true);
+
+            getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
+        }else{
+            relationArchive[i]->setHighlighted(false);
+            getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
+        }
     }
 
     for(int i=0; i<nodeMap.length(); i++){

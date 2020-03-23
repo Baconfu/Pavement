@@ -23,6 +23,7 @@ public:
     void setDisplayChildNode(Node * n);
     void setDisplayParentNode(Node * n);
 
+
     Node * findDisplayParentNode();
     Node * findDisplayChildNode();
 
@@ -64,6 +65,7 @@ private:
 
     Node * m_displayChildNode;
     Node * m_displayParentNode;
+
 
     QQuickItem * m_obj = nullptr;
 

@@ -21,7 +21,6 @@
 
 
 
-
 class Node;
 class Relation;
 class structural;

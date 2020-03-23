@@ -7,9 +7,13 @@ Relation::Relation(QObject * parent):
 
 }
 
-void Relation::isTouching(int x, int y)
+bool Relation::isInside(int x, int y)
 {
+    if(x > worldMidPoint().x - 20 && x < worldMidPoint().x + 20 && y > worldMidPoint().y - 20 && y < worldMidPoint().y + 20){
+        return true;
 
+    }
+    return false;
 }
 
 int Relation::setRelationCutoff()
@@ -24,6 +28,7 @@ int Relation::setRelationCutoff()
 
 
     if(getDisplayDestination()){
+
         Node * destinationNode = m_displayDestination;
         Node * originNode = m_displayOrigin;
         double pi = 3.1415926;
@@ -196,6 +201,7 @@ void Relation::updateSelf()
 
 Node *Relation::findDisplayOrigin()
 {
+    /*
     if(originObjectType() == "node"){
         if(originNode()->isVisible()){
             return originNode();
@@ -209,11 +215,13 @@ Node *Relation::findDisplayOrigin()
     }
     if(originObjectType() == "relation"){
 
-    }
+    }*/
+    return m_origin_node;
 }
 
 Node *Relation::findDisplayDestination()
 {
+    /*
     if(destinationObjectType() == "node"){
         if(destinationNode()->isVisible()){
             return destinationNode();
@@ -230,6 +238,8 @@ Node *Relation::findDisplayDestination()
     }
     Node * n = nullptr;
     return n;
+    */
+    return m_destination_node;
 }
 
 
@@ -276,6 +286,21 @@ void Relation::registerIncomingRelation(Relation *r)
         fromRelation.append(r);
         fromRelation_relation.append(r->originRelation());
     }
+}
+
+void Relation::setHighlighted(bool b)
+{
+
+    if(m_highlighted == b){
+        return;
+    }
+    m_highlighted = b;
+    if(b){
+        obj()->setProperty("highlighted",true);
+    }else{
+        obj()->setProperty("highlighted",false);
+    }
+
 }
 
 void Relation::finalizeSelf()

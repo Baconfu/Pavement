@@ -4,6 +4,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QFile>
+#include <QByteArray>
+#include <QJsonArray>
 
 
 
@@ -14,7 +16,7 @@ public:
 
     QJsonObject load(QString path);
 
-    void write(QString path);
+    void write(QString path,QJsonObject obj);
 
 protected:
     QString m_fileName;

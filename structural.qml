@@ -9,8 +9,14 @@ Item {
     height:100
     z:-3
 
+    property bool highlighted: false
+    onHighlightedChanged: {
+        if(highlighted)
+            line.lineWidth = 2
+        else
+            line.lineWidth = 1
+    }
 
-    property int lineWidth: 1
     property int cutoffX
     property int cutoffY
     PaintStructural{
@@ -23,9 +29,7 @@ Item {
 
 
 
-        lineWidth: container.lineWidth
-
-
+        lineWidth: 1
 
     }
     ExpandIcon {
