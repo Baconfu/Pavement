@@ -14,6 +14,8 @@ void Node::inputAccepted()
     b->setFocusWindow();
 }
 
+//test
+
 void Node::typeInputAccepted(QString s)
 {
     Body * b = Body::getInstance();
