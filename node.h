@@ -53,18 +53,23 @@ public:
 
     QVector<Node*> getParents(){return m_parents;}
     int addParent(Node * n);
-    void registerParent(Node * n);
     void removeParent(Node * n);
-    bool parentExists(Node * n);
 
     QVector<Node*> ancestorPath(Node * target);
 
     QVector<Node*> getChildren(){return m_children;}
     int addChild(Node * n);
-    void registerChild(Node * n);
     void removeChild(Node * n);
-    bool childExists(Node * n);
 
+    void getDescendants(QVector<Node*> * out){
+        if(!out->contains(this)){
+            out->append(this);
+            for(int i=0; i<m_children.length(); i++){
+                m_children[i]->getDescendants(out);
+            }
+            return;
+        }
+    }
 
     QString typeName(){return m_type;}
 
@@ -86,7 +91,8 @@ public:
     void removeMember(Node * n);
     bool memberExists(Node * n);
 
-
+    void setUnderMap(QVector<Node*> nodes);
+    QVector<Node*> getUnderMap(){return m_underMap;}
 
     QVector<Relation*> getAllRelations();
     void registerRelation(Relation * r);
@@ -139,8 +145,11 @@ private:
     };
 
 
+    QVector<Node*> m_underMap;
 
 
+
+    //Foreign diplomacy
     QVector<Relation*> toNode;
     QVector<Node*> toNode_node;
     QVector<Relation*> fromNode;
@@ -148,41 +157,48 @@ private:
     QVector<Relation*> toRelation;
     QVector<Relation*> toRelation_relation;
 
+    QString m_type;
+    Node * m_typeNode = nullptr;
+    QVector<Node*> m_members;
+
+    //vassalage diplomacy
+    QVector<Node*> m_parents;
+    QVector<Node*> m_children;
+    QVector<structural*> toParent;
 
 
-
-    void setStyle();
-    Body::style getStyle(){return m_style;}
-    int m_id;
-    QString m_name;
-
+    //Geopolitical information.
     int m_absX;
     int m_absY;
     int m_width;
     int m_height;
     Body::coordinate m_centerPosition;
 
-    QVector<Node*> m_parents;
-    QVector<Node*> m_children;
-    QVector<structural*> toParent;
+
+    //Domestic policy
+    void setStyle();
+    Body::style getStyle(){return m_style;}
+    int m_id;
+    QString m_name;
+
 
     structural * m_hoveringStructural = nullptr;
 
 
-    QString m_type;
-    Node * m_typeNode = nullptr;
-    QVector<Node*> m_members;
-
     Body::style m_style;
 
-    bool m_visible = true;
+    //STATE VARIABLES
 
+    bool m_visible = true;
     bool m_hidden = false;
     bool m_dissolve = false;
+    bool m_expanded = false;
+
+    bool m_preventFocus = false;
 
     QQuickItem * m_obj = nullptr;
 
-    bool m_preventFocus = false;
+
 
 
 public:

@@ -11,16 +11,20 @@ Item {
 
     property bool highlighted: false
     onHighlightedChanged: {
-        if(highlighted)
+        if(highlighted){
+            console.log(10)
             line.lineWidth = 2
-        else
+        }
+        else{
+            console.log(11)
             line.lineWidth = 1
+        }
     }
+
 
     property int cutoffX
     property int cutoffY
     PaintStructural{
-
         id: line
         objectName: "line"
         color: "grey"
@@ -28,12 +32,11 @@ Item {
         p1:Qt.point(container.width,container.height)
 
 
-
         lineWidth: 1
 
     }
     ExpandIcon {
-
+        visible: false
         x: container.width / 2 - 6
         y: container.height / 2 - 6
         width:12

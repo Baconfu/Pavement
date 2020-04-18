@@ -88,3 +88,12 @@ QSGNode * PaintRelation::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData *
     node->markDirty(QSGNode::DirtyGeometry);
     return node;
 }
+
+void PaintRelation::setLineWidth(int n)
+{
+    if(m_lineWidth != n){
+        m_lineWidth = n;
+        emit lineWidthChanged();
+        update();
+    }
+}

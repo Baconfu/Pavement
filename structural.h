@@ -50,8 +50,8 @@ public:
     void deleteObj();
 
 private:
-    QVector<Node*> parentAncestorPath();
-    QVector<Node*> childAncestorPath();
+    QVector<Node*> parentIncludeNodes();
+    QVector<Node*> childIncludeNodes();
     bool m_visible = true;
     bool m_hovering = false;
 

@@ -1,5 +1,6 @@
 #include "relation.h"
 #include "node.h"
+#include <ghostnode.h>
 
 Relation::Relation(QObject * parent):
     QObject (parent)
@@ -27,10 +28,10 @@ int Relation::setRelationCutoff()
     double angle = inverseVector.getAngle();
 
 
-    if(getDisplayDestination()){
+    if(true){
 
-        Node * destinationNode = m_displayDestination;
-        Node * originNode = m_displayOrigin;
+        Node * destinationNode = m_destination_node;
+        Node * originNode = m_origin_node;
         double pi = 3.1415926;
         double a1 = atan(double(destinationNode->height()) / double(destinationNode->width()));
 
@@ -90,6 +91,7 @@ void Relation::setOriginObject(Relation * r){
 
 void Relation::setDestinationObject(Node *n){
     m_destination_node = n;
+
     Body::coordinate c = n->centerPosition();
     if(hovering()){
         setHovering(false);
@@ -118,6 +120,38 @@ void Relation::setHovering(bool b)
         clearDestinationObject();
     }
     \
+}
+
+void Relation::determineOriginType()
+{
+    if(m_origin_node){
+        originType = node;
+        return;
+    }
+    if(m_origin_relation){
+        originType = relation;
+        return;
+    }
+    if(m_origin_ghost){
+        originType = ghost;
+        return;
+    }
+}
+
+void Relation::determineDestinationType()
+{
+    if(m_destination_node){
+        destinationType = node;
+        return;
+    }
+    if(m_destination_relation){
+        destinationType = relation;
+        return;
+    }
+    if(m_destination_ghost){
+        destinationType = ghost;
+        return;
+    }
 }
 void Relation::setOrigin(Body::coordinate c){
     m_origin = c;
@@ -165,97 +199,38 @@ Body::coordinate Relation::localMidPoint(){
 
 void Relation::updateSelf()
 {
-    if(getDisplayOrigin()){
-        setOrigin(m_displayOrigin->centerPosition());
-        setRelationCutoff();
-    }else{
-        if(originObjectType()=="node"){
-            setOrigin(m_origin_node->centerPosition());
-            setRelationCutoff();
-        }
-        if(originObjectType()=="relation"){
-            setOrigin(m_origin_relation->worldMidPoint());
-        }
-    }
-    if(getDisplayDestination()){
-        setDestination(m_displayDestination->centerPosition());
-        setRelationCutoff();
-    }else{
-        if(destinationObjectType()=="node"){
-            setDestination(m_destination_node->centerPosition());
-            setRelationCutoff();
-        }
-        if(destinationObjectType()=="relation"){
-            setDestination(m_destination_relation->worldMidPoint());
-        }
-    }
-
     if(hovering()){
         Body * b = Body::getInstance();
-
         setDestination(b->mousePosition());
+
+    }
+
+    if(originType == node){
+        setOrigin(m_origin_node->centerPosition());
+
+    }
+    if(originType == ghost){
+        setOrigin(m_origin_ghost->getCenterPosition());
+    }
+    if(originType == relation){
+        setOrigin(m_origin_relation->worldMidPoint());
     }
 
 
-}
-
-Node *Relation::findDisplayOrigin()
-{
-    /*
-    if(originObjectType() == "node"){
-        if(originNode()->isVisible()){
-            return originNode();
-        }
-        QVector<Node*> path = originNode()->getIncludes();
-        int i=0;
-        while(!path[i]->isVisible()){
-            i+=1;
-        }
-        return path[i];
+    if(destinationType == node){
+        qDebug()<<m_destination_node;
+        setDestination(m_destination_node->centerPosition());
+        setRelationCutoff();
     }
-    if(originObjectType() == "relation"){
-
-    }*/
-    return m_origin_node;
-}
-
-Node *Relation::findDisplayDestination()
-{
-    /*
-    if(destinationObjectType() == "node"){
-        if(destinationNode()->isVisible()){
-            return destinationNode();
-        }
-        QVector<Node*> path = destinationNode()->getIncludes();
-        int i=0;
-        while(!path[i]->isVisible()){
-            i+=1;
-        }
-        return path[i];
+    if(destinationType == ghost){
+        setDestination(m_destination_ghost->getCenterPosition());
+        setRelationCutoff();
     }
-    if(destinationObjectType() == "relation"){
-
+    if(destinationType == relation){
+        setDestination(m_destination_relation->worldMidPoint());
     }
-    Node * n = nullptr;
-    return n;
-    */
-    return m_destination_node;
+
 }
-
-
-
-Node *Relation::getDisplayOrigin()
-{
-    m_displayOrigin = findDisplayOrigin();
-    return m_displayOrigin;
-}
-
-Node *Relation::getDisplayDestination()
-{
-    m_displayDestination = findDisplayDestination();
-    return m_displayDestination;
-}
-
 void Relation::setVisibility(bool visibility)
 {
     m_obj->setProperty("visible",visibility);
@@ -264,7 +239,7 @@ void Relation::setVisibility(bool visibility)
 void Relation::updateRelations(){
 
 }
-
+/*
 void Relation::registerRelation(Relation *r)
 {
     if(r->destinationObjectType() == "node"){
@@ -287,7 +262,7 @@ void Relation::registerIncomingRelation(Relation *r)
         fromRelation_relation.append(r->originRelation());
     }
 }
-
+*/
 void Relation::setHighlighted(bool b)
 {
 
@@ -310,14 +285,14 @@ void Relation::finalizeSelf()
         connect(originNode(),SIGNAL(updateRelation()),this,SLOT(updateSelf()));
     }
     if(originRelation()){
-        originRelation()->registerRelation(this);
+        //originRelation()->registerRelation(this);
     }
     if(destinationNode()){
         destinationNode()->registerIncomingRelation(this);
         connect(destinationNode(),SIGNAL(updateRelation()),this,SLOT(updateSelf()));
     }
     if(destinationRelation()){
-        destinationRelation()->registerIncomingRelation(this);
+        //destinationRelation()->registerIncomingRelation(this);
     }
 }
 

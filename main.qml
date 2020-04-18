@@ -42,6 +42,7 @@ Window {
             x:0
             y:-50
             objectName: "debug"
+
         }
 
         Item {

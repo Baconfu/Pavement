@@ -17,7 +17,13 @@ public:
 
     bool isInside(int x,int y);
 
+    enum type{
+        node = 0,
+        relation = 1,
+        ghost = 2
+    };
 private:
+
 
     int tally = 0;
 
@@ -28,17 +34,26 @@ private:
     bool m_hovering = false;
     bool m_highlighted = false;
 
+
+    /*
     QVector<Relation*> toRelation;
     QVector<Relation*> toRelation_relation;
     QVector<Relation*> fromRelation;
     QVector<Relation*> fromRelation_relation;
     QVector<Relation*> fromNode;
-    QVector<Node*> fromNode_node;
+    QVector<Node*> fromNode_node;*/
+
+    int originType;
+    int destinationType;
 
     Node * m_origin_node = nullptr;
     Relation * m_origin_relation = nullptr;
+    GhostNode * m_origin_ghost = nullptr;
+
     Node * m_destination_node = nullptr;
     Relation * m_destination_relation = nullptr;
+    GhostNode * m_destination_ghost = nullptr;
+
 
     Node * m_displayOrigin = nullptr;
     Node * m_displayDestination = nullptr;
@@ -53,51 +68,24 @@ private:
 public:
     void setOriginObject(Node * n);
     void setOriginObject(Relation * r);
+    void setOriginObject(GhostNode * g);
     void setDestinationObject(Node * n);
     void setDestinationObject(Relation * r);
+    void setDestinationObject(GhostNode * g);
     void clearDestinationObject();
     void setHovering(bool b);
-    QString originObjectType(){
-        if(m_origin_node && !m_origin_relation){return "node";}
-        if(m_origin_relation && !m_origin_node){return "relation";}
-        if(m_origin_node && m_origin_relation){
-            qDebug()<<"Error: relation origin is both a node and a relation";
-            return "error";
-        }
-        if(!m_origin_node && !m_origin_relation) {
-            qDebug()<<"Error: relation has no origin object";
-            return "error";
-        }
-        return "";
-    }
-    QString destinationObjectType(){
 
-        if(m_destination_node && !m_destination_relation){return "node";}
-        if(m_destination_relation && !m_destination_node){return "relation";}
-        if(m_destination_node && m_destination_relation){
-            qDebug()<<"Error: relation origin is both a node and a relation";
-            return "error";
-        }
-        if(!m_destination_node && !m_destination_relation) {
-            if(!hovering()){
-                qDebug()<<"Error: relation has no destination object";
-            }
+    void determineOriginType();
+    void determineDestinationType();
+    void determineTypes();
 
-        }
-        return "";
-    }
+    int getDestinationType(){return destinationType;}
+    int getOriginType(){return originType;}
 
     Node * originNode(){return m_origin_node;}
     Relation * originRelation(){return m_origin_relation;}
     Node * destinationNode(){return m_destination_node;}
     Relation * destinationRelation(){return m_destination_relation;}
-
-    Node * findDisplayDestination();
-    Node * findDisplayOrigin();
-    Node * getDisplayOrigin();
-    Node * getDisplayDestination();
-    void setDisplayOrigin(Node * n);
-    void setDisplayDestination(Node * n);
 
 
     bool isVisible(){return m_visible;}

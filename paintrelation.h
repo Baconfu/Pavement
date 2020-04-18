@@ -32,7 +32,7 @@ public:
     void setP1(QPointF point){m_p1 = point;}
 
     int lineWidth(){return m_lineWidth;}
-    void setLineWidth(int n){m_lineWidth = n;emit lineWidthChanged();update();}
+    void setLineWidth(int n);
 
 private:
     QColor m_color;

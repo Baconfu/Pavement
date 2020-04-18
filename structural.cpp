@@ -211,8 +211,7 @@ void structural::setHighlighted(bool b)
 {
     if(b != m_highlighted){
         m_highlighted = b;
-        qDebug()<<parentNode()->name()<<tally;
-        tally+=1;
+
         if(b){
 
             obj()->setProperty("focus",true);

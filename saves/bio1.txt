@@ -1,0 +1,36 @@
+4
+0
+Meristems
+286
+168
+0
+1
+3
+-1
+members:0
+1
+root apical meristem
+263
+304
+0
+0
+-1
+members:0
+2
+shoot apical meristem
+148
+211
+0
+0
+-1
+members:0
+3
+meristem cell
+384
+232
+1
+0
+0
+-1
+members:0
+0

@@ -16,8 +16,10 @@ SOURCES += \
         body.cpp \
         expandicon.cpp \
         file.cpp \
+        ghostnode.cpp \
         main.cpp \
         node.cpp \
+        nodearea.cpp \
         paintnode.cpp \
         paintrelation.cpp \
         paintstructural.cpp \
@@ -43,7 +45,9 @@ HEADERS += \
     body.h \
     expandicon.h \
     file.h \
+    ghostnode.h \
     node.h \
+    nodearea.h \
     paintnode.h \
     paintrelation.h \
     paintstructural.h \

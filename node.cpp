@@ -14,8 +14,6 @@ void Node::inputAccepted()
     b->setFocusWindow();
 }
 
-//test
-
 void Node::typeInputAccepted(QString s)
 {
     Body * b = Body::getInstance();
@@ -55,44 +53,16 @@ void Node::setName(QString name)
 
 int Node::addParent(Node *n)
 {
-    if(parentExists(n)){
-        return 1;
+    if(!m_parents.contains(n)){
+        m_parents.append(n);
     }
-    m_parents.append(n);
-    structural * s = newStructural();
-    s->setParentNode(n);
-    s->setDisplayParentNode(n);
-    connect(this,SIGNAL(updateStructural()),s,SLOT(update()),Qt::UniqueConnection);
-    s->update();
     return 0;
-}
-
-void Node::registerParent(Node *n)
-{
-    m_parents.append(n);
-
 }
 
 
 void Node::removeParent(Node * n)
 {
-    n->removeChild(this);
-    for(int i=0; i<getParents().length(); i++){
-        if(getParents()[i] == n){
-            m_parents.removeAt(i);
-            break;
-        }
-    }
-}
-
-bool Node::parentExists(Node *n)
-{
-    for(int i=0; i<getParents().length(); i++){
-        if(n->ID() == getParents()[i]->ID()){
-            return true;
-        }
-    }
-    return false;
+    m_parents.removeAt(m_parents.indexOf(n));
 }
 
 QVector<Node *> Node::ancestorPath(Node *target)
@@ -121,39 +91,18 @@ QVector<Node *> Node::ancestorPath(Node *target)
 
 int Node::addChild(Node *n)
 {
-    if(childExists(n)){
-        return 1;
+    if(!m_children.contains(n)){
+        m_children.append(n);
     }
-    m_children.append(n);
-    structural * s = n->newStructural();
-    s->setParentNode(this);
-    s->update();
     return 0;
-}
-
-void Node::registerChild(Node *n)
-{
-    m_children.append(n);
 }
 
 void Node::removeChild(Node *n)
 {
-    for(int i=0; i<m_children.length(); i++){
-        if(n == m_children[i]){
-            m_children.removeAt(i);
-        }
-    }
+    m_children.removeAt(m_children.indexOf(n));
+
 }
 
-bool Node::childExists(Node *n)
-{
-    for(int i=0; i<getChildren().length(); i++){
-        if(n->ID() == getChildren()[i]->ID()){
-            return true;
-        }
-    }
-    return false;
-}
 
 void Node::setType(Node *n)
 {
@@ -266,12 +215,12 @@ QVector<Relation*> Node::getAllRelations()
 
 void Node::registerRelation(Relation *r)
 {
-    if(r->destinationObjectType() == "node"){
+    if(r->getDestinationType() == Relation::node){
         toNode.append(r);
         toNode_node.append(r->destinationNode());
 
     }
-    if(r->destinationObjectType() == "relation"){
+    if(r->getDestinationType() == Relation::relation){
         toRelation.append(r);
         toRelation_relation.append(r->destinationRelation());
 
@@ -280,11 +229,11 @@ void Node::registerRelation(Relation *r)
 }
 void Node::registerIncomingRelation(Relation *r)
 {
-    if(r->originObjectType() == "node"){
+    if(r->getOriginType() == Relation::node){
         fromNode.append(r);
         fromNode_node.append(r->originNode());
     }
-    if(r->originObjectType() == "relation"){
+    if(r->getOriginType() == Relation::relation){
         qDebug()<<"error: invalid relation";
     }
 }

@@ -1,0 +1,130 @@
+{
+    "nodes": [
+        {
+            "id": 0,
+            "name": "hello",
+            "parents": [
+                {
+                    "id": 3,
+                    "name": "greeting"
+                }
+            ],
+            "type": "greeting",
+            "x": 179,
+            "y": 145
+        },
+        {
+            "id": 1,
+            "name": "hola",
+            "parents": [
+                {
+                    "id": 3,
+                    "name": "greeting"
+                }
+            ],
+            "type": "hello",
+            "x": 402,
+            "y": 246
+        },
+        {
+            "id": 2,
+            "name": "nihao",
+            "parents": [
+                {
+                    "id": 3,
+                    "name": "greeting"
+                },
+                {
+                    "id": 4,
+                    "name": "chinese"
+                }
+            ],
+            "type": "greeting",
+            "x": 259,
+            "y": 329
+        },
+        {
+            "id": 3,
+            "name": "greeting",
+            "parents": [
+                {
+                    "id": 5,
+                    "name": "language"
+                }
+            ],
+            "type": "language",
+            "x": 278,
+            "y": 222
+        },
+        {
+            "id": 4,
+            "name": "chinese",
+            "parents": [
+                {
+                    "id": 5,
+                    "name": "language"
+                }
+            ],
+            "type": "language",
+            "x": 169,
+            "y": 274
+        },
+        {
+            "id": 5,
+            "name": "language",
+            "parents": [
+            ],
+            "type": "hello",
+            "x": 104,
+            "y": 204
+        },
+        {
+            "id": 6,
+            "name": "thing",
+            "parents": [
+            ],
+            "type": "greeting",
+            "x": 370,
+            "y": 131
+        },
+        {
+            "id": 7,
+            "name": "hello",
+            "parents": [
+                {
+                    "id": 1,
+                    "name": "hola"
+                }
+            ],
+            "type": "thing",
+            "x": 371,
+            "y": 362
+        },
+        {
+            "id": 8,
+            "name": "f",
+            "parents": [
+                {
+                    "id": 7,
+                    "name": "hello"
+                }
+            ],
+            "type": "",
+            "x": 402,
+            "y": 452
+        },
+        {
+            "id": 9,
+            "name": "trol",
+            "parents": [
+                {
+                    "id": 8,
+                    "name": "f"
+                }
+            ],
+            "type": "",
+            "x": 495,
+            "y": 445
+        }
+    ]
+}

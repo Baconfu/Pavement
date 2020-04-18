@@ -2,6 +2,7 @@
 #include <node.h>
 #include <structural.h>
 #include <pavementfile.h>
+#include <ghostnode.h>
 
 using namespace std;
 
@@ -100,8 +101,246 @@ void Body::initialize()
     f.alias = QStringList{};
     f.commonShorthand = "NULL";
     functions.append(f);
+    f.name = "break";
+    f.alias = QStringList{};
+    f.commonShorthand = "NULL";
+    functions.append(f);
+    f.name = "expand";
+    f.alias = QStringList{"expand node"};
+    f.commonShorthand = "NULL";
+    functions.append(f);
+
+    f.name = "toggle batch select";
+    f.alias = QStringList{"toggle batch select"};
+    f.commonShorthand = "NULL";
+    functions.append(f);
+
+    f.name = "select all children";
+    f.alias = QStringList{"select children"};
+    f.commonShorthand = "se";
+    f.contexts = {node_selected};
+    functions.append(f);
+
+    f.name = "clear batch selection";
+    f.alias = QStringList{"clear selection","clear","empty batch"};
+    f.commonShorthand = "NULL";
+    f.contexts = {batch_selecting};
+    functions.append(f);
+
+    f.name = "deselect batch";
+    f.alias = QStringList{"deselect all","deselect"};
+    f.commonShorthand = "NULL";
+    functions.append(f);
+
+    f.name = "select";
+    f.alias = QStringList{"select node","add","append","batch select"};
+    f.commonShorthand = "s";
+    f.contexts = {node_selected};
+    functions.append(f);
+
+    f.name = "deselect";
+    f.alias = QStringList{"deselect node"};
+    f.commonShorthand = "ds";
+    f.contexts = {node_selected};
+    functions.append(f);
+
+    f.name = "ghost node";
+    f.alias = QStringList{"ghost"};
+    f.commonShorthand = "gh";
+    f.contexts = {node_selected};
+    functions.append(f);
+
+    f.name = "create ghost";
+    f.alias = QStringList{"create ghost node","new ghost node"};
+    f.commonShorthand = "g";
+    functions.append(f);
+}
 
 
+int Body::acceptedSelection(int n)
+{
+
+    if(latestContext() == opening_file){
+
+        QString g;
+
+        g = displayFunctions[n].name;
+        openFile(defaultPath + "/" + g);
+        contextResolved();
+
+        setFocusWindow();
+        m_searchBar->setProperty("visible",false);
+        return 0;
+    }
+    if(latestContext() == saving_file){
+        QString g;
+        if(n == -1){
+            g = m_searchBar->findChild<QObject*>("textInput")->property("text").toString();
+        }else{
+            g = displayFunctions[n].name;
+        }
+
+        saveFile(defaultPath + "/" + g);
+        contextResolved();
+        setFocusWindow();
+        m_searchBar->setProperty("visible",false);
+        return 0;
+    }
+    if(latestContext() == node_browsing){
+        QString s = displayFunctions[n].name;
+        Node * n = getNodeByName(s);
+        newGhostNode(n,tabPosition().x,tabPosition().y);
+    }
+
+
+    m_searchBar->setProperty("visible",false);
+    if(n == -1){
+        return 0;
+    }
+
+    QString f = "";
+    QVector<int> contexts;
+
+    if(latestContext() != opening_file && latestContext() != saving_file){
+        f = displayFunctions[n].name;
+         contexts = displayFunctions[n].contexts;
+
+    }
+
+    contextResolved();
+
+
+    if(f == "frame"){
+        frameView();
+
+    }
+
+
+    if(f=="new node"){
+        int id = allocateNewID("node");
+        int x = m_tabPosition.x;
+        int y = m_tabPosition.y;
+
+        newNode(id,"",x,y,nullptr,nullptr);
+    }
+    if(f=="new relation"){
+        int id = allocateNewID("relation");
+        if(latestContext() == Context::node_selected){
+            Node * n = nullptr;
+            newRelation(id,selectedNode(),n);
+            setSelected(n);
+            setFocusWindow();
+        }
+        else{
+            qDebug()<<"error: no node selected";
+        }
+
+    }
+    if(f == "parent"){
+        if(latestContext() == Context::node_selected){
+            Node * n = nullptr;
+            setContext(Context::parenting);
+
+            selectedNode()->setHoveringStructural(selectedNode()->newStructural());
+            selectedNode()->hoveringStructural()->setHovering(true);
+            connect(this,SIGNAL(mouseMoved()),selectedNode()->hoveringStructural(),SLOT(update()));
+            selectedNode()->hoveringStructural()->update();
+            setSelected(n);
+            setFocusWindow();
+            updateStructuralMap();
+
+        }
+        else{
+            qDebug()<<"error: no node selected";
+        }
+    }
+    if(f == "include"){
+        if(latestContext() == node_selected){
+            setContext(including);
+
+
+        }
+    }
+    if(f == "dissolve"){
+        if(latestContext() == node_selected){
+            selectedNode()->dissolve();
+        }
+    }
+
+    if(f == "break"){
+        if(latestContext() == Context::relation_selected){
+
+        }
+    }
+
+    if(f == "save"){
+        saveFile("/home/chuan/qt_projects/Pavement_1_1/saves/data.txt");
+    }
+    if(f == "open"){
+        //qDebug()<<10;
+        autoTab(opening_file);
+    }
+    if(f == "save as"){
+        autoTab(saving_file);
+    }
+    if(f == "debug"){
+        getRoot()->findChild<QObject*>("line"+QString::number(debugTally))->setProperty("lineWidth",2);
+        getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
+    }
+    if(f == "select"){
+        if(contexts.contains(latestContext())){
+            if(selectedNode()){
+                batchSelect(selectedNode());
+            }
+            if(selectedGhost()){
+
+            }
+            setContext(batch_selected);
+            contextReset();
+        }
+    }
+    if(f == "select all children"){
+        if(contexts.contains(latestContext())){
+            QVector<Node*> selection;
+            selectedNode()->getDescendants(&selection);
+            batchSelect(selection);
+            setContext(batch_selected);
+            contextReset();
+
+        }
+    }
+    if(f == "clear batch selection"){
+        if(contexts.contains(latestContext())){
+            batchDeselect();
+            contextReset();
+        }
+        batchDeselect();
+
+    }
+    if(f == "deselect batch"){
+        batchDeselect();
+    }
+    if(f == "toggle batch select"){
+
+    }
+
+    if(f == "deselect"){
+        if(contexts.contains(latestContext())){
+            batchDeselect(selectedNode());
+            contextReset();
+        }
+    }
+    if(f == "ghost node"){
+        if(contexts.contains(latestContext())){
+            GhostNode * n = newGhostNode(selectedNode(),mousePosition().x,mousePosition().y);
+        }
+    }
+    if(f == "create ghost"){
+        autoTab(node_browsing);
+
+    }
+
+    return 0;
 }
 
 
@@ -186,20 +425,36 @@ void Body::saveFile(QString path)
         for(int i=0; i<relationArchive.length(); i++){
             Relation * r = relationArchive[i];
 
-            if(r->originObjectType()=="error" || r->destinationObjectType()=="error"){
-                qDebug()<<"dangling relation";
-                continue;
-            }
+
 
             myfile<<r->ID()<<"\n";
-            myfile<<r->originObjectType().toStdString()<<"\n";
-            if(r->originObjectType()=="node") {myfile<<r->originNode()->ID()<<"\n";}
-            if(r->originObjectType()=="relation") {myfile<<r->originRelation()->ID()<<"\n";}
+            string s;
+            if(r->getOriginType() == 0){
+                s = "node";
+            }
+            if(r->getOriginType() == 1){
+                s= "relation";
+            }
+            if(r->getOriginType() == 2){
+                s = "ghost";
+            }
+            myfile<<s;
 
+            if(r->getOriginType() == Relation::node) {myfile<<r->originNode()->ID()<<"\n";}
+            if(r->getOriginType() == Relation::relation) {myfile<<r->originRelation()->ID()<<"\n";}
 
-            myfile<<r->destinationObjectType().toStdString()<<"\n";
-            if(r->destinationObjectType()=="node") {myfile<<r->destinationNode()->ID()<<"\n";}
-            if(r->destinationObjectType()=="relation") {myfile<<r->destinationRelation()->ID()<<"\n";}
+            if(r->getDestinationType() == 0){
+                s = "node";
+            }
+            if(r->getDestinationType() == 1){
+                s= "relation";
+            }
+            if(r->getDestinationType() == 2){
+                s = "ghost";
+            }
+            myfile<<s;
+            if(r->getDestinationType() == Relation::node) {myfile<<r->destinationNode()->ID()<<"\n";}
+            if(r->getDestinationType() == Relation::relation) {myfile<<r->destinationRelation()->ID()<<"\n";}
 
         }
     }
@@ -207,6 +462,7 @@ void Body::saveFile(QString path)
 
 void Body::openFile(QString path)
 {
+
     ifstream myfile;
     myfile.open(path.toStdString());
 
@@ -219,6 +475,7 @@ void Body::openFile(QString path)
         int n = QString::fromStdString(str).toInt();
 
         for(int i=0; i<n; i++){
+
             Node * node = new Node;
             node->initializeObj();
 
@@ -244,8 +501,8 @@ void Body::openFile(QString path)
                     structural *s = node->newStructural();
                     s->setParentNode(n);
                     s->setChildNode(node);
-                    n->registerChild(node);
-                    node->registerParent(n);
+                    n->addChild(node);
+                    node->addParent(n);
                     s->update();
                 }
             }
@@ -260,8 +517,8 @@ void Body::openFile(QString path)
                     structural * s = node->newStructural();
                     s->setParentNode(node);
                     s->setChildNode(n);
-                    n->registerParent(node);
-                    node->registerChild(n);
+                    n->addParent(node);
+                    node->addChild(n);
                     s->update();
                 }
             }
@@ -419,6 +676,13 @@ Body::coordinate Body::getDisplayDimensions()
     return c;
 }
 
+void Body::abstract(QVector<Node *> nodes)
+{
+
+    Node * n = newNode(allocateNewID("node"),"",mousePosition().x,mousePosition().y,nullptr,nullptr);
+
+}
+
 void Body::startTimer()
 {
     if(!timer.isActive()){
@@ -526,8 +790,8 @@ void Body::enterPressed()
                     if(s[j]->hovering()){
 
 
-                        nodeMap[i]->registerParent(highlightedNode());
-                        highlightedNode()->registerChild(nodeMap[i]);
+                        nodeMap[i]->addParent(highlightedNode());
+                        highlightedNode()->addChild(nodeMap[i]);
                         s[j]->setParentNode(highlightedNode());
                         disconnect(this,SIGNAL(mouseMoved()),s[j],SLOT(update()));
                         s[j]->setHovering(false);
@@ -581,51 +845,15 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 
     mouseMoved();
 
-    for(int i=0; i<structuralMap.length(); i++){
 
-        if(structuralMap[i]->isInside(m_mousePosition.x,m_mousePosition.y)){
-
-            structuralMap[i]->setHighlighted(true);
-
-            getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
-            if(i==structuralMap.length()-1){
-                break;
-            }
-            for(int j=i+1; j<structuralMap.length(); j++){
-                structuralMap[j]->setHighlighted(false);
-            }
-            break;
-
-        }else{
-            if(structuralMap[i]->highlighted()){
-                structuralMap[i]->setHighlighted(false);
-            }
-
-
-        }
-
-    }
-
-
-
-    for(int i=0; i<relationArchive.length(); i++){
-        if(relationArchive[i]->isInside(m_mousePosition.x,m_mousePosition.y)){
-
-            relationArchive[i]->setHighlighted(true);
-
-            getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
-        }else{
-            relationArchive[i]->setHighlighted(false);
-            getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
-        }
-    }
-
+    bool highlighted = false;
     for(int i=0; i<nodeMap.length(); i++){
 
         if(nodeMap[i]->isInside(mousePosition().x,mousePosition().y)){
 
             if(hoveringRelation() || latestContext() == parenting || latestContext() == including){
                 setHighlightedNode(nodeMap[i]);
+                highlighted = true;
             }else{
                 nodeMap[i]->hoverSelect(mousePosition().y);
 
@@ -634,11 +862,18 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
         }else{
             nodeMap[i]->preventFocus(false);
         }
-
-
+    }
+    for(int i=0; i<ghostNodeMap.length(); i++){
+        if(ghostNodeMap[i]->isInside(mousePosition().x,mousePosition().y)){
+            setHighlightedNode(ghostNodeMap[i]);
+            highlighted = true;
+            setSelected(ghostNodeMap[i]);
+        }
     }
 
-
+    if(!highlighted){
+        setHighlightedNode();
+    }
 }
 
 void Body::setHoveringRelation(Relation *r)
@@ -669,14 +904,64 @@ void Body::updateStructuralMap()
     structuralMap = getAllStructurals();
 }
 
+void Body::batchSelect(Node *n){
+    if(m_batchSelected.contains(n)){
+
+        m_batchSelected.removeOne(n);
+        n->highlight(false);
+    }else{
+        m_batchSelected.append(n);
+        n->highlight(true);
+    }
+
+}
+
+void Body::batchSelect(QVector<Node *> n){
+    for(int i=0; i<n.length(); i++){
+        batchSelect(n[i]);
+    }
+}
+
+void Body::batchDeselect(Node *n){
+    if(m_batchSelected.contains(n)){
+        n->highlight(false);
+        m_batchSelected.removeOne(n);
+    }
+}
+
 void Body::setHighlightedNode(Node *n)
 {
-    if(!n && m_highlightedNode){
-        m_highlightedNode->highlight(false);
-    }
-    m_highlightedNode = n;
     if(n){
+        m_highlightedNode = n;
         n->highlight(true);
+        if(m_highlightedGhost){
+            m_highlightedGhost->highlight(false);
+            m_highlightedGhost = nullptr;
+        }
+    }
+}
+
+void Body::setHighlightedNode(GhostNode *n)
+{
+    if(n){
+        m_highlightedGhost = n;
+        n->highlight(true);
+        if(m_highlightedNode){
+            m_highlightedNode->highlight(false);
+            m_highlightedNode = nullptr;
+        }
+    }
+}
+
+void Body::setHighlightedNode()
+{
+    if(m_highlightedNode){
+        m_highlightedNode->highlight(false);
+        m_highlightedNode = nullptr;
+    }
+    if(m_highlightedGhost){
+        m_highlightedGhost->highlight(false);
+        m_highlightedGhost = nullptr;
     }
 }
 
@@ -721,6 +1006,14 @@ int Body::searching(QString input)
         QStringList saves = getSaves("/home/chuan/qt_projects/Pavement_1_1/saves");
         pool = functionFromList(saves);
     }
+    if(latestContext() == node_browsing){
+        pool.clear();
+        QStringList nodes;
+        for(int i=0; i<nodeMap.length(); i++){
+            nodes.append(nodeMap[i]->name());
+        }
+        pool = functionFromList(nodes);
+    }
     if(pool.length()==0){
 
         return 0;
@@ -764,122 +1057,6 @@ int Body::searching(QString input)
 
 }
 
-int Body::acceptedSelection(int n)
-{
-
-    if(latestContext() == opening_file){
-
-        QString g;
-        g = displayFunctions[n].name;
-        openFile(defaultPath + "/" + g);
-        contextResolved();
-        setFocusWindow();
-        m_searchBar->setProperty("visible",false);
-        return 0;
-    }
-    if(latestContext() == saving_file){
-        QString g;
-        if(n == -1){
-            g = m_searchBar->findChild<QObject*>("textInput")->property("text").toString();
-        }else{
-            g = displayFunctions[n].name;
-        }
-
-        saveFile(defaultPath + "/" + g);
-        contextResolved();
-        setFocusWindow();
-        m_searchBar->setProperty("visible",false);
-        return 0;
-    }
-
-
-    m_searchBar->setProperty("visible",false);
-    if(n == -1){
-        return 0;
-    }
-
-    QString f = "";
-    if(latestContext() != opening_file && latestContext() != saving_file){
-        f = displayFunctions[n].name;
-
-    }
-
-    contextResolved();
-
-    if(f == "frame"){
-        frameView();
-    }
-
-
-    if(f=="new node"){
-        int id = allocateNewID("node");
-        int x = m_tabPosition.x;
-        int y = m_tabPosition.y;
-
-        newNode(id,"",x,y,nullptr,nullptr);
-    }
-    if(f=="new relation"){
-        int id = allocateNewID("relation");
-        if(latestContext() == Context::node_selected){
-            Node * n = nullptr;
-            newRelation(id,selectedNode(),n);
-            setSelected(n);
-            setFocusWindow();
-        }
-        else{
-            qDebug()<<"error: no node selected";
-        }
-
-    }
-    if(f == "parent"){
-        if(latestContext() == Context::node_selected){
-            Node * n = nullptr;
-            setContext(Context::parenting);
-
-            selectedNode()->setHoveringStructural(selectedNode()->newStructural());
-            selectedNode()->hoveringStructural()->setHovering(true);
-            connect(this,SIGNAL(mouseMoved()),selectedNode()->hoveringStructural(),SLOT(update()));
-            selectedNode()->hoveringStructural()->update();
-            setSelected(n);
-            setFocusWindow();
-            updateStructuralMap();
-
-        }
-        else{
-            qDebug()<<"error: no node selected";
-        }
-    }
-    if(f == "include"){
-        if(latestContext() == node_selected){
-            setContext(including);
-
-
-        }
-    }
-    if(f == "dissolve"){
-        if(latestContext() == node_selected){
-            selectedNode()->dissolve();
-        }
-    }
-
-    if(f == "save"){
-        saveFile("/home/chuan/qt_projects/Pavement_1_1/saves/data.txt");
-    }
-    if(f == "open"){
-        //qDebug()<<10;
-        autoTab(opening_file);
-    }
-    if(f == "save as"){
-        autoTab(saving_file);
-    }
-    if(f == "debug"){
-        getRoot()->findChild<QObject*>("line"+QString::number(debugTally))->setProperty("lineWidth",2);
-        getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
-    }
-
-    return 0;
-}
-
 void Body::timeOut()
 {
     if(latestContext() != Context::tab_searching){
@@ -898,8 +1075,9 @@ void Body::pan(int x, int y)
 
 
 
-void Body::newNode(int id, QString name,int x, int y, Node * parent, Node * typeNode)
+Node * Body::newNode(int id, QString name,int x, int y, Node * parent, Node * typeNode)
 {
+
     Node * n = new Node;
     n->initializeObj();
     n->setID(id);
@@ -910,7 +1088,7 @@ void Body::newNode(int id, QString name,int x, int y, Node * parent, Node * type
     n->setParent(parent);
     n->giveInputFocus();
     nodeMap.append(n);
-    n=nullptr;
+    return n;
 }
 void Body::newRelation(int id, Node *origin, Node *destination)
 {
@@ -933,6 +1111,17 @@ void Body::newRelation(int id, Node *origin, Node *destination)
     relationArchive.append(r);
     //qDebug()<<r->obj();
     r=nullptr;
+}
+
+GhostNode *Body::newGhostNode(Node *original,int x,int y)
+{
+    GhostNode * n = new GhostNode(original);
+    n->initializeObj();
+    n->setX(x);
+    n->setY(y);
+    n->adoptOriginal();
+    ghostNodeMap.append(n);
+    return n;
 }
 
 int Body::allocateNewID(QString type)
@@ -1051,5 +1240,6 @@ void Body::clearSearch()
         m_searchBar->findChild<QObject*>(t)->setProperty("text","");
     }
 }
+
 
 

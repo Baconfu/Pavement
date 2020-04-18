@@ -20,6 +20,7 @@ Item {
     z:0
 
     property bool highlighted: false
+    property bool ghost:false
 
     signal typeAccepted(string s)
     signal update()
@@ -78,6 +79,7 @@ Item {
         TextInput {
             id: textInput
             x:5
+            enabled: !ghost
             objectName: "textInput"
             onContentWidthChanged: {
                 if(contentWidth<5){
@@ -110,6 +112,7 @@ Item {
         TextInput {
             id: typeInput
             objectName: "typeName"
+            enabled: !ghost
             anchors.fill:parent
             font.pointSize: 9
             text: ""

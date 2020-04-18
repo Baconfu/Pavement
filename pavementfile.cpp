@@ -29,10 +29,13 @@ void PavementFile::saveNode(Node *n)
     }
     node["parents"] = parents;
 
+    QJsonArray subMap;
 
 
 
-    nodes.append(node);
+
+
+
 
     m_obj["nodes"] = nodes;
 }
