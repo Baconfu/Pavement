@@ -17,25 +17,34 @@ Item {
         typeInput.text = type
     }
 
+
+
     z:0
 
     property bool highlighted: false
+    property bool faded: false
+    property bool ghost:false
 
     signal typeAccepted(string s)
+    signal typePassivelyAccepted(string s)
     signal update()
+    signal passivelyAccepted()
 
-    onAbsXChanged: {
-        x = absX
-    }
-    onAbsYChanged: {
-        y = absY
-    }
+
     onHighlightedChanged: {
         if(highlighted){
             highlight.visible = true
         }
         else{
             highlight.visible = false
+        }
+    }
+    onFadedChanged: {
+        if(faded){
+            opacity = 0.4
+        }
+        else{
+            opacity = 1
         }
     }
 
@@ -78,7 +87,9 @@ Item {
         TextInput {
             id: textInput
             x:5
+            enabled: !ghost
             objectName: "textInput"
+            activeFocusOnPress:false
             onContentWidthChanged: {
                 if(contentWidth<5){
                     container.width = 10
@@ -86,6 +97,11 @@ Item {
                 }else{
                     container.width = contentWidth + 10
                     nameContainer.width = contentWidth + 10
+                }
+            }
+            onFocusChanged: {
+                if(!focus){
+                    passivelyAccepted()
                 }
             }
 
@@ -97,6 +113,7 @@ Item {
             color: "grey"
 
         }
+
     }
 
     Rectangle{
@@ -110,10 +127,18 @@ Item {
         TextInput {
             id: typeInput
             objectName: "typeName"
+            activeFocusOnPress: false
+            enabled: !ghost
             anchors.fill:parent
             font.pointSize: 9
             text: ""
             font.italic: false
+
+            onFocusChanged: {
+                if(focus == false){
+                    typePassivelyAccepted(typeInput.text)
+                }
+            }
 
             property bool italic: false
             onItalicChanged: {

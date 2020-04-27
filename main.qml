@@ -29,6 +29,8 @@ Window {
             objectName: "mouseArea"
             anchors.fill: parent
             signal mouseTransform(int x,int y,int offsetX,int offsetY)
+            signal mouseClicked(int x,int y);
+            signal mouseDoubleClicked(int x,int y)
             hoverEnabled: true
             onMouseXChanged: {
                 mouseTransform(mouseX,mouseY,layer.x,layer.y)
@@ -36,12 +38,20 @@ Window {
             onMouseYChanged: {
                 mouseTransform(mouseX,mouseY,layer.x,layer.y)
             }
+            onClicked: {
+
+                mouseClicked(mouseX - layer.x, mouseY - layer.y)
+            }
+            onDoubleClicked: {
+
+            }
         }
 
         TextInput{
             x:0
             y:-50
             objectName: "debug"
+
         }
 
         Item {

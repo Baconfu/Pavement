@@ -20,10 +20,11 @@
 
 
 
-
+class BaseNode;
 class Node;
 class Relation;
 class structural;
+class GhostNode;
 
 class Body: public QObject
 {
@@ -102,6 +103,12 @@ public:
             }
             return angle;
         }
+        coordinate add(coordinate c){
+            coordinate r;
+            r.x = x + c.x;
+            r.y = y + c.y;
+            return r;
+        }
     }coordinate;
 
 
@@ -113,6 +120,12 @@ public:
     Node * getNodeByName(QString name);
     QVector<Node*> getNodeByType(QString type);
     QVector<Node*> getNodeByType(Node * typeNode);
+
+    void registerGhost(GhostNode * g){
+        if(!ghostNodeMap.contains(g)){
+            ghostNodeMap.append(g);
+        }
+    }
 
     Relation * getRelationPointerByID(int id);
     Relation * getRelationPointerByID(int id,QVector<Relation*> pool);
@@ -127,15 +140,45 @@ public:
         }
         return m_context[m_context.length()-1];
     }
-    void contextResolved(){m_context.pop_back();}
-    void setContext(int c){
-        if(latestContext() != c){
+    void contextResolved(){m_context.pop_back();
 
-            m_context.append(c);
-            //qDebug()<<"setting context: "<<m_context;
+                          }
+    void contextReset(){m_context.clear();}
+    void setContext(int c){
+        if(c == tab_searching){
+            if(latestContext() != c){
+
+                m_context.append(c);
+
+            }
+
+        }else{
+            if(!context().contains(c)){
+                m_context.append(c);
+            }
         }
 
     }
+
+    Node * getNodeFromBase(BaseNode * b);
+    GhostNode * getGhostFromBase(BaseNode * b);
+
+    void abstract(QVector<BaseNode*> nodes);
+    enum Context{
+        neutral = 0,
+        node_selected = 1,
+        relation_selected = 2,
+        nothing_selected = 3,
+        creating_relation = 4,
+        parenting = 5,
+        tab_searching = 6,
+        opening_file = 7,
+        saving_file = 8,
+        including = 9,
+        batch_selected = 10,
+        batch_selecting = 11,
+        node_browsing = 12
+    };
 
 private:
     QString defaultPath = "/home/chuan/qt_projects/Pavement_1_1/saves";
@@ -163,18 +206,7 @@ private:
      */
 
 
-    enum Context{
-        neutral = 0,
-        node_selected = 1,
-        relation_selected = 2,
-        nothing_selected = 3,
-        creating_relation = 4,
-        parenting = 5,
-        tab_searching = 6,
-        opening_file = 7,
-        saving_file = 8,
-        including = 9
-    };
+
 
     QVector<int> m_context;
 
@@ -189,27 +221,60 @@ private:
     QVector<Node*> nodeMap;
     QVector<Relation*> relationArchive;
     QVector<structural*> structuralMap;
+    QVector<GhostNode*> ghostNodeMap;
+
+
+
+    void removeGhosts(QVector<GhostNode*> ghosts){
+        for(int i=0; i<ghosts.length(); i++){
+            ghostNodeMap.removeOne(ghosts[i]);
+        }
+    }
+    void removeNodes(QVector<BaseNode*> nodes);
 
     QVector<structural*> getAllStructurals();
     void updateStructuralMap();
 
 
+    BaseNode * m_selectedNode = nullptr;
+    QVector<BaseNode*> m_batchSelected;
+    QVector<BaseNode*> batchSelected(){
+        return m_batchSelected;
+    }
+    void batchSelect(BaseNode * n);
+    void batchSelect(QVector<BaseNode*> n);
+    void batchDeselect(BaseNode * n);
+    void batchDeselect(QVector<BaseNode*> n){
+        for(int i = 0; i<n.length(); i++){
+            batchDeselect(n[i]);
+        }
+    }
+    void batchDeselect(){
+        QVector<BaseNode*> temp;
+        temp = m_batchSelected;
+        for(int i=0; i<temp.length(); i++){
+            batchDeselect(temp[i]);
+        }
 
-    Node * m_previousNode = nullptr;
-    Node * m_selectedNode = nullptr;
+    }
+
     Relation * m_selectedRelation = nullptr;
 
-    Node * m_highlightedNode = nullptr;
+    BaseNode * m_highlightedNode = nullptr;
 
-    Node * selectedNode(){return m_selectedNode;}
+    BaseNode * selectedNode(){return m_selectedNode;}
     Relation * selectedRelation(){return m_selectedRelation;}
     int selectedType(){
-        if(m_selectedNode){return 1;}
-        if(m_selectedRelation){return 2;}
-        return 0;
+
+        if(m_selectedNode){return 0;}
+        if(m_selectedRelation){return 1;}
+
+        return -1;
     }
-    void setSelected(Node * n){
+    void setSelected(BaseNode * n){
+
         m_selectedNode = n;
+
         m_selectedRelation = nullptr;
         if(n){
             setContext(Context::node_selected);
@@ -224,8 +289,9 @@ private:
         }
     }
 
-    Node * highlightedNode(){return m_highlightedNode;}
-    void setHighlightedNode(Node * n);
+    BaseNode * highlightedNode(){return m_highlightedNode;}
+    void setHighlightedNode(BaseNode * n);
+    void setHighlightedNode();
 
 
     struct function {
@@ -249,10 +315,17 @@ private:
     void updateSearchBar(QStringList topMatches);
     void clearSearch();
 
-    void newNode(int id, QString name,int x, int y,Node * parent, Node * typeNode);
-    void newRelation(int id, Node * origin, Node * destination);
-    void newRelation(int id, Node * origin, Relation * destination);
+
+    Node * newNode(int id, QString name,int x, int y,Node * parent, Node * typeNode);
+    Node * newNode(int id, QString name, int x, int y);
+    void newRelation(int id, BaseNode * origin, BaseNode * destination);
+    void newRelation(int id, BaseNode * origin, Relation * destination);
     void newRelation(int id, Relation * origin, Relation * destination);
+
+
+    GhostNode * newGhostNode(Node * original,int x,int y);
+
+
 
 
 
@@ -267,6 +340,9 @@ public slots:
     int searching(QString input);
     int acceptedSelection(int n);
     void timeOut();
+
+    void mouseClicked(int x,int y);
+    void mouseDoubleClicked(int x,int y);
 
 };
 

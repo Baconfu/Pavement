@@ -9,8 +9,8 @@ structural::structural(QObject * parent):
 
 void structural::setChildNode(Node * n)
 {
-
     setDisplayChildNode(n);
+    setDestination(n->getCenterPosition());
     m_childNode = n;
     connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
 }
@@ -19,7 +19,7 @@ void structural::setParentNode(Node *n)
 {
 
     setDisplayParentNode(n);
-
+    setOrigin(n->getCenterPosition());
     m_parentNode = n;
     connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
 }
@@ -27,6 +27,7 @@ void structural::setParentNode(Node *n)
 void structural::setDisplayChildNode(Node *n)
 {
     m_displayChildNode = n;
+
     disconnect();
     connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
 }
@@ -109,7 +110,7 @@ void structural::update()
     if(hovering()){
         Body * b = Body::getInstance();
         setOrigin(b->mousePosition());
-        setDestination(displayChildNode()->centerPosition());
+        setDestination(displayChildNode()->getCenterPosition());
         setStructuralCutoff();
     }else{
 
@@ -122,8 +123,10 @@ void structural::update()
         }
         setDisplayParentNode(findDisplayParentNode());
 
-        setOrigin(displayParentNode()->centerPosition());
-        setDestination(displayChildNode()->centerPosition());
+        parentNode()->syncCenterPosition();
+        childNode()->syncCenterPosition();
+        setOrigin(displayParentNode()->getCenterPosition());
+        setDestination(displayChildNode()->getCenterPosition());
         setStructuralCutoff();
     }
 }
@@ -167,22 +170,22 @@ void structural::setStructuralCutoff()
 
         if(angle>=a1 && angle < pi - a1){
             targetEdge_gradient = 0;
-            targetEdge_b = destinationNode->absY() + destinationNode->height() - originNode->centerPosition().y;
+            targetEdge_b = destinationNode->getY() + destinationNode->height() - originNode->getCenterPosition().y;
 
         }
         if(angle >= pi - a1 && angle < pi + a1){
             targetEdge_gradient = 1;
-            targetEdge_b = destinationNode->absX() - originNode->centerPosition().x - 5;
+            targetEdge_b = destinationNode->getX() - originNode->getCenterPosition().x - 5;
 
         }
         if(angle >= pi + a1 && angle < 2 * pi - a1){
             targetEdge_gradient = 0;
-            targetEdge_b = destinationNode->absY() - originNode->centerPosition().y;
+            targetEdge_b = destinationNode->getY() - originNode->getCenterPosition().y;
 
         }
         if(angle >= 2 * pi - a1 || angle < a1){
             targetEdge_gradient = 1;
-            targetEdge_b = destinationNode->absX() + destinationNode->width() - originNode->centerPosition().x + 5;
+            targetEdge_b = destinationNode->getX() + destinationNode->width() - originNode->getCenterPosition().x + 5;
 
         }
 
@@ -211,8 +214,7 @@ void structural::setHighlighted(bool b)
 {
     if(b != m_highlighted){
         m_highlighted = b;
-        qDebug()<<parentNode()->name()<<tally;
-        tally+=1;
+
         if(b){
 
             obj()->setProperty("focus",true);

@@ -1,9 +1,14 @@
 #include "node.h"
+#include <ghostnode.h>
 
-Node::Node(QObject * parent):
-    QObject (parent)
+Node::Node(QObject * parent, int id)
 {
+    m_id = id;
+}
 
+QString Node::getName()
+{
+    return m_name;
 }
 
 void Node::inputAccepted()
@@ -12,26 +17,40 @@ void Node::inputAccepted()
     preventFocus(true);
     Body * b = Body::getInstance();
     b->setFocusWindow();
+    if(b->latestContext() == Body::node_selected){
+        b->contextResolved();
+    }
+
+    m_name = m_obj->findChild<QObject*>("textInput")->property("text").toString();
 }
 
-//test
+void Node::inputPassivelyAccepted()
+{
+    m_name = m_obj->findChild<QObject*>("textInput")->property("text").toString();
+}
 
 void Node::typeInputAccepted(QString s)
 {
     Body * b = Body::getInstance();
     setType(b->getNodeByName(s));
-    qDebug()<<b->getNodeByName(s);
+
     b->setFocusWindow();
+}
+
+void Node::typeInputPassivelyAccepted(QString s)
+{
+    Body * b = Body::getInstance();
+    setType(b->getNodeByName(s));
+
+
 }
 
 void Node::highlight(bool visible)
 {
+
+
     obj()->setProperty("highlighted",visible);
-    if(visible){
-        obj()->setProperty("z",-4);
-    }else{
-        obj()->setProperty("z",0);
-    }
+
 }
 
 void Node::preventFocus(bool b)
@@ -40,59 +59,51 @@ void Node::preventFocus(bool b)
 }
 
 
-
-void Node::setID(int id)
-{
-    m_id = id;
-    obj()->setProperty("myID",id);
-}
-
 void Node::setName(QString name)
 {
     m_name = name;
-    obj()->setProperty("name",name);
+    m_obj->setProperty("name",name);
+}
+
+void Node::setPosition(Body::coordinate c)
+{
+    m_position = c;
+    m_obj->setProperty("x",c.x);
+    m_obj->setProperty("y",c.y);
+
+}
+
+Body::coordinate Node::getPosition()
+{
+    Body::coordinate c;
+    c.x = m_obj->property("x").toInt();
+    c.y = m_obj->property("y").toInt();
+    m_position = c;
+    return c;
+}
+
+Body::coordinate Node::getCenterPosition()
+{
+    Body::coordinate c;
+    refreshWidthHeight();
+    getPosition();
+    c.x = m_position.x + m_width/2;
+    c.y = m_position.y + m_height/2;
+    return c;
 }
 
 int Node::addParent(Node *n)
 {
-    if(parentExists(n)){
-        return 1;
+    if(!m_parents.contains(n)){
+        m_parents.append(n);
     }
-    m_parents.append(n);
-    structural * s = newStructural();
-    s->setParentNode(n);
-    s->setDisplayParentNode(n);
-    connect(this,SIGNAL(updateStructural()),s,SLOT(update()),Qt::UniqueConnection);
-    s->update();
     return 0;
-}
-
-void Node::registerParent(Node *n)
-{
-    m_parents.append(n);
-
 }
 
 
 void Node::removeParent(Node * n)
 {
-    n->removeChild(this);
-    for(int i=0; i<getParents().length(); i++){
-        if(getParents()[i] == n){
-            m_parents.removeAt(i);
-            break;
-        }
-    }
-}
-
-bool Node::parentExists(Node *n)
-{
-    for(int i=0; i<getParents().length(); i++){
-        if(n->ID() == getParents()[i]->ID()){
-            return true;
-        }
-    }
-    return false;
+    m_parents.removeAt(m_parents.indexOf(n));
 }
 
 QVector<Node *> Node::ancestorPath(Node *target)
@@ -121,46 +132,48 @@ QVector<Node *> Node::ancestorPath(Node *target)
 
 int Node::addChild(Node *n)
 {
-    if(childExists(n)){
-        return 1;
+    if(!m_children.contains(n)){
+        m_children.append(n);
     }
-    m_children.append(n);
-    structural * s = n->newStructural();
-    s->setParentNode(this);
-    s->update();
     return 0;
-}
-
-void Node::registerChild(Node *n)
-{
-    m_children.append(n);
 }
 
 void Node::removeChild(Node *n)
 {
-    for(int i=0; i<m_children.length(); i++){
-        if(n == m_children[i]){
-            m_children.removeAt(i);
-        }
-    }
+    m_children.removeAt(m_children.indexOf(n));
+
 }
 
-bool Node::childExists(Node *n)
+GhostNode *Node::getGhostByID(int id)
 {
-    for(int i=0; i<getChildren().length(); i++){
-        if(n->ID() == getChildren()[i]->ID()){
-            return true;
+    for(int i=0; i<m_ghosts.length(); i++){
+        if(m_ghosts[i]->getID() == id){
+            return m_ghosts[i];
         }
     }
-    return false;
+    return nullptr;
+
 }
+
+GhostNode *Node::newGhostNode()
+{
+    GhostNode * n = new GhostNode(this);
+    registerGhost(n);
+    n->setID(allocateGhostID());
+    n->initializeObj();
+    n->adoptOriginal();
+    Body * body = Body::getInstance();
+    body->registerGhost(n);
+    return n;
+}
+
 
 void Node::setType(Node *n)
 {
     if(n){
         m_typeNode = n;
-        m_type = n->name();
-        m_style = n->getStyle();
+        m_type = n->getName();
+
         obj()->setProperty("type",m_type);
         obj()->findChild<QObject*>("typeName")->setProperty("italic",true);
 
@@ -196,7 +209,7 @@ int Node::registerMember(Node *n)
 void Node::removeMember(Node *n)
 {
     for(int i=0; i<members().length(); i++){
-        if(n->ID() == members()[i]->ID()){
+        if(n->getID() == members()[i]->getID()){
             Node * nll = nullptr;
             n->setType(nll);
             members().removeAt(i);
@@ -214,6 +227,44 @@ bool Node::memberExists(Node *n)
     return false;
 }
 
+void Node::setUnderMap(QVector<BaseNode *> nodes)
+{
+    m_underMap = nodes;
+
+
+}
+
+void Node::setAbstraction(BaseNode *n)
+{
+    m_abstraction = n;
+
+}
+
+void Node::expand()
+{
+    if(!m_expanded){
+
+        m_expanded = true;
+        for(int i=0; i<m_underMap.length(); i++){
+            m_underMap[i]->setVisibility(true);
+        }
+    }
+}
+
+void Node::abstract()
+{
+
+    if(m_expanded){
+
+        m_expanded = false;
+        for(int i=0; i<m_underMap.length(); i++){
+            m_underMap[i]->setVisibility(false);
+
+        }
+
+    }
+}
+
 void Node::deleteObj()
 {
     m_obj->deleteLater();
@@ -226,6 +277,8 @@ void Node::setVisibility(bool visibility)
     obj()->setProperty("visible",visibility);
 
 }
+
+
 
 void Node::setHidden(bool b)
 {
@@ -266,12 +319,12 @@ QVector<Relation*> Node::getAllRelations()
 
 void Node::registerRelation(Relation *r)
 {
-    if(r->destinationObjectType() == "node"){
+    if(r->getDestinationType() == Relation::node){
         toNode.append(r);
         toNode_node.append(r->destinationNode());
 
     }
-    if(r->destinationObjectType() == "relation"){
+    if(r->getDestinationType() == Relation::relation){
         toRelation.append(r);
         toRelation_relation.append(r->destinationRelation());
 
@@ -280,11 +333,11 @@ void Node::registerRelation(Relation *r)
 }
 void Node::registerIncomingRelation(Relation *r)
 {
-    if(r->originObjectType() == "node"){
+    if(r->getOriginType() == Relation::node){
         fromNode.append(r);
         fromNode_node.append(r->originNode());
     }
-    if(r->originObjectType() == "relation"){
+    if(r->getOriginType() == Relation::relation){
         qDebug()<<"error: invalid relation";
     }
 }
@@ -344,7 +397,9 @@ void Node::initializeObj()
     connect(object,SIGNAL(heightChanged()),this,SLOT(getHeightFromObj()));
     QObject * textObj = object->findChild<QObject*>("textInput");
     connect(textObj,SIGNAL(accepted()),this,SLOT(inputAccepted()));
+    connect(object,SIGNAL(passivelyAccepted()),this,SLOT(inputPassivelyAccepted()));
     connect(object,SIGNAL(typeAccepted(QString)),this,SLOT(typeInputAccepted(QString)));
+    connect(object,SIGNAL(typePassivelyAccepted(QString)),this,SLOT(typeInputPassivelyAccepted(QString)));
     connect(object,SIGNAL(update()),this,SLOT(updateRelations()));
     m_obj = object;
 }
@@ -353,17 +408,18 @@ void Node::initializeObj()
 
 bool Node::isInside(int x, int y)
 {
-    if(x>absX() && x<absX() + width() && y > absY() && y < absY() + height()){
+    if(x>m_position.x && x<m_position.x + width() && y > m_position.y && y < m_position.y + height()){
         return true;
     }else{
         return false;
     }
 }
 
+
 void Node::hoverSelect(int y)
 {
     int divider = obj()->findChild<QObject*>("typeNameContainer")->property("y").toInt();
-    int localY = y - absY();
+    int localY = y - m_position.y;
     if(localY<=divider){
         giveInputFocus();
     }else{

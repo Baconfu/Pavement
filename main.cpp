@@ -8,6 +8,10 @@
 #include <paintrelation.h>
 #include <paintstructural.h>
 #include <expandicon.h>
+#include <math.h>
+#include <file.h>
+#include <pavementfile.h>
+
 
 extern QQmlApplicationEngine * enginePtr;
 extern QQuickWindow * windowPtr;

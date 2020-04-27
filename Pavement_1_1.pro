@@ -13,11 +13,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        basenode.cpp \
         body.cpp \
         expandicon.cpp \
         file.cpp \
+        ghostnode.cpp \
         main.cpp \
         node.cpp \
+        nodearea.cpp \
         paintnode.cpp \
         paintrelation.cpp \
         paintstructural.cpp \
@@ -40,10 +43,13 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    basenode.h \
     body.h \
     expandicon.h \
     file.h \
+    ghostnode.h \
     node.h \
+    nodearea.h \
     paintnode.h \
     paintrelation.h \
     paintstructural.h \

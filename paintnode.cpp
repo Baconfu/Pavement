@@ -30,5 +30,6 @@ void PaintNode::paint(QPainter * painter)
         painter->drawLine(l);
     }
 
+
 }
 

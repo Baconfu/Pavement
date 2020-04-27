@@ -5,66 +5,59 @@
 #include <relation.h>
 #include <body.h>
 #include <structural.h>
+#include <basenode.h>
 
 
-class Node: public QObject
+class Node: public BaseNode
 {
     Q_OBJECT
-    Q_PROPERTY(int m_absX READ absX WRITE setAbsX NOTIFY absXChanged)
-    Q_PROPERTY(int m_absY READ absY WRITE setAbsY NOTIFY absYChanged)
+
 public:
-    Node(QObject * parent = nullptr);
+    Node(QObject * parent = nullptr, int id = -1);
 
-    int ID(){return m_id;}
-    void setID(int id);
+    Node * getNodePointer(){return this;}
 
-    QString name(){
-        m_name = obj()->findChild<QObject*>("textInput")->property("text").toString();
-        return m_name;
-    }
+
+    QString derivedType(){return "node";}
+
+    QString getName();
     void setName(QString name);
 
-    int absX() {return m_absX;}
-    void setAbsX(int x) {
-        m_absX = x;
-        obj()->setProperty("absX",x);
-        updateRelations();
-    }
+    void setPosition(Body::coordinate c);
+    Body::coordinate getPosition();
+    Body::coordinate getCenterPosition();
+    int getX(){return getPosition().x;}
+    int getY(){return getPosition().y;}
 
-    int absY() {return m_absY;}
-    void setAbsY(int y){
-        m_absY = y;
-        obj()->setProperty("absY",y);
-        updateRelations();
-    }
-
-    Body::coordinate centerPosition(){
-        setCenterPosition();
-        return m_centerPosition;
-    }
-    void setCenterPosition(Body::coordinate c){
-        m_centerPosition = c;
-    }
-    void setCenterPosition(){
-        m_centerPosition.x = absX() + width() / 2;
-        m_centerPosition.y = absY() + height() / 2;
-
-    }
+    int getID(){return m_id;}
 
     QVector<Node*> getParents(){return m_parents;}
     int addParent(Node * n);
-    void registerParent(Node * n);
     void removeParent(Node * n);
-    bool parentExists(Node * n);
 
     QVector<Node*> ancestorPath(Node * target);
 
     QVector<Node*> getChildren(){return m_children;}
     int addChild(Node * n);
-    void registerChild(Node * n);
     void removeChild(Node * n);
-    bool childExists(Node * n);
 
+    void getDescendants(QVector<Node*> * out){
+        if(!out->contains(this)){
+            out->append(this);
+            for(int i=0; i<m_children.length(); i++){
+                m_children[i]->getDescendants(out);
+            }
+            return;
+        }
+    }
+
+
+    QVector<GhostNode*> m_ghosts;
+    void registerGhost(GhostNode * n){m_ghosts.append(n);}
+    int allocateGhostID(){return m_ghosts.length();}
+    GhostNode * getGhostByID(int id);
+    QVector<GhostNode*> getGhosts(){return m_ghosts;}
+    GhostNode * newGhostNode();
 
     QString typeName(){return m_type;}
 
@@ -75,6 +68,7 @@ public:
 
         m_width = obj()->property("width").toInt();
         m_height = obj()->property("height").toInt();
+
     }
     int width(){refreshWidthHeight(); return m_width;}
     int height(){refreshWidthHeight(); return m_height;}
@@ -86,7 +80,13 @@ public:
     void removeMember(Node * n);
     bool memberExists(Node * n);
 
+    void setUnderMap(QVector<BaseNode*> nodes);
+    QVector<BaseNode*> getUnderMap(){return m_underMap;}
 
+    void setAbstraction(BaseNode * n);
+
+    void expand();
+    void abstract();
 
     QVector<Relation*> getAllRelations();
     void registerRelation(Relation * r);
@@ -111,6 +111,8 @@ public:
     bool isVisible(){return m_visible;}
     void setVisibility(bool visibility);
 
+
+
     bool hidden(){return m_hidden;}
     void setHidden(bool b);
 
@@ -121,8 +123,18 @@ public:
 
     void highlight(bool visible);
 
+
+
     void preventFocus(bool b);
     bool preventingFocus(){return m_preventFocus;}
+    void syncCenterPosition(){
+        Body::coordinate c;
+        c.x = m_position.x + m_width/2;
+
+        c.y = m_position.y + m_height/2;
+        m_centerPosition = c;
+    }
+
 
 
 private:
@@ -139,54 +151,61 @@ private:
     };
 
 
+    QVector<BaseNode*> m_underMap;
+
+    BaseNode * m_abstraction = nullptr;
 
 
+    //Foreign diplomacy
     QVector<Relation*> toNode;
-    QVector<Node*> toNode_node;
+    QVector<BaseNode*> toNode_node;
     QVector<Relation*> fromNode;
-    QVector<Node*> fromNode_node;
+    QVector<BaseNode*> fromNode_node;
     QVector<Relation*> toRelation;
     QVector<Relation*> toRelation_relation;
-
-
-
-
-    void setStyle();
-    Body::style getStyle(){return m_style;}
-    int m_id;
-    QString m_name;
-
-    int m_absX;
-    int m_absY;
-    int m_width;
-    int m_height;
-    Body::coordinate m_centerPosition;
-
-    QVector<Node*> m_parents;
-    QVector<Node*> m_children;
-    QVector<structural*> toParent;
-
-    structural * m_hoveringStructural = nullptr;
-
 
     QString m_type;
     Node * m_typeNode = nullptr;
     QVector<Node*> m_members;
 
+    //vassalage diplomacy
+    QVector<Node*> m_parents;
+    QVector<Node*> m_children;
+    QVector<structural*> toParent;
+
+
+    //Geopolitical information.
+    int m_width;
+    int m_height;
+    void setCenterPosition(Body::coordinate c){
+        m_centerPosition = c;
+    }
+
+
+
+    //Domestic policy
+    void setStyle();
+
+    structural * m_hoveringStructural = nullptr;
+
+
     Body::style m_style;
 
-    bool m_visible = true;
+    //STATE VARIABLES
 
+    bool m_visible = true;
     bool m_hidden = false;
     bool m_dissolve = false;
-
-    QQuickItem * m_obj = nullptr;
+    bool m_expanded = false;
 
     bool m_preventFocus = false;
 
 
+
+
 public:
     bool isInside(int x, int y);
+
     void hoverSelect(int y);
 
 signals:
@@ -204,7 +223,9 @@ public slots:
     }
 
     void inputAccepted();
+    void inputPassivelyAccepted();
     void typeInputAccepted(QString s);
+    void typeInputPassivelyAccepted(QString s);
     void updateRelations();
 };
 
