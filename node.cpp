@@ -47,10 +47,21 @@ void Node::typeInputPassivelyAccepted(QString s)
 
 void Node::highlight(bool visible)
 {
-
-
     obj()->setProperty("highlighted",visible);
 
+}
+
+void Node::hover(bool b)
+{
+    if(!m_batchSelected){
+        highlight(b);
+    }
+}
+
+void Node::select(bool b)
+{
+    highlight(b);
+    m_batchSelected = b;
 }
 
 void Node::preventFocus(bool b)
@@ -65,11 +76,53 @@ void Node::setName(QString name)
     m_obj->setProperty("name",name);
 }
 
+void Node::transform(Body::coordinate c)
+{
+    setPosition(getPosition().add(c));
+    if(m_abstraction){
+        m_abstraction->reFormatExpandedForm();
+    }
+}
+
+void Node::transformIgnoreSubMap(Body::coordinate c)
+{
+    transform(c);
+    transformSubMap(c.invert());
+}
+
 void Node::setPosition(Body::coordinate c)
 {
     m_position = c;
     m_obj->setProperty("x",c.x);
     m_obj->setProperty("y",c.y);
+    updateAbsolutePosition();
+    updateRelation();
+
+}
+
+void Node::setPositionIgnoreSubMap(Body::coordinate c)
+{
+    Body::coordinate vector = m_position.subtract(c);
+    setPosition(c);
+    transformSubMap(vector);
+}
+
+void Node::setPositionByCenter(Body::coordinate c)
+{
+    Body::coordinate m;
+
+    m.x = c.x - m_width/2;
+    m.y = c.y - m_height/2;
+    setPosition(m);
+}
+
+void Node::setPositionByCenterIgnoreSubMap(Body::coordinate c)
+{
+    Body::coordinate m;
+
+    m.x = c.x - m_width/2;
+    m.y = c.y - m_height/2;
+    setPositionIgnoreSubMap(m);
 
 }
 
@@ -85,10 +138,11 @@ Body::coordinate Node::getPosition()
 Body::coordinate Node::getCenterPosition()
 {
     Body::coordinate c;
-    refreshWidthHeight();
+
     getPosition();
     c.x = m_position.x + m_width/2;
     c.y = m_position.y + m_height/2;
+    m_centerPosition = c;
     return c;
 }
 
@@ -181,9 +235,7 @@ void Node::setType(Node *n)
         n->registerMember(this);
     }else{
         Body * b = Body::getInstance();
-        if(m_typeNode){
-            n->removeMember(m_typeNode);
-        }
+
         m_typeNode = nullptr;
         m_type = "";
         m_style = b->defaultStyle();
@@ -230,24 +282,119 @@ bool Node::memberExists(Node *n)
 void Node::setUnderMap(QVector<BaseNode *> nodes)
 {
     m_underMap = nodes;
+    for(int i=0; i<nodes.length(); i++){
+        BaseNode * b = nodes[i];
+        Body::coordinate c = b->getPosition().subtract(this->getPosition());
+        b->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
+        b->setPosition(c);
+        b->setVisibility(false);
 
+    }
+    if(!nodes.isEmpty()){
+        reFormatExpandedForm();
+        updateAbsolutePosition();
+    }
+
+
+}
+
+void Node::underMapAppendNode(BaseNode *node)
+{
+    m_underMap.append(node);
+    Body::coordinate c = node->getPosition().subtract(this->getPosition());
+    node->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
+    node->setPosition(c);
+    //node->setVisibility(false);
+    node->setAbstraction(this);
+    reFormatExpandedForm();
+
+}
+
+void Node::transformSubMap(Body::coordinate vector)
+{
+    for(int i=0; i<m_underMap.length(); i++){
+        m_underMap[i]->transform(vector);
+    }
+}
+
+void Node::reFormatExpandedForm()
+{
+    if(!m_underMap.isEmpty()){
+
+        int leftMost = 10000000;
+        int rightMost = -1000000;
+        int topMost = 10000000;
+        int botMost = -1000000;
+
+        for(int i=0; i<m_underMap.length(); i++){
+            BaseNode * b = m_underMap[i];
+
+
+            int x = b->getPosition().x;
+            if(x < leftMost){
+
+                leftMost = x;
+            }
+            x = b->getPosition().x + b->width();
+            if(x > rightMost){
+
+                rightMost = x;
+            }
+            int y = b->getPosition().y;
+            if(y < topMost){
+
+                topMost = y;
+            }
+            y = b->getPosition().y + b->height();
+            if(y > botMost){
+
+                botMost = y;
+            }
+
+        }
+        Body::coordinate median;
+        median.x = (leftMost + rightMost) / 2;
+        median.y = (topMost + botMost) / 2;
+
+        int displace = m_obj->findChild<QQuickItem*>("nameContainer")->property("height").toInt();
+        m_obj->findChild<QObject*>("expandedArea")->setProperty("width",rightMost - leftMost);
+        m_obj->findChild<QObject*>("expandedArea")->setProperty("height",botMost - topMost + displace);
+        Body::coordinate geometry;
+        geometry.x = width()/2;
+        geometry.y = height()/2;
+
+
+        transformIgnoreSubMap(median.subtract(geometry));
+
+
+    }
+    updateRelation();
 
 }
 
 void Node::setAbstraction(BaseNode *n)
 {
     m_abstraction = n;
-
 }
 
 void Node::expand()
 {
-    if(!m_expanded){
+    if(m_underMap.isEmpty()){
+        m_expanded = true;
+        m_obj->setProperty("expanded",true);
+    }
+    if(!m_expanded && !m_underMap.isEmpty()){
 
         m_expanded = true;
         for(int i=0; i<m_underMap.length(); i++){
             m_underMap[i]->setVisibility(true);
         }
+        Body::coordinate center = getCenterPosition();
+        m_obj->setProperty("expanded",true);
+
+
+        setPositionByCenterIgnoreSubMap(center);
+
     }
 }
 
@@ -258,10 +405,14 @@ void Node::abstract()
 
         m_expanded = false;
         for(int i=0; i<m_underMap.length(); i++){
+            m_underMap[i]->abstract();
             m_underMap[i]->setVisibility(false);
 
         }
+        Body::coordinate center = getCenterPosition();
+        m_obj->setProperty("expanded",false);
 
+        setPositionByCenterIgnoreSubMap(center);
     }
 }
 
@@ -269,6 +420,49 @@ void Node::deleteObj()
 {
     m_obj->deleteLater();
     m_obj = nullptr;
+}
+
+void Node::destroy()
+{
+    m_obj->deleteLater();
+    m_obj = nullptr;
+    Body * b = Body::getInstance();
+
+    b->removeNode(this);
+
+    QVector<BaseNode*> temp = m_underMap;
+    for(int i=0; i<temp.length(); i++){
+        temp[i]->destroy();
+    }
+    if(m_abstraction){
+        if(typeid (*m_abstraction) == typeid (GhostNode)){
+            m_abstraction->getGhostPointer()->removeSubNode(this);
+        }
+        if(typeid (*m_abstraction) == typeid (Node)){
+            m_abstraction->getNodePointer()->removeSubNode(this);
+        }
+    }
+
+    QVector<GhostNode*> temp2 = m_ghosts;
+    for(int i=0; i<temp2.length(); i++){
+        b->removeGhost(temp2[i]);
+        temp2[i]->destroy();
+
+    }
+    for(int i=0; i<m_members.length(); i++){
+        m_members[i]->setType(nullptr);
+    }
+    for(int i=0; i<m_children.length(); i++){
+        m_children[i]->removeParent(this);
+    }
+    for(int i=0; i<m_parents.length(); i++){
+        m_parents[i]->removeChild(this);
+    }
+
+    terminate();
+
+    disconnect();
+
 }
 
 void Node::setVisibility(bool visibility)
@@ -357,12 +551,7 @@ structural * Node::newStructural()
 
 void Node::updateRelations()
 {
-    QVector<Relation*> v = getAllRelations();
-    for(int i=0; i<v.length(); i++){
-        v[i]->updateSelf();
-    }
-    updateRelation();
-    updateStructural();
+
 }
 
 void Node::setStyle()
@@ -383,6 +572,11 @@ void Node::giveTypeInputFocus()
     }
 }
 
+void Node::moving(bool b)
+{
+    m_moving = b;
+}
+
 void Node::initializeObj()
 {
     Body * body = Body::getInstance();
@@ -393,26 +587,57 @@ void Node::initializeObj()
     QQuickItem * item = body->getRoot();
     object->setParentItem(item->findChild<QQuickItem*>("layer"));
     object->setParent(body->engine());
-    connect(object,SIGNAL(widthChanged()),this,SLOT(getWidthFromObj()));
-    connect(object,SIGNAL(heightChanged()),this,SLOT(getHeightFromObj()));
+    connect(object,SIGNAL(widthChanged()),this,SLOT(widthChanged()));
+    connect(object,SIGNAL(heightChanged()),this,SLOT(heightChanged()));
     QObject * textObj = object->findChild<QObject*>("textInput");
     connect(textObj,SIGNAL(accepted()),this,SLOT(inputAccepted()));
     connect(object,SIGNAL(passivelyAccepted()),this,SLOT(inputPassivelyAccepted()));
     connect(object,SIGNAL(typeAccepted(QString)),this,SLOT(typeInputAccepted(QString)));
     connect(object,SIGNAL(typePassivelyAccepted(QString)),this,SLOT(typeInputPassivelyAccepted(QString)));
     connect(object,SIGNAL(update()),this,SLOT(updateRelations()));
+    connect(object,SIGNAL(update()),this,SLOT(geometryChanged()));
+
     m_obj = object;
+    widthChanged();
+    heightChanged();
 }
 
 
 
-bool Node::isInside(int x, int y)
+BaseNode * Node::isInside(int x, int y)
 {
-    if(x>m_position.x && x<m_position.x + width() && y > m_position.y && y < m_position.y + height()){
-        return true;
-    }else{
-        return false;
+    Body::coordinate position = m_position;
+
+    if(m_obj->property("expanded").toBool()){
+        for(int i=0; i<m_underMap.length(); i++){
+            BaseNode * b = m_underMap[i]->isInside(x-position.x,y-position.y);
+            if(b){
+                return b;
+            }
+        }
     }
+
+    int width = m_width;
+    int height = m_height;
+
+    if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
+        return this;
+    }else{
+        return nullptr;
+    }
+}
+
+
+void Node::updateAbsolutePosition()
+{
+
+    if(m_abstraction){
+        m_absolutePosition = m_abstraction->getAbsolutePosition().add(getPosition());
+    }
+    else{
+        m_absolutePosition = m_position;
+    }
+
 }
 
 
@@ -425,6 +650,48 @@ void Node::hoverSelect(int y)
     }else{
         giveTypeInputFocus();
     }
+
+}
+
+void Node::widthChanged()
+{
+    m_width = m_obj->property("width").toInt();
+
+}
+void Node::heightChanged()
+{
+    m_height = m_obj->property("height").toInt();
+
+}
+
+void Node::mouseClicked()
+{
+
+}
+
+void Node::mousePressed()
+{
+
+}
+
+void Node::mouseReleased()
+{
+
+}
+
+void Node::geometryChanged()
+{
+    QVector<Relation*> v = getAllRelations();
+    for(int i=0; i<v.length(); i++){
+        v[i]->updateSelf();
+    }
+
+    updateStructural();
+
+    for(int i=0; i<m_underMap.length(); i++){
+        m_underMap[i]->geometryChanged();
+    }
+
 }
 
 

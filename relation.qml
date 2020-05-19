@@ -8,7 +8,7 @@ Item {
     y:10
     width:100
     height:100
-    z:-3
+    z:5
 
     property bool highlighted: false
     onHighlightedChanged: {
@@ -25,16 +25,19 @@ Item {
         anchors.fill:parent
         lineWidth: 1
 
+        p0:Qt.point(0,0)
         p1:Qt.point(container.width,container.height)
 
 
         Rectangle{
             id:textBox
             objectName: "textBox"
-            property int xMod;
-            property int yMod;
-            x: xMod/2 - textInput.contentWidth/2
-            y: yMod/2 - textInput.contentHeight/2
+            property int xModd;
+            property int yModd;
+            property int xModo;
+            property int yModo;
+            x: (xModd + xModo)/2 - textInput.contentWidth/2
+            y: (yModd + yModo)/2 - textInput.contentHeight/2
             width: textInput.contentWidth;
             height: textInput.contentHeight;
             opacity: 0.8

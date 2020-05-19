@@ -8,6 +8,7 @@
 #include <paintrelation.h>
 #include <paintstructural.h>
 #include <expandicon.h>
+#include <paintnodearea.h>
 #include <math.h>
 #include <file.h>
 #include <pavementfile.h>
@@ -41,6 +42,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<PaintRelation>("Paint",1,0,"PaintRelation");
     qmlRegisterType<PaintStructural>("Paint",1,0,"PaintStructural");
     qmlRegisterType<ExpandIcon>("Paint",1,0,"ExpandIcon");
+    qmlRegisterType<PaintNodeArea>("Paint",1,0,"PaintNodeArea");
 
     Body * body = Body::getInstance();
     qDebug()<<"initial instance"<<body;

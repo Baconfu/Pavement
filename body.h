@@ -22,6 +22,7 @@
 
 class BaseNode;
 class Node;
+class NodeArea;
 class Relation;
 class structural;
 class GhostNode;
@@ -40,7 +41,6 @@ public:
     QQuickWindow * window();
     void setFocusWindow();
     void frameView();
-
 
 
     void initialize();
@@ -109,10 +109,24 @@ public:
             r.y = y + c.y;
             return r;
         }
+        coordinate invert(){
+            coordinate r;
+            r.x = x * -1;
+            r.y = y * -1;
+            return r;
+        }
     }coordinate;
 
 
+    coordinate averagePosition(QVector<BaseNode*> nodes);
+    coordinate medianPosition(QVector<BaseNode*> nodes);
+    QVector<coordinate> boundaries(QVector<BaseNode*> nodes);
+
     coordinate mousePosition(){return m_mousePosition;}
+    coordinate oldMousePosition(){return m_oldMousePosition;}
+    coordinate mouseVector(){
+        return m_mouseVector;
+    }
     coordinate tabPosition(){return m_tabPosition;}
 
     Node * getNodePointerByID(int id);
@@ -127,6 +141,12 @@ public:
         }
     }
 
+    void removeNode(Node * n){nodeMap.removeOne(n);}
+    void removeGhost(GhostNode * g){ghostNodeMap.removeOne(g);}
+    void removeRelation(Relation * r){relationArchive.removeOne(r);}
+    void removeNode(BaseNode * b);
+    void removeStructural(structural * s){structuralMap.removeOne(s);}
+
     Relation * getRelationPointerByID(int id);
     Relation * getRelationPointerByID(int id,QVector<Relation*> pool);
 
@@ -140,11 +160,18 @@ public:
         }
         return m_context[m_context.length()-1];
     }
-    void contextResolved(){m_context.pop_back();
+    void contextResolved(){
+        if(true){
+            //qDebug()<<"context resolved:"<<m_context;
+        }
+        m_context.pop_back();
+    }
+    void contextReset(){
 
-                          }
-    void contextReset(){m_context.clear();}
+        m_context.clear();
+    }
     void setContext(int c){
+        //qDebug()<<m_context<<"setting context:"<<c;
         if(c == tab_searching){
             if(latestContext() != c){
 
@@ -155,6 +182,7 @@ public:
         }else{
             if(!context().contains(c)){
                 m_context.append(c);
+
             }
         }
 
@@ -177,7 +205,10 @@ public:
         including = 9,
         batch_selected = 10,
         batch_selecting = 11,
-        node_browsing = 12
+        node_browsing = 12,
+        moving_node = 13,
+        structural_selected = 14,
+        mouse_held = 15
     };
 
 private:
@@ -216,8 +247,12 @@ private:
 
     coordinate m_mouseLocalPosition;
     coordinate m_mousePosition;
+    coordinate m_oldMousePosition;
+    coordinate m_mouseVector;
     coordinate m_tabPosition;
+    bool m_mouseHeld = false;
 
+    QVector<NodeArea*> areaMap;
     QVector<Node*> nodeMap;
     QVector<Relation*> relationArchive;
     QVector<structural*> structuralMap;
@@ -260,31 +295,26 @@ private:
 
     Relation * m_selectedRelation = nullptr;
 
+    structural * m_selectedStructural = nullptr;
+
     BaseNode * m_highlightedNode = nullptr;
+
 
     BaseNode * selectedNode(){return m_selectedNode;}
     Relation * selectedRelation(){return m_selectedRelation;}
-    int selectedType(){
-
-        if(m_selectedNode){return 0;}
-        if(m_selectedRelation){return 1;}
-
-        return -1;
-    }
-    void setSelected(BaseNode * n){
-
-        m_selectedNode = n;
-
-        m_selectedRelation = nullptr;
-        if(n){
-            setContext(Context::node_selected);
+    void setSelected(structural * s){
+        m_selectedStructural = s;
+        if(s && latestContext()!= creating_relation && latestContext() != parenting){
+            setContext(structural_selected);
         }
-
     }
+    void setSelected(BaseNode * n);
     void setSelected(Relation * r){
         m_selectedRelation = r;
-        m_selectedNode = nullptr;
+
+
         if(r){
+            m_selectedNode = nullptr;
             setContext(Context::relation_selected);
         }
     }
@@ -292,6 +322,8 @@ private:
     BaseNode * highlightedNode(){return m_highlightedNode;}
     void setHighlightedNode(BaseNode * n);
     void setHighlightedNode();
+
+
 
 
     struct function {
@@ -315,6 +347,8 @@ private:
     void updateSearchBar(QStringList topMatches);
     void clearSearch();
 
+    bool tabAccepted = false; //mutual exclusion: tabaccepted and enterPressed
+
 
     Node * newNode(int id, QString name,int x, int y,Node * parent, Node * typeNode);
     Node * newNode(int id, QString name, int x, int y);
@@ -324,6 +358,8 @@ private:
 
 
     GhostNode * newGhostNode(Node * original,int x,int y);
+
+    NodeArea * newNodeArea(QVector<BaseNode*> nodes);
 
 
 
@@ -343,6 +379,9 @@ public slots:
 
     void mouseClicked(int x,int y);
     void mouseDoubleClicked(int x,int y);
+    void mousePressed(int x,int y);
+    void mouseReleased();
+    void mouseHeld();
 
 };
 

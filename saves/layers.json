@@ -75,6 +75,35 @@
             },
             "x": 115,
             "y": 445
+        },
+        {
+            "id": 4,
+            "name": "abstraction",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                    {
+                        "id": 1,
+                        "original": 3,
+                        "subMap": [
+                        ],
+                        "x": 21,
+                        "y": 48
+                    },
+                    {
+                        "id": 2,
+                        "original": 2,
+                        "subMap": [
+                        ],
+                        "x": 156,
+                        "y": 94
+                    }
+                ],
+                "subNodes": null
+            },
+            "x": 469,
+            "y": 422
         }
     ]
 }

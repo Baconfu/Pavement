@@ -23,18 +23,43 @@ public:
     QString getName();
     void setName(QString name);
 
+
+    //TRANSFORM: SETTING FUNCTIONS
+    void transform(Body::coordinate c);
+    void transformIgnoreSubMap(Body::coordinate c);
     void setPosition(Body::coordinate c);
+    void setPositionIgnoreSubMap(Body::coordinate c);
+    void setPositionByCenter(Body::coordinate c);
+    void setPositionByCenterIgnoreSubMap(Body::coordinate c);
+
+
+    //TRANSFORM: GETTING FUNCTIONS
     Body::coordinate getPosition();
     Body::coordinate getCenterPosition();
+    Body::coordinate getCenterAbsolutePosition(){
+        Body::coordinate c;
+        c.x = m_absolutePosition.x + m_width/2;
+        c.y = m_absolutePosition.y + m_height/2;
+        return c;
+    }
+    Body::coordinate getAbsolutePosition(){updateAbsolutePosition(); return m_absolutePosition;}
     int getX(){return getPosition().x;}
     int getY(){return getPosition().y;}
 
+
+    //NODE DIMENSIONS: GETTING FUNCTIONS
+    int width(){return m_width;}
+    int height(){return m_height;}
+
+
+    //NODE INFORMATION: GETTING FUNCTIONS
     int getID(){return m_id;}
 
+
+    //NODE PARENTS AND CHILDREN
     QVector<Node*> getParents(){return m_parents;}
     int addParent(Node * n);
     void removeParent(Node * n);
-
     QVector<Node*> ancestorPath(Node * target);
 
     QVector<Node*> getChildren(){return m_children;}
@@ -52,66 +77,66 @@ public:
     }
 
 
-    QVector<GhostNode*> m_ghosts;
+    //NODE GHOSTS
     void registerGhost(GhostNode * n){m_ghosts.append(n);}
+    void unregisterGhost(GhostNode *n){m_ghosts.removeOne(n);}
     int allocateGhostID(){return m_ghosts.length();}
     GhostNode * getGhostByID(int id);
     QVector<GhostNode*> getGhosts(){return m_ghosts;}
     GhostNode * newGhostNode();
 
+
+    //NODE TYPES AND MEMBERS
     QString typeName(){return m_type;}
 
     Node * getType(){return m_typeNode;}
     void setType(Node * n);
-
-    void refreshWidthHeight(){
-
-        m_width = obj()->property("width").toInt();
-        m_height = obj()->property("height").toInt();
-
-    }
-    int width(){refreshWidthHeight(); return m_width;}
-    int height(){refreshWidthHeight(); return m_height;}
-
-
 
     QVector<Node*> members(){return m_members;}
     int registerMember(Node * n);
     void removeMember(Node * n);
     bool memberExists(Node * n);
 
+    //NODE SUBMAP
     void setUnderMap(QVector<BaseNode*> nodes);
+    void underMapAppendNode(QVector<BaseNode*> nodes);
+    void underMapAppendNode(BaseNode * node);
     QVector<BaseNode*> getUnderMap(){return m_underMap;}
+    void removeSubNode(BaseNode * b){m_underMap.removeOne(b);}
+    void transformSubMap(Body::coordinate vector);
+
+    void reFormatExpandedForm();
 
     void setAbstraction(BaseNode * n);
 
     void expand();
     void abstract();
 
+
+
+    //NODE RELATIONS
     QVector<Relation*> getAllRelations();
     void registerRelation(Relation * r);
     void registerIncomingRelation(Relation * r);
-
     void deleteRelationByTarget(Node * n);
     void deleteAllRelations();
 
+    //NODE STRUCTURALS
     QVector<structural*> getAllStructurals(){return toParent;}
     structural * newStructural();
     structural * hoveringStructural(){return m_hoveringStructural;}
     void setHoveringStructural(structural * s){m_hoveringStructural = s;}
 
+    //NODE CONTROLS
     void giveInputFocus();
     void giveTypeInputFocus();
 
-    void initializeObj(); //just creates the obj and sets it to m_obj
-
-    void deleteObj();
-    QQuickItem * obj(){return m_obj;}
+    //NODE STATE VARIABLES
+    void moving(bool b);
+    bool isMoving(){return m_moving;}
 
     bool isVisible(){return m_visible;}
     void setVisibility(bool visibility);
-
-
 
     bool hidden(){return m_hidden;}
     void setHidden(bool b);
@@ -120,24 +145,25 @@ public:
     void dissolve();
     void distill();
 
-
     void highlight(bool visible);
-
-
-
+    void hover(bool b);
+    void select(bool b);
+    //Implement highlight state controllers
     void preventFocus(bool b);
     bool preventingFocus(){return m_preventFocus;}
-    void syncCenterPosition(){
-        Body::coordinate c;
-        c.x = m_position.x + m_width/2;
 
-        c.y = m_position.y + m_height/2;
-        m_centerPosition = c;
-    }
+
+
+    void initializeObj(); //just creates the obj and sets it to m_obj
+
+    void deleteObj();
+    void destroy();
+    QQuickItem * obj(){return m_obj;}
 
 
 
 private:
+    int tally = 0;
     enum cellStyle{
         minimal = 0,
         closed = 1,
@@ -168,6 +194,9 @@ private:
     Node * m_typeNode = nullptr;
     QVector<Node*> m_members;
 
+
+    QVector<GhostNode*> m_ghosts;
+
     //vassalage diplomacy
     QVector<Node*> m_parents;
     QVector<Node*> m_children;
@@ -193,10 +222,13 @@ private:
 
     //STATE VARIABLES
 
+    bool m_batchSelected = false;
+    bool m_hover = false;
     bool m_visible = true;
     bool m_hidden = false;
     bool m_dissolve = false;
     bool m_expanded = false;
+    bool m_moving = false;
 
     bool m_preventFocus = false;
 
@@ -204,23 +236,28 @@ private:
 
 
 public:
-    bool isInside(int x, int y);
+    BaseNode * isInside(int x, int y);
+
+    void updateAbsolutePosition();
 
     void hoverSelect(int y);
 
 signals:
-    void absXChanged();
-    void absYChanged();
+
 
     void updateStructural();
     void updateRelation();
+    void terminate();
 public slots:
-    void getWidthFromObj(){
-        m_width = obj()->property("width").toInt();
-    }
-    void getHeightFromObj(){
-        m_height = obj()->property("height").toInt();
-    }
+    void widthChanged();
+    void heightChanged();
+
+
+    void mouseClicked();
+    void mousePressed();
+    void mouseReleased();
+
+    void geometryChanged();
 
     void inputAccepted();
     void inputPassivelyAccepted();

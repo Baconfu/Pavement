@@ -18,8 +18,23 @@ public:
     void setID(int id){m_id = id;}
     GhostNode * getGhostPointer(){return this;}
 
+    void updateAbsolutePosition();
+
+    void transform(Body::coordinate c);
+    void transformSubMap(Body::coordinate c);
+    void transformIgnoreSubMap(Body::coordinate c);
     void setPosition(Body::coordinate c);
+    void setPositionByCenter(Body::coordinate c);
+    void setPositionByCenterIgnoreSubMap(Body::coordinate c);
     Body::coordinate getPosition();
+    Body::coordinate getAbsolutePosition(){updateAbsolutePosition();return m_absolutePosition;}
+    Body::coordinate getCenterAbsolutePosition(){
+        Body::coordinate c;
+        updateAbsolutePosition();
+        c.x = m_absolutePosition.x + m_width/2;
+        c.y = m_absolutePosition.y + m_height/2;
+        return c;
+    }
     QString getName(){return m_name;}
     void setName(QString name);
 
@@ -28,15 +43,18 @@ public:
     int getX(){return m_position.x;}
     int getY(){return m_position.y;}
 
-    void calculateLocalVector();
-    Body::coordinate getLocalVector();
-    void setPositionByLocalVector();
-    void imposeLocalVector(Body::coordinate c);
+
 
     int width(){return m_width;}
     int height(){return m_height;}
 
     int getID(){return m_id;}
+
+    QVector<BaseNode*> getUnderMap(){return m_underMap;}
+    void setUnderMap(QVector<BaseNode*> subMap);
+    void removeSubNode(BaseNode * b){m_underMap.removeOne(b);}
+
+    void reFormatExpandedForm();
 
     void abstract();
     void expand();
@@ -44,16 +62,22 @@ public:
     void setAbstraction(BaseNode * n);
     BaseNode * getAbstraction(){return m_abstraction;}
 
+    void shiftSubMap(Body::coordinate vector);
+
+    bool isMoving(){return m_moving;}
+    void moving(bool b){m_moving = b;}
+
+    void destroy();
     void initializeObj();
     void adoptOriginal();
 
-    bool isInside(int x,int y);
+    BaseNode * isInside(int x,int y);
 
 
-    void setSelected(bool b);
+    void select(bool b);
     bool selected(){return m_batchSelected;}
 
-    void setHover(bool b);
+    void hover(bool b);
     bool hoverSelected(){return m_hoverSelected;}
 
     void preventFocus(bool b){
@@ -70,6 +94,7 @@ public:
 
 
 private:
+    int tally = 0;
     Node * m_original;
 
     bool m_preventFocus = false;
@@ -79,18 +104,29 @@ private:
 
     bool m_batchSelected = false;
     bool m_hoverSelected = false;
+    bool m_moving = false;
 
     Body::coordinate m_localVector;
 
     bool m_visible = true;
 
+    bool markedForDestruction = false;
+
     QVector<BaseNode*> m_underMap;
     BaseNode * m_abstraction = nullptr;
 signals:
+
     void updateRelation();
+    void terminate();
 public slots:
-    void getWidth(){m_width = m_obj->property("width").toInt();}
-    void getHeight(){m_height = m_obj->property("height").toInt();}
+    void mouseClicked();
+    void mousePressed();
+    void mouseReleased();
+
+
+    void geometryChanged();
+    void widthChanged();
+    void heightChanged();
 };
 
 #endif // GHOSTNODE_H

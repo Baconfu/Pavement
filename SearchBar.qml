@@ -81,6 +81,7 @@ Item {
             }
             onAccepted: {
                 if(text.length == 0){
+                    console.log("length is zero")
                     optionSelected(-1)
                 }
                 if(item.optionHighlighted>-1){
@@ -90,6 +91,7 @@ Item {
                     if(selectFirst){
                         optionSelected(0)
                     }else{
+                        console.log("nothing selected")
                         optionSelected(-1)
                     }
 

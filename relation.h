@@ -97,7 +97,10 @@ public:
     void setDestination(Body::coordinate c);
     void setDestination(int x,int y);
 
-    int setRelationCutoff();
+    void syncCutoff();
+    Body::coordinate calculateRelationCutoff(BaseNode * origin, BaseNode * destination);
+    void setDestinationCutoff(Body::coordinate c);
+    void setOriginCutoff(Body::coordinate c);
 
     Body::coordinate origin(){return m_origin;}
     Body::coordinate destination(){return m_destination;}
@@ -117,10 +120,11 @@ public:
     void finalizeSelf();
     void initializeObj();
     void createObj();
-    void deleteObj();
+
     QQuickItem * obj(){return m_obj;}
 public slots:
     void updateSelf();
+    void destroy();
 };
 
 #endif // RELATION_H

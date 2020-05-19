@@ -35,47 +35,56 @@ bool Relation::isInside(int x, int y)
     return false;
 }
 
-int Relation::setRelationCutoff()
+Body::coordinate Relation::calculateRelationCutoff(BaseNode * originNode, BaseNode * destinationNode)
 {
     if(hovering()){
-        return 0;
+        Body::coordinate c;
+        c.x=0;
+        c.y=0;
+        return c;
     }
-    Body::coordinate localVector = destination().subtract(origin());
-    Body::coordinate inverseVector = origin().subtract(destination());
+
+    Body::coordinate destination = destinationNode->getCenterAbsolutePosition();
+    Body::coordinate origin = originNode->getCenterAbsolutePosition();
+
+    Body::coordinate localVector = destination.subtract(origin);
+    Body::coordinate inverseVector = origin.subtract(destination);
 
     double angle = inverseVector.getAngle();
 
 
+
     if(true){
 
-        BaseNode * destinationNode = m_destination_node;
-        BaseNode * originNode = m_origin_node;
+
         double pi = 3.1415926;
         double a1 = atan(double(destinationNode->height()) / double(destinationNode->width()));
 
         int targetEdge_gradient = 0;
         double targetEdge_b = 0;
 
+        int destinationY = destinationNode->getAbsolutePosition().y;
+        int destinationX = destinationNode->getAbsolutePosition().x;
 
 
         if(angle>=a1 && angle < pi - a1){
             targetEdge_gradient = 0;
-            targetEdge_b = destinationNode->getY() + destinationNode->height() - originNode->getCenterPosition().y;
+            targetEdge_b = destinationY + destinationNode->height() - originNode->getCenterAbsolutePosition().y;
 
         }
         if(angle >= pi - a1 && angle < pi + a1){
             targetEdge_gradient = 1;
-            targetEdge_b = destinationNode->getX() - originNode->getCenterPosition().x - 5;
+            targetEdge_b = destinationX - originNode->getCenterAbsolutePosition().x - 5;
 
         }
         if(angle >= pi + a1 && angle < 2 * pi - a1){
             targetEdge_gradient = 0;
-            targetEdge_b = destinationNode->getY() - originNode->getCenterPosition().y;
+            targetEdge_b = destinationY - originNode->getCenterAbsolutePosition().y;
 
         }
         if(angle >= 2 * pi - a1 || angle < a1){
             targetEdge_gradient = 1;
-            targetEdge_b = destinationNode->getX() + destinationNode->width() - originNode->getCenterPosition().x + 5;
+            targetEdge_b = destinationX + destinationNode->width() - originNode->getCenterAbsolutePosition().x + 5;
 
         }
 
@@ -91,20 +100,46 @@ int Relation::setRelationCutoff()
         }
 
 
-        obj()->findChild<QObject*>("textBox")->setProperty("xMod",intersectionX);
-        obj()->findChild<QObject*>("textBox")->setProperty("yMod",intersectionY);
 
-        obj()->findChild<QObject*>("line")->setProperty("p1",QPointF(intersectionX,intersectionY));
+        Body::coordinate c;
+        c.x = intersectionX;
+        c.y = intersectionY;
+        qDebug()<<c.x<<c.y<<"intersections";
+        return c;
 
     }
-    return 0;
+
+}
+
+void Relation::setDestinationCutoff(Body::coordinate c)
+{
+
+    obj()->findChild<QObject*>("textBox")->setProperty("xModd",c.x);
+    obj()->findChild<QObject*>("textBox")->setProperty("yModd",c.y);
+
+    obj()->findChild<QObject*>("line")->setProperty("p1",QPointF(c.x,c.y));
+}
+
+void Relation::setOriginCutoff(Body::coordinate c)
+{
+    obj()->findChild<QObject*>("textBox")->setProperty("xModo",c.x);
+    obj()->findChild<QObject*>("textBox")->setProperty("yModo",c.y);
+
+    obj()->findChild<QObject*>("line")->setProperty("p0",QPointF(c.x,c.y));
 }
 
 void Relation::setOriginObject(BaseNode *n){
     m_origin_node = n;
-    Body::coordinate c = n->getCenterPosition();
+    Body::coordinate c;
+    if(n->getAbstraction()){
+        c = n->getCenterPosition().add(n->getAbstraction()->getAbsolutePosition());
+    }else{
+        c = n->getCenterPosition();
+    }
+
 
     determineTypes();
+
     setOrigin(c);
 }
 
@@ -117,14 +152,24 @@ void Relation::setOriginObject(Relation * r){
 
 void Relation::setDestinationObject(BaseNode *n){
     m_destination_node = n;
+    Body::coordinate c;
+    if(n->getAbstraction()){
+        Body::coordinate c2;
+        c2.x = n->width();
+        c2.y = n->height();
 
-    Body::coordinate c = n->getCenterPosition();
+        c = n->getAbsolutePosition().add(c2);
+    }else{
+        c = n->getCenterPosition();
+    }
+
 
     determineTypes();
     if(hovering()){
         setHovering(false);
     }
     setDestination(c);
+
     updateSelf();
 }
 void Relation::setDestinationObject(Relation *r){
@@ -213,6 +258,12 @@ void Relation::setDestination(int x, int y){
     setDestination(c);
 }
 
+void Relation::syncCutoff()
+{
+    setOriginCutoff(calculateRelationCutoff(m_destination_node,m_origin_node).add(destination().subtract(origin())));
+    setDestinationCutoff(calculateRelationCutoff(m_origin_node,m_destination_node));
+}
+
 Body::coordinate Relation::worldMidPoint(){
     Body::coordinate p;
     p.x = origin().x + width() / 2;
@@ -229,19 +280,20 @@ Body::coordinate Relation::localMidPoint(){
 void Relation::updateSelf()
 {
 
+    qDebug()<<"hi";
+
     if(originType == node){
+        if(!originNode()){
+            destroy();
+        }
         if(m_origin_node->isVisible()){
             setVisibility(true);
-            setOrigin(m_origin_node->getCenterPosition());
+            qDebug()<<m_origin_node->getCenterAbsolutePosition().x;
+            setOrigin(m_origin_node->getCenterAbsolutePosition());
         }else{
-
-
             setVisibility(false);
             return;
         }
-
-
-
     }
 
     if(originType == relation){
@@ -257,10 +309,14 @@ void Relation::updateSelf()
 
 
     if(destinationType == node){
+        if(!destinationNode()){
+            destroy();
 
+        }
         if(m_destination_node->isVisible()){
-            setDestination(m_destination_node->getCenterPosition());
-            setRelationCutoff();
+            setDestination(m_destination_node->getCenterAbsolutePosition());
+            syncCutoff();
+
             setVisibility(true);
         }else{
             setVisibility(false);
@@ -343,6 +399,7 @@ void Relation::finalizeSelf()
 
 
         connect(originNode(),SIGNAL(updateRelation()),this,SLOT(updateSelf()));
+        connect(originNode(),SIGNAL(terminate()),this,SLOT(destroy()));
 
 
     }
@@ -352,6 +409,7 @@ void Relation::finalizeSelf()
     if(destinationNode()){
         //destinationNode()->registerIncomingRelation(this);
         connect(destinationNode(),SIGNAL(updateRelation()),this,SLOT(updateSelf()));
+        connect(destinationNode(),SIGNAL(terminate()),this,SLOT(destroy()));
     }
     if(destinationRelation()){
         //destinationRelation()->registerIncomingRelation(this);
@@ -379,8 +437,11 @@ void Relation::createObj()
 
 
 
-void Relation::deleteObj(){
+void Relation::destroy(){
     m_obj->deleteLater();
     m_obj = nullptr;
+    Body * b = Body::getInstance();
+    b->removeRelation(this);
+    disconnect();
 }
 

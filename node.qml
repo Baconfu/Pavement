@@ -12,6 +12,7 @@ Item {
 
     onNameChanged: {
         textInput.text = name
+
     }
     onTypeChanged: {
         typeInput.text = type
@@ -20,6 +21,9 @@ Item {
 
 
     z:0
+
+    property bool expanded: false
+
 
     property bool highlighted: false
     property bool faded: false
@@ -30,6 +34,28 @@ Item {
     signal update()
     signal passivelyAccepted()
 
+
+    onExpandedChanged: {
+        textInput.updateInput();
+        if(expanded){
+            standard.visible = false
+            expandedArea.visible = true
+            typeNameContainer.y = expandedArea.y + expandedArea.height
+            container.width = expandedArea.width
+            container.height = expandedArea.height + nameContainer.height + typeInput.height
+
+
+        }
+        else{
+            standard.visible = true
+            expandedArea.visible = false
+
+            typeNameContainer.y = nameContainer.y + nameContainer.height
+            textInput.updateInput()
+
+            container.height = nameContainer.height + typeInput.height
+        }
+    }
 
     onHighlightedChanged: {
         if(highlighted){
@@ -52,6 +78,7 @@ Item {
     y:0
     width:10
     height: nameContainer.height + typeInput.height
+
 
     onWidthChanged: {
         update()
@@ -79,26 +106,39 @@ Item {
 
     Rectangle {
         id:nameContainer
+        objectName: "nameContainer"
         color:"white"
-        x:0
+        x:container.width/2 - width/2
         y:0
         width: 10
+
         height: 20
+
         TextInput {
             id: textInput
             x:5
+            text: ""
             enabled: !ghost
             objectName: "textInput"
             activeFocusOnPress:false
             onContentWidthChanged: {
+                updateInput()
+            }
+
+            function updateInput(){
                 if(contentWidth<5){
-                    container.width = 10
+                    if(!expanded){
+                        container.width = 10
+                    }
                     nameContainer.width = 10
                 }else{
-                    container.width = contentWidth + 10
+                    if(!expanded){
+                        container.width = contentWidth + 10
+                    }
                     nameContainer.width = contentWidth + 10
                 }
             }
+
             onFocusChanged: {
                 if(!focus){
                     passivelyAccepted()
@@ -107,6 +147,7 @@ Item {
 
         }
         PaintNode {
+            id: standard
             mode: "standard"
             anchors.fill: parent
             lineWidth: 2
@@ -117,6 +158,7 @@ Item {
     }
 
     Rectangle{
+        id: typeNameContainer
         objectName: "typeNameContainer"
         x:container.width / 2 - typeInput.contentWidth / 2
         y:nameContainer.height
@@ -133,6 +175,7 @@ Item {
             font.pointSize: 9
             text: ""
             font.italic: false
+
 
             onFocusChanged: {
                 if(focus == false){
@@ -158,7 +201,41 @@ Item {
         height:12
 
     }
+    Item {
+        id: expandedArea
+        objectName: "expandedArea"
+        visible: false
+        y:0
+        x:0
+        width: 100
+        height:100
+        onWidthChanged: {
+            if(expanded)
+                container.width = width
+        }
+        onHeightChanged: {
+            if(expanded)
+                container.height = height+ nameContainer.height + typeInput.height
+        }
 
+        Rectangle {
+            id: expandedRectangle
+            objectName: "expandedRectangle"
+            y:nameContainer.y + nameContainer.height
+            x:0
+            width:expandedArea.width
+            height:expandedArea.height-y
+            z:-1
+
+            radius: 10
+            border.color: "black"
+            border.width: 1
+
+
+
+
+        }
+    }
 
 
 }

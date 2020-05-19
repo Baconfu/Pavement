@@ -22,6 +22,14 @@ Body::coordinate BaseNode::getCenterPosition()
     return c;
 }
 
+Body::coordinate BaseNode::getCenterAbsolutePosition()
+{
+    Body::coordinate c;
+    c.x=0;
+    c.y=0;
+    return c;
+}
+
 Body::coordinate BaseNode::getLocalCenterPosition()
 {
     Body::coordinate c;
@@ -90,13 +98,6 @@ void BaseNode::setVisibility(bool visibility)
     qDebug()<<"BaseNode virtual function called. "<<visibility;
 }
 
-Body::coordinate BaseNode::getLocalVector()
-{
-    Body::coordinate c;
-    c.x=0;
-    c.y=0;
-    return c;
-}
 
 
 

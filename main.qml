@@ -26,11 +26,16 @@ Window {
             myItem.enterPressed()
         }
         MouseArea {
+            z:1
             objectName: "mouseArea"
             anchors.fill: parent
             signal mouseTransform(int x,int y,int offsetX,int offsetY)
             signal mouseClicked(int x,int y);
             signal mouseDoubleClicked(int x,int y)
+            signal mousePressed(int x,int y)
+            signal mouseHeld()
+
+            signal mouseReleased();
             hoverEnabled: true
             onMouseXChanged: {
                 mouseTransform(mouseX,mouseY,layer.x,layer.y)
@@ -39,9 +44,21 @@ Window {
                 mouseTransform(mouseX,mouseY,layer.x,layer.y)
             }
             onClicked: {
-
                 mouseClicked(mouseX - layer.x, mouseY - layer.y)
             }
+            onPressed: {
+                mousePressed(mouseX - layer.x, mouseY - layer.y)
+            }
+
+            onReleased: {
+                mouseReleased()
+            }
+            pressAndHoldInterval: 200
+            onPressAndHold: {
+                mouseHeld()
+                console.log("held")
+            }
+
             onDoubleClicked: {
 
             }

@@ -1,0 +1,48 @@
+{
+    "ghosts": [
+        {
+            "id": 1,
+            "original": 1,
+            "subMap": [
+            ],
+            "x": 537,
+            "y": 363
+        },
+        {
+            "id": 1,
+            "original": 0,
+            "subMap": [
+            ],
+            "x": 483,
+            "y": 372
+        }
+    ],
+    "nodes": [
+        {
+            "id": 0,
+            "name": "he;lp",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 394,
+            "y": 233
+        },
+        {
+            "id": 1,
+            "name": "what",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 590,
+            "y": 251
+        }
+    ]
+}

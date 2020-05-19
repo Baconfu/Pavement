@@ -22,6 +22,7 @@ SOURCES += \
         node.cpp \
         nodearea.cpp \
         paintnode.cpp \
+        paintnodearea.cpp \
         paintrelation.cpp \
         paintstructural.cpp \
         pavementfile.cpp \
@@ -51,9 +52,13 @@ HEADERS += \
     node.h \
     nodearea.h \
     paintnode.h \
+    paintnodearea.h \
     paintrelation.h \
     paintstructural.h \
     pavementfile.h \
     relation.h \
     structural.h \
     utility.h
+
+DISTFILES += \
+    pavementmodel.qmodel

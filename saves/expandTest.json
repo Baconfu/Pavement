@@ -1,0 +1,69 @@
+{
+    "ghosts": [
+        {
+            "id": 1,
+            "original": 0,
+            "subMap": [
+            ],
+            "x": 95,
+            "y": 386
+        },
+        {
+            "id": 1,
+            "original": 1,
+            "subMap": [
+            ],
+            "x": 223,
+            "y": 461
+        },
+        {
+            "id": 1,
+            "original": 2,
+            "subMap": [
+            ],
+            "x": 54,
+            "y": 504
+        }
+    ],
+    "nodes": [
+        {
+            "id": 0,
+            "name": "hello",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 293,
+            "y": 250
+        },
+        {
+            "id": 1,
+            "name": "what",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 456,
+            "y": 235
+        },
+        {
+            "id": 2,
+            "name": "trol",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 401,
+            "y": 361
+        }
+    ]
+}

@@ -1,0 +1,108 @@
+{
+    "nodes": [
+        {
+            "id": 0,
+            "name": "glucose",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 466,
+            "y": 347
+        },
+        {
+            "id": 1,
+            "name": "glucose-6-phosphate",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 465,
+            "y": 480
+        },
+        {
+            "id": 2,
+            "name": "fructose-6-phostphate",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 506,
+            "y": 592
+        },
+        {
+            "id": 3,
+            "name": "furctose-1-6-phosphate",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 543,
+            "y": 696
+        },
+        {
+            "id": 4,
+            "name": "triose phosphate",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 592,
+            "y": 810
+        },
+        {
+            "id": 5,
+            "name": "glycerate-3-phosphate",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 599,
+            "y": 921
+        },
+        {
+            "id": 6,
+            "name": "pyruvate",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 647,
+            "y": 1011
+        },
+        {
+            "id": 7,
+            "name": "acetyl-CoA",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 650,
+            "y": 1077
+        }
+    ]
+}

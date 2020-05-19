@@ -15,11 +15,19 @@ public:
     BaseNode(QObject * parent = nullptr,int id = -1);
 
 
+    virtual void setPosition(Body::coordinate){}
+    virtual void geometryChanged(){}
+
     virtual Body::coordinate getPosition();
+    virtual Body::coordinate getAbsolutePosition(){return m_absolutePosition;}
     virtual Body::coordinate getCenterPosition();
+    virtual Body::coordinate getCenterAbsolutePosition();
     virtual Body::coordinate getLocalCenterPosition();
     virtual int getX();
     virtual int getY();
+
+    virtual void transform(Body::coordinate){}
+    virtual void transformIgnoreSubMap(Body::coordinate){}
 
     virtual int width();
     virtual int height();
@@ -32,6 +40,9 @@ public:
     virtual void setID(int id);
     virtual int getID();
 
+
+    virtual void hover(bool b){qDebug()<<b;}
+    virtual void select(bool){}
     virtual void highlight(bool b);
 
 
@@ -39,9 +50,15 @@ public:
 
     virtual Node * getNodePointer(){return nullptr;}
     virtual GhostNode * getGhostPointer(){return nullptr;}
+    virtual NodeArea * getAreaPointer(){return nullptr;}
 
     virtual void abstract(){}
     virtual void expand(){}
+
+    virtual QVector<BaseNode*> getUnderMap(){QVector<BaseNode*> null; return null;}
+    virtual void underMapAppendNode(BaseNode*){}
+
+    virtual void reFormatExpandedForm(){}
 
     virtual void setAbstraction(BaseNode * b){qDebug()<<"BaseNode virtual function called. "<<b;}
     virtual BaseNode * getAbstraction();
@@ -49,12 +66,17 @@ public:
     virtual void setVisibility(bool visibility);
     virtual bool isVisible(){return true;}
 
-    virtual bool isInside(int x,int y){qDebug()<<"BaseNode virtual function called. "<< x<<y; return false;}
+    virtual BaseNode * isInside(int x,int y){qDebug()<<"BaseNode virtual function called. "<< x<<y; return nullptr;}
 
-    virtual void calculateLocalVector(){}
-    virtual Body::coordinate getLocalVector();
-    virtual void setPositionByLocalVector(){}
-    virtual void imposeLocalVector(Body::coordinate c){qDebug()<<"BaseNode virtual function called. "<<c.x<<c.y;}
+    virtual void updateAbsolutePosition(){}
+
+    virtual void moving(bool){}
+    virtual bool isMoving(){return false;}
+
+    virtual void destroy(){}
+    virtual QQuickItem * obj(){return m_obj;}
+
+
 
 protected:
     int m_id;
@@ -64,6 +86,7 @@ protected:
 
 
     Body::coordinate m_position;
+    Body::coordinate m_absolutePosition;
     Body::coordinate m_centerPosition;
 
     QQuickItem * m_obj;

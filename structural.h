@@ -42,12 +42,15 @@ public:
     void setHighlighted(bool b);
     bool highlighted(){return m_highlighted;}
 
+    void setSelected(bool b);
+    bool isSelected(){return m_selected;}
+
     void setVisibility(bool b);
     bool visible(){return m_visible;}
 
     QQuickItem * obj(){return m_obj;}
     void initializeObj();
-    void deleteObj();
+
 
 private:
     QVector<Node*> parentIncludeNodes();
@@ -56,6 +59,7 @@ private:
     bool m_hovering = false;
 
     bool m_highlighted = false;
+    bool m_selected = false;
 
     Body::coordinate m_origin;
     Body::coordinate m_destination;
@@ -72,6 +76,7 @@ private:
     int tally = 0;
 public slots:
     void update();
+    void destroy();
 };
 
 #endif // STRUCTURAL_H

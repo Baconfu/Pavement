@@ -33,6 +33,26 @@ Item {
 
 
         lineWidth: 1
+        Rectangle{
+            id:textBox
+            objectName: "textBox"
+            property int xMod;
+            property int yMod;
+            x: xMod + (container.width-xMod)/2 - textInput.contentWidth/2
+            y: yMod + (container.height-yMod)/2 - textInput.contentHeight/2
+            width: textInput.contentWidth;
+            height: textInput.contentHeight;
+            opacity: 0.8
+            TextInput {
+                x:0
+                y:0
+                id:textInput
+                objectName: "textInput"
+                text: ""
+                font.pointSize: 9
+
+            }
+        }
 
     }
     ExpandIcon {

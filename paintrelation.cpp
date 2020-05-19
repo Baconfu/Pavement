@@ -63,7 +63,7 @@ QSGNode * PaintRelation::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData *
     double arm = angle + (pi/6) ;
     double arm2 = angle - (pi/6);
 
-    QPointF origin = QPointF(0,0);
+    QPointF origin = p0();
     QPointF destination = p1();
 
     double armX = cos(arm) * 15;
@@ -77,6 +77,7 @@ QSGNode * PaintRelation::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData *
 
 
     QSGGeometry::Point2D * vertices = geometry->vertexDataAsPoint2D();
+
 
     vertices[0].set(origin.x(),origin.y());
     vertices[1].set(destination.x(),destination.y());

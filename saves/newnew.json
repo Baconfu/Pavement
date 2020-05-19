@@ -1,0 +1,327 @@
+{
+    "nodes": [
+        {
+            "id": 0,
+            "name": "hello",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 293,
+            "y": 250
+        },
+        {
+            "id": 1,
+            "name": "what",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 456,
+            "y": 235
+        },
+        {
+            "id": 2,
+            "name": "trol",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                ],
+                "subNodes": null
+            },
+            "x": 401,
+            "y": 361
+        },
+        {
+            "id": 3,
+            "name": "abstraction",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                    {
+                        "id": 1,
+                        "original": 1,
+                        "subMap": [
+                        ],
+                        "x": 106,
+                        "y": 16
+                    },
+                    {
+                        "id": 1,
+                        "original": 2,
+                        "subMap": [
+                        ],
+                        "x": -63,
+                        "y": 59
+                    },
+                    {
+                        "id": 1,
+                        "original": 0,
+                        "subMap": [
+                        ],
+                        "x": -22,
+                        "y": -59
+                    }
+                ],
+                "subNodes": null
+            },
+            "x": 117,
+            "y": 445
+        },
+        {
+            "id": 4,
+            "name": "abstraction2",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                    {
+                        "id": 2,
+                        "original": 1,
+                        "subMap": [
+                        ],
+                        "x": 105,
+                        "y": 95
+                    },
+                    {
+                        "id": 1,
+                        "original": 3,
+                        "subMap": [
+                            {
+                                "id": 3,
+                                "original": 1,
+                                "subMap": [
+                                ],
+                                "x": 111,
+                                "y": 16
+                            },
+                            {
+                                "id": 3,
+                                "original": 2,
+                                "subMap": [
+                                ],
+                                "x": -68,
+                                "y": 59
+                            },
+                            {
+                                "id": 2,
+                                "original": 0,
+                                "subMap": [
+                                ],
+                                "x": -17,
+                                "y": -59
+                            }
+                        ],
+                        "x": -36,
+                        "y": -9
+                    },
+                    {
+                        "id": 2,
+                        "original": 2,
+                        "subMap": [
+                        ],
+                        "x": 164,
+                        "y": -42
+                    }
+                ],
+                "subNodes": null
+            },
+            "x": 452,
+            "y": 488
+        },
+        {
+            "id": 5,
+            "name": "abstraction3",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                    {
+                        "id": 3,
+                        "original": 0,
+                        "subMap": [
+                        ],
+                        "x": 343,
+                        "y": 314
+                    },
+                    {
+                        "id": 1,
+                        "original": 4,
+                        "subMap": [
+                            {
+                                "id": 4,
+                                "original": 1,
+                                "subMap": [
+                                ],
+                                "x": 256,
+                                "y": 306
+                            },
+                            {
+                                "id": 3,
+                                "original": 3,
+                                "subMap": [
+                                    {
+                                        "id": 5,
+                                        "original": 1,
+                                        "subMap": [
+                                        ],
+                                        "x": 179,
+                                        "y": 103
+                                    },
+                                    {
+                                        "id": 5,
+                                        "original": 2,
+                                        "subMap": [
+                                        ],
+                                        "x": 0,
+                                        "y": 146
+                                    },
+                                    {
+                                        "id": 4,
+                                        "original": 0,
+                                        "subMap": [
+                                        ],
+                                        "x": 51,
+                                        "y": 28
+                                    }
+                                ],
+                                "x": 0,
+                                "y": 28
+                            },
+                            {
+                                "id": 4,
+                                "original": 2,
+                                "subMap": [
+                                ],
+                                "x": 305,
+                                "y": 169
+                            }
+                        ],
+                        "x": 0,
+                        "y": 27
+                    },
+                    {
+                        "id": 2,
+                        "original": 3,
+                        "subMap": [
+                        ],
+                        "x": 415,
+                        "y": 203
+                    }
+                ],
+                "subNodes": null
+            },
+            "x": 898,
+            "y": 231
+        },
+        {
+            "id": 6,
+            "name": "abstraction4",
+            "parents": [
+            ],
+            "submap": {
+                "subGhosts": [
+                    {
+                        "id": 1,
+                        "original": 5,
+                        "subMap": [
+                            {
+                                "id": 5,
+                                "original": 0,
+                                "subMap": [
+                                ],
+                                "x": 317,
+                                "y": 314
+                            },
+                            {
+                                "id": 3,
+                                "original": 4,
+                                "subMap": [
+                                ],
+                                "x": 0,
+                                "y": 27
+                            },
+                            {
+                                "id": 4,
+                                "original": 3,
+                                "subMap": [
+                                ],
+                                "x": 410,
+                                "y": 203
+                            }
+                        ],
+                        "x": 0,
+                        "y": 28
+                    },
+                    {
+                        "id": 2,
+                        "original": 4,
+                        "subMap": [
+                            {
+                                "id": 6,
+                                "original": 1,
+                                "subMap": [
+                                ],
+                                "x": 171,
+                                "y": 218
+                            },
+                            {
+                                "id": 5,
+                                "original": 3,
+                                "subMap": [
+                                    {
+                                        "id": 7,
+                                        "original": 1,
+                                        "subMap": [
+                                        ],
+                                        "x": 174,
+                                        "y": 103
+                                    },
+                                    {
+                                        "id": 7,
+                                        "original": 2,
+                                        "subMap": [
+                                        ],
+                                        "x": 0,
+                                        "y": 146
+                                    },
+                                    {
+                                        "id": 6,
+                                        "original": 0,
+                                        "subMap": [
+                                        ],
+                                        "x": 46,
+                                        "y": 28
+                                    }
+                                ],
+                                "x": 0,
+                                "y": 27
+                            },
+                            {
+                                "id": 6,
+                                "original": 2,
+                                "subMap": [
+                                ],
+                                "x": 225,
+                                "y": 81
+                            }
+                        ],
+                        "x": 534,
+                        "y": 163
+                    }
+                ],
+                "subNodes": null
+            },
+            "x": 179,
+            "y": 480
+        }
+    ]
+}

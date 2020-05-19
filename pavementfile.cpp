@@ -105,11 +105,17 @@ void PavementFile::saveRelation(Relation *r)
     }else{
         relation["originalOrigin"] = -1;
     }
+    if(typeid (*originNode) == typeid (NodeArea)){
+        relation["originArea"] = originNode->getID();
+    }else{
+        relation["originArea"] = -1;
+    }
     if(r->getOriginType() == Relation::relation){
         relation["originRelation"] = r->originRelation()->ID();
     }else{
         relation["originRelation"] = -1;
     }
+
 
     if(r->getDestinationType() == Relation::node){
         relation["destinationNode"] = destinationNode->getID();
@@ -121,11 +127,17 @@ void PavementFile::saveRelation(Relation *r)
     }else{
         relation["originalDestination"] = -1;
     }
+    if(typeid (*destinationNode) == typeid (NodeArea)){
+        relation["destinationArea"] = destinationNode->getID();
+    }else{
+        relation["destinationArea"] = -1;
+    }
     if(r->getDestinationType() == Relation::relation){
         relation["destinationRelation"] = r->destinationRelation()->ID();
     }else{
         relation["destinationRelation"] = -1;
     }
+
     relations.append(relation);
 
     m_obj["relations"] = relations;
@@ -168,17 +180,22 @@ QVector<Node*> PavementFile::loadNodes()
             }
         }
     }
+    QVector<Node*> nArray = nodePool;
     for(int i=0; i<nodePool.length(); i++){
         QJsonObject node = nodes[i].toObject();
         QJsonObject subMap = node["submap"].toObject();
-        QJsonArray subGhostMap = subMap["subGhosts"].toArray();
+        QJsonArray subNodeMap = subMap["subGhosts"].toArray();
 
         QVector<BaseNode*> sub;
-        for(int j=0; j<subGhostMap.count(); j++){
-            QJsonObject ghost = subGhostMap[j].toObject();
-            sub.append(loadGhost(ghost));
+        for(int j=0; j<subNodeMap.count(); j++){
+            QJsonObject ghost = subNodeMap[j].toObject();
+            GhostNode * g = loadGhost(ghost,nodePool[i]->getPosition());
+            g->setAbstraction(nodePool[i]);
+            sub.append(g);
         }
+
         nodePool[i]->setUnderMap(sub);
+
     }
     return nodePool;
 }
@@ -193,6 +210,7 @@ Node *PavementFile::loadNode(QJsonObject node)
     Body::coordinate c;
     c.x = node["x"].toInt();
     c.y = node["y"].toInt();
+
     n->setPosition(c);
     return n;
 }
@@ -202,12 +220,15 @@ QVector<GhostNode *> PavementFile::loadGhosts()
     QJsonArray ghosts = m_obj["ghosts"].toArray();
     QVector<GhostNode*> ghostPool;
     for(int i=0; i<ghosts.count(); i++){
-        ghostPool.append(loadGhost(ghosts[i].toObject()));
+        Body::coordinate c;
+        c.x = 0;
+        c.y = 0;
+        ghostPool.append(loadGhost(ghosts[i].toObject(),c));
     }
     return ghostPool;
 }
 
-GhostNode *PavementFile::loadGhost(QJsonObject ghost)
+GhostNode *PavementFile::loadGhost(QJsonObject ghost,Body::coordinate positionOffset)
 {
     int original = ghost["original"].toInt();
     Node * originalNode = findNodeByID(nodePool,original);
@@ -218,11 +239,22 @@ GhostNode *PavementFile::loadGhost(QJsonObject ghost)
 
 
     n->setID(ghost["id"].toInt());
-
     Body::coordinate c;
     c.x = ghost["x"].toInt();
     c.y = ghost["y"].toInt();
-    n->setPosition(c);
+    n->setPosition(c.add(positionOffset));
+
+    QJsonArray subMap = ghost["subMap"].toArray();
+    QVector<BaseNode*> underMap;
+    for(int i=0; i<subMap.count(); i++){
+        QJsonObject subNode = subMap[i].toObject();
+        GhostNode * g = loadGhost(subNode,n->getPosition());
+        g->setAbstraction(n);
+        underMap.append(g);
+    }
+
+    n->setUnderMap(underMap);
+
     n->adoptOriginal();
     ghostPool.append(n);
     return n;
@@ -310,8 +342,22 @@ QJsonObject PavementFile::writeGhostNode(GhostNode *n)
 
     ghost["id"] = n->getID();
     ghost["original"] = n->getOriginal()->getID();
-    ghost["x"] = n->getX();
-    ghost["y"] = n->getY();
+    Body::coordinate c = n->getPosition();
+    ghost["x"] = c.x;
+    ghost["y"] = c.y;
+    QJsonArray subMap;
+    QVector<BaseNode*> underMap = n->getUnderMap();
+    for(int i=0; i<underMap.length(); i++){
+        BaseNode * b = underMap[i];
+        QJsonObject subNode;
+        if(typeid (*b) == typeid (GhostNode)){
+
+            subNode = writeGhostNode(b->getGhostPointer());
+        }
+
+        subMap.append(subNode);
+    }
+    ghost["subMap"] = subMap;
 
 
     return ghost;

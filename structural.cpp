@@ -13,6 +13,7 @@ void structural::setChildNode(Node * n)
     setDestination(n->getCenterPosition());
     m_childNode = n;
     connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
+
 }
 
 void structural::setParentNode(Node *n)
@@ -22,6 +23,7 @@ void structural::setParentNode(Node *n)
     setOrigin(n->getCenterPosition());
     m_parentNode = n;
     connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
+    connect(n,SIGNAL(terminate()),this,SLOT(destroy()));
 }
 
 void structural::setDisplayChildNode(Node *n)
@@ -79,9 +81,24 @@ Node *structural::findDisplayChildNode()
 
 bool structural::isInside(int x, int y)
 {
-    int tx = (origin().x + destination().x) / 2;
-    int ty = (origin().y + destination().y) / 2;
-    if(x > tx-20 && x < tx + 20 && y > ty - 20 && y < ty + 20){
+
+    int tbx = m_obj->findChild<QObject*>("textBox")->property("x").toInt() + m_obj->property("x").toInt();
+    int tby = m_obj->findChild<QObject*>("textBox")->property("y").toInt() + m_obj->property("y").toInt();
+    int tbwidth = m_obj->findChild<QObject*>("textBox")->property("width").toInt();
+    int tbheight = m_obj->findChild<QObject*>("textBox")->property("height").toInt();
+
+
+
+    int give = 5;
+    if(tbwidth<4){
+        give = 10;
+    }
+
+
+
+    if(x > tbx - give && x < tbx + tbwidth + give && y > tby - 2 && y < tby + tbheight + 2){
+
+        tally+=1;
         return true;
     }
     return false;
@@ -123,12 +140,20 @@ void structural::update()
         }
         setDisplayParentNode(findDisplayParentNode());
 
-        parentNode()->syncCenterPosition();
-        childNode()->syncCenterPosition();
         setOrigin(displayParentNode()->getCenterPosition());
         setDestination(displayChildNode()->getCenterPosition());
         setStructuralCutoff();
     }
+}
+
+void structural::destroy()
+{
+    m_parentNode->removeChild(m_childNode);
+    m_childNode->removeParent(m_parentNode);
+    Body * b = Body::getInstance();
+    m_obj->deleteLater();
+    m_obj = nullptr;
+    b->removeStructural(this);
 }
 
 void structural::setOrigin(Body::coordinate c)
@@ -200,6 +225,9 @@ void structural::setStructuralCutoff()
             intersectionY = int(targetEdge_b);
         }
 
+        m_obj->findChild<QObject*>("textInput")->setProperty("xMod",intersectionX);
+        m_obj->findChild<QObject*>("textInput")->setProperty("yMod",intersectionY);
+
         obj()->findChild<QObject*>("line")->setProperty("p1",QPointF(intersectionX,intersectionY));
     }
 
@@ -222,6 +250,21 @@ void structural::setHighlighted(bool b)
         }else{
             obj()->setProperty("focus",true);
             obj()->setProperty("highlighted",false);
+        }
+    }
+}
+
+void structural::setSelected(bool b)
+{
+    if(b != m_selected){
+        m_selected = b;
+        if(b){
+
+            m_obj->findChild<QObject*>("textInput")->setProperty("focus",true);
+        }
+        else{
+            Body * b = Body::getInstance();
+            b->setFocusWindow();
         }
     }
 }

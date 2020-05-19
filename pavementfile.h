@@ -6,6 +6,7 @@
 #include <relation.h>
 #include <structural.h>
 #include <ghostnode.h>
+#include <nodearea.h>
 
 
 class PavementFile : public File
@@ -19,7 +20,7 @@ public:
     QVector<Node*> loadNodes();
     Node * loadNode(QJsonObject node);
     QVector<GhostNode*> loadGhosts();
-    GhostNode * loadGhost(QJsonObject ghost);
+    GhostNode * loadGhost(QJsonObject ghost,Body::coordinate positionOffset);
 
     QVector<Relation *> loadRelations();
     void writeJson();
@@ -35,6 +36,7 @@ private:
 
     QVector<Node*> nodePool;
     QVector<GhostNode*> ghostPool;
+    QVector<NodeArea*> areaPool;
 
     QJsonObject findElementByID(QJsonArray elements,int id);
     Node * findNodeByID(QVector<Node*> nodes,int id);
