@@ -502,9 +502,6 @@ void Body::frameView()
         nodes.append(nodeMap[i]);
 
     }
-    for(int i=0; i<ghostNodeMap.length(); i++){
-        nodes.append(ghostNodeMap[i]);
-    }
 
     coordinate c = averagePosition(nodes);
 
@@ -523,13 +520,7 @@ void Body::saveFile(QString path)
     for(int i=0; i<relationArchive.length(); i++){
         file.saveRelation(relationArchive[i]);
     }
-    for(int i=0; i<ghostNodeMap.length(); i++){
 
-        if(!ghostNodeMap[i]->getAbstraction()){
-            file.saveGhost(ghostNodeMap[i]);
-
-        }
-    }
     file.writeJson();
 }
 
@@ -542,14 +533,20 @@ void Body::openFile(QString path)
 
     QVector<Node*> nodePool = file.loadNodes();
 
-    nodeMap.append(nodePool);
+    for(int i=0; i<nodePool.length(); i++){
+        nodeMap.append(nodePool[i]);
+    }
 
-    ghostNodeMap.append(file.loadGhosts());
+
+    QVector<GhostNode*> ghostPool = file.loadGhosts();
+    for(int i=0; i<ghostPool.length(); i++){
+        nodeMap.append(ghostPool[i]);
+    }
 
     QVector<GhostNode*> ghosts = file.getGhostPool();
     for(int i=0; i<ghosts.length(); i++){
-        if(!ghostNodeMap.contains(ghosts[i])){
-            ghostNodeMap.append(ghosts[i]);
+        if(!nodeMap.contains(ghosts[i])){
+            nodeMap.append(ghosts[i]);
         }
 
     }
@@ -679,10 +676,14 @@ Node *Body::getNodePointerByID(int id)
 {
     Node * n = nullptr;
     for(int i=0; i<nodeMap.length(); i++){
-        if(id == nodeMap[i]->getID()){
-            n = nodeMap[i];
-            break;
+        BaseNode * b = nodeMap[i];
+        if(typeid (*b) == typeid (Node)){
+            if(id == nodeMap[i]->getID()){
+                n = nodeMap[i]->getNodePointer();
+                break;
+            }
         }
+
     }
     return n;
 }
@@ -702,12 +703,30 @@ Node *Body::getNodeByName(QString name)
 {
     Node * n = nullptr;
     for(int i=0; i<nodeMap.length(); i++){
-        if(name == nodeMap[i]->getName()){
-            n=nodeMap[i];
-            break;
+        n = nodeMap[i]->getNodePointer();
+        if(n){
+            if(n->getName() == name){
+                return n;
+            }
         }
     }
-    return n;
+    return nullptr;
+}
+
+void Body::registerGhost(GhostNode *g){
+    if(!nodeMap.contains(g)){
+        nodeMap.append(g);
+    }
+}
+
+void Body::removeNode(Node *n)
+{
+    nodeMap.removeOne(n);
+}
+
+void Body::removeGhost(GhostNode *g)
+{
+    nodeMap.removeOne(g);
 }
 
 void Body::removeNode(BaseNode *b)
@@ -801,6 +820,7 @@ double Body::velocityMagnitude(int x, int y)
 
     int smallestX = 0;
     int smallestY = 0;
+
     if(x - pad.x < smallestX){smallestX = x - pad.x;}
     if((c2.x - pad.x) - x < smallestX){smallestX = (c2.x - pad.x) - x;}
 
@@ -887,25 +907,32 @@ void Body::enterPressed()
 
     }
     if(latestContext() == Context::parenting){
-        if(highlightedNode() && highlightedNode()->derivedType() == "node"){
-            Node * highlightNode = getNodePointerByID(highlightedNode()->getID());
+        BaseNode * b = highlightedNode();
+        if(highlightedNode() && typeid (*b) == typeid (Node)){
+            Node * n = b->getNodePointer();
             for(int i=0; i<nodeMap.length(); i++){
-
-                QVector<structural*> s = nodeMap[i]->getAllStructurals();
+                BaseNode *b2 = nodeMap[i];
+                Node * n2 = nullptr;
+                if(typeid (*b2) == typeid (Node)){
+                    n2 = b2->getNodePointer();
+                }else{
+                    continue;
+                }
+                QVector<structural*> s = n2->getAllStructurals();
                 for(int j=0; j<s.length(); j++){
                     if(s[j]->hovering()){
 
 
-                        nodeMap[i]->addParent(highlightNode);
-                        highlightNode->addChild(nodeMap[i]);
-                        s[j]->setParentNode(highlightNode);
+                        n2->addParent(n);
+                        n->addChild(n2);
+                        s[j]->setParentNode(n2);
                         disconnect(this,SIGNAL(mouseMoved()),s[j],SLOT(update()));
                         s[j]->setHovering(false);
                         s[j]->update();
                         updateStructuralMap();
 
                         structural * s = nullptr;
-                        nodeMap[i]->setHoveringStructural(s);
+                        n2->setHoveringStructural(s);
 
                         contextReset();
                     }
@@ -918,9 +945,6 @@ void Body::enterPressed()
 
         for(int i=0; i<nodeMap.length(); i++){
             nodeMap[i]->moving(false);
-        }
-        for(int i=0; i<ghostNodeMap.length(); i++){
-            ghostNodeMap[i]->moving(false);
         }
         contextReset();
     }
@@ -967,32 +991,18 @@ void Body::mouseReleased()
     if(latestContext() == moving_node){
         if(m_mouseHeld){
             if(highlightedNode()){
-                for(int i=0; i<ghostNodeMap.length(); i++){
-                    if(ghostNodeMap[i]->isMoving()){
-
-                        highlightedNode()->underMapAppendNode(ghostNodeMap[i]);
-                    }
-                }
-                for(int i=0; i<areaMap.length(); i++){
-                    if(areaMap[i]->isMoving()){
-                        highlightedNode()->underMapAppendNode(areaMap[i]);
+                for(int i=0; i<nodeMap.length(); i++){
+                    if(nodeMap[i]->isMoving()){
+                        highlightedNode()->underMapAppendNode(nodeMap[i]);
                     }
                 }
             }
         }
-
-
         contextResolved();
 
     }
     for(int i=0; i<nodeMap.length(); i++){
         nodeMap[i]->moving(false);
-    }
-    for(int i=0; i<ghostNodeMap.length(); i++){
-        ghostNodeMap[i]->moving(false);
-    }
-    for(int i=0; i<areaMap.length(); i++){
-        areaMap[i]->moving(false);
     }
     m_mouseHeld = false;
 
@@ -1053,30 +1063,12 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
         if(nodeMap[i]->isMoving()){
 
             nodeMap[i]->transform(m_mouseVector);
-            moving  = true;
-        }
-    }
-
-    for(int i=0; i<ghostNodeMap.length(); i++){
-        if(ghostNodeMap[i]->isMoving()){
-
-            ghostNodeMap[i]->transform(m_mouseVector);
-            if(ghostNodeMap[i]->getAbstraction()){
-                ghostNodeMap[i]->getAbstraction()->reFormatExpandedForm();
+            if(nodeMap[i]->getAbstraction()){
+                nodeMap[i]->getAbstraction()->reFormatExpandedForm();
             }
             moving  = true;
         }
     }
-    for(int i=0; i<areaMap.length(); i++){
-        if(areaMap[i]->isMoving()){
-            areaMap[i]->transform(m_mouseVector);
-            if(areaMap[i]->getAbstraction()){
-                areaMap[i]->getAbstraction()->reFormatExpandedForm();
-            }
-        }
-        moving = true;
-    }
-
 
     for(int i=0; i<nodeMap.length(); i++){
         if(nodeMap[i]->getAbstraction() == nullptr){
@@ -1146,102 +1138,10 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
                 }
 
             }
-            else{
-
-                nodeMap[i]->preventFocus(false);
-            }
         }
 
     }
-    for(int i=0; i<ghostNodeMap.length(); i++){
-        if(!ghostNodeMap[i]->getAbstraction()){
 
-            BaseNode * b = ghostNodeMap[i]->isInside(mousePosition().x,mousePosition().y);
-            if(b){
-
-                if(typeid (*b) == typeid (GhostNode)){
-                    GhostNode * g = b->getGhostPointer();
-                    if(!g->preventingFocus()){
-                        if(g->isMoving()){
-                            continue;
-                        }
-                        QVector<int> contexts = {including,creating_relation,moving_node};
-                        if(contexts.contains(latestContext())){
-                            setHighlightedNode(g);
-
-                            highlighted = true;
-
-                        }
-                        else{
-                            highlighted = true;
-                            setSelected(g);
-                            g->hover(true);
-                        }
-
-                    }else{
-                        g->hover(false);
-                        g->preventFocus(false);
-                    }
-                }
-
-            }
-        }
-
-    }
-    for(int i=0; i<areaMap.length(); i++){
-        if(!areaMap[i]->getAbstraction()){
-            BaseNode * b = areaMap[i]->isInside(mousePosition().x,mousePosition().y);
-            if(b){
-
-                if(typeid (*b) == typeid (NodeArea)){
-
-                    NodeArea * a = b->getAreaPointer();
-                    if(a->isMoving()){
-                        continue;
-                    }
-                    QVector<int> contexts = {including,creating_relation,moving_node};
-                    if(contexts.contains(latestContext())){
-                        setHighlightedNode(a);
-
-                        highlighted = true;
-
-                    }
-                    else{
-                        highlighted = true;
-                        setSelected(a);
-                        a->hover(true);
-                    }
-
-
-                }
-                if(typeid (*b) == typeid (GhostNode)){
-                    GhostNode * g = b->getGhostPointer();
-                    if(!g->preventingFocus()){
-                        if(g->isMoving()){
-                            continue;
-                        }
-                        QVector<int> contexts = {including,creating_relation,moving_node};
-                        if(contexts.contains(latestContext())){
-                            setHighlightedNode(g);
-
-                            highlighted = true;
-
-                        }
-                        else{
-                            highlighted = true;
-                            setSelected(g);
-                            g->hover(true);
-                        }
-
-                    }else{
-                        g->hover(false);
-                        g->preventFocus(false);
-                    }
-                }
-
-            }
-        }
-    }
 
     bool structuralSelected = false;
     for(int i=0; i<structuralMap.length(); i++){
@@ -1297,11 +1197,17 @@ void Body::setHoveringRelation(Relation *r)
 
 }
 
+void Body::removeGhosts(QVector<GhostNode *> ghosts){
+    for(int i=0; i<ghosts.length(); i++){
+        nodeMap.removeOne(ghosts[i]);
+    }
+}
+
 void Body::removeNodes(QVector<BaseNode *> nodes){
     for(int i=0; i<nodes.length(); i++){
         BaseNode * n = nodes[i];
         if(typeid (*n) == typeid (GhostNode)){
-            ghostNodeMap.removeOne(n->getGhostPointer());
+            nodeMap.removeOne(n->getGhostPointer());
         }
         if(typeid (*n) == typeid (Node)){
             nodeMap.removeOne(n->getNodePointer());
@@ -1313,12 +1219,16 @@ QVector<structural *> Body::getAllStructurals()
 {
     QVector<structural*> s;
     for(int i=0; i<nodeMap.length(); i++){
-        QVector<structural*> f = nodeMap[i]->getAllStructurals();
-        for(int j=0; j<f.length(); j++){
-            if(!s.contains(f[j])){
-                s.append(f[j]);
+        BaseNode * b = nodeMap[i];
+        if(typeid (*b) == typeid (Node)){
+            QVector<structural*> f = nodeMap[i]->getNodePointer()->getAllStructurals();
+            for(int j=0; j<f.length(); j++){
+                if(!s.contains(f[j])){
+                    s.append(f[j]);
+                }
             }
         }
+
     }
     return(s);
 }
@@ -1446,12 +1356,12 @@ int Body::searching(QString input)
     pool = functions;
     if(latestContext() == opening_file){
         pool.clear();
-        QStringList saves = getSaves("/home/chuan/qt_projects/Pavement_1_1/saves");
+        QStringList saves = getSaves(defaultPath);
         pool = functionFromList(saves);
     }
     if(latestContext() == saving_file){
         pool.clear();
-        QStringList saves = getSaves("/home/chuan/qt_projects/Pavement_1_1/saves");
+        QStringList saves = getSaves(defaultPath);
         pool = functionFromList(saves);
     }
     if(latestContext() == node_browsing){
@@ -1576,7 +1486,7 @@ GhostNode *Body::newGhostNode(Node *original,int x,int y)
     c.y = y;
     n->setPosition(c);
     n->adoptOriginal();
-    ghostNodeMap.append(n);
+    nodeMap.append(n);
     return n;
 }
 
@@ -1588,7 +1498,7 @@ NodeArea *Body::newNodeArea(QVector<BaseNode *> nodes)
         n->underMapAppendNode(nodes[i]);
     }
     n->reFormatExpandedForm();
-    areaMap.append(n);
+    nodeMap.append(n);
 }
 
 int Body::allocateNewID(QString type)

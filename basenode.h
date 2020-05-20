@@ -26,6 +26,8 @@ public:
     virtual int getX();
     virtual int getY();
 
+    virtual QString getName(){QString s; return s;}
+
     virtual void transform(Body::coordinate){}
     virtual void transformIgnoreSubMap(Body::coordinate){}
 

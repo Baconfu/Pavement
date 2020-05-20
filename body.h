@@ -135,14 +135,10 @@ public:
     QVector<Node*> getNodeByType(QString type);
     QVector<Node*> getNodeByType(Node * typeNode);
 
-    void registerGhost(GhostNode * g){
-        if(!ghostNodeMap.contains(g)){
-            ghostNodeMap.append(g);
-        }
-    }
+    void registerGhost(GhostNode * g);
 
-    void removeNode(Node * n){nodeMap.removeOne(n);}
-    void removeGhost(GhostNode * g){ghostNodeMap.removeOne(g);}
+    void removeNode(Node * n);
+    void removeGhost(GhostNode * g);
     void removeRelation(Relation * r){relationArchive.removeOne(r);}
     void removeNode(BaseNode * b);
     void removeStructural(structural * s){structuralMap.removeOne(s);}
@@ -212,7 +208,7 @@ public:
     };
 
 private:
-    QString defaultPath = "/home/chuan/qt_projects/Pavement_1_1/saves";
+    QString defaultPath = "/home/chuan/qt_projects/Pavement1.1/saves";
 
     QTimer timer;
     void startTimer();
@@ -252,19 +248,14 @@ private:
     coordinate m_tabPosition;
     bool m_mouseHeld = false;
 
-    QVector<NodeArea*> areaMap;
-    QVector<Node*> nodeMap;
+
+    QVector<BaseNode*> nodeMap;
     QVector<Relation*> relationArchive;
     QVector<structural*> structuralMap;
-    QVector<GhostNode*> ghostNodeMap;
 
 
 
-    void removeGhosts(QVector<GhostNode*> ghosts){
-        for(int i=0; i<ghosts.length(); i++){
-            ghostNodeMap.removeOne(ghosts[i]);
-        }
-    }
+    void removeGhosts(QVector<GhostNode*> ghosts);
     void removeNodes(QVector<BaseNode*> nodes);
 
     QVector<structural*> getAllStructurals();

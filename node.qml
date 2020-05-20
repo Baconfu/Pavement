@@ -215,13 +215,13 @@ Item {
         }
         onHeightChanged: {
             if(expanded)
-                container.height = height+ nameContainer.height + typeInput.height
+                container.height = height+ nameContainer.height + typeNameContainer.height
         }
 
         Rectangle {
             id: expandedRectangle
             objectName: "expandedRectangle"
-            y:nameContainer.y + nameContainer.height
+            y:nameContainer.height
             x:0
             width:expandedArea.width
             height:expandedArea.height-y

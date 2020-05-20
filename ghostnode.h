@@ -35,7 +35,7 @@ public:
         c.y = m_absolutePosition.y + m_height/2;
         return c;
     }
-    QString getName(){return m_name;}
+    QString getName(){m_name = m_original->getName(); return m_name;}
     void setName(QString name);
 
 
