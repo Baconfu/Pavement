@@ -80,7 +80,7 @@ public:
     //NODE GHOSTS
     void registerGhost(GhostNode * n){m_ghosts.append(n);}
     void unregisterGhost(GhostNode *n){m_ghosts.removeOne(n);}
-    int allocateGhostID(){return m_ghosts.length();}
+    int allocateGhostID();
     GhostNode * getGhostByID(int id);
     QVector<GhostNode*> getGhosts(){return m_ghosts;}
     GhostNode * newGhostNode();

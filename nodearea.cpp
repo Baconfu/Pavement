@@ -198,6 +198,7 @@ void NodeArea::highlight(bool b)
 void NodeArea::initializeObj()
 {
     Body * body = Body::getInstance();
+
     QQuickItem * object;
 
     QQmlComponent component(body->engine(),QUrl("qrc:/nodeArea.qml"));
@@ -207,6 +208,8 @@ void NodeArea::initializeObj()
     object->setParent(body->engine());
     connect(object,SIGNAL(widthChanged()),this,SLOT(widthChanged()));
     connect(object,SIGNAL(heightChanged()),this,SLOT(heightChanged()));
+
+    setID(body->allocateNewID("node"));
 
     m_obj = object;
     widthChanged();

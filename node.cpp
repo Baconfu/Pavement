@@ -198,6 +198,13 @@ void Node::removeChild(Node *n)
 
 }
 
+int Node::allocateGhostID()
+{
+    Body * b = Body::getInstance();
+
+    return b->allocateNewID("node");
+}
+
 GhostNode *Node::getGhostByID(int id)
 {
     for(int i=0; i<m_ghosts.length(); i++){
@@ -218,6 +225,7 @@ GhostNode *Node::newGhostNode()
     n->adoptOriginal();
     Body * body = Body::getInstance();
     body->registerGhost(n);
+
     return n;
 }
 
@@ -620,6 +628,7 @@ BaseNode * Node::isInside(int x, int y)
         for(int i=0; i<m_underMap.length(); i++){
             BaseNode * b = m_underMap[i]->isInside(x-position.x,y-position.y);
             if(b){
+                preventFocus(false);
                 return b;
             }
         }
@@ -631,6 +640,7 @@ BaseNode * Node::isInside(int x, int y)
     if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
         return this;
     }else{
+        preventFocus(false);
         return nullptr;
     }
 }

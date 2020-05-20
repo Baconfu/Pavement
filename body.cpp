@@ -515,7 +515,11 @@ void Body::saveFile(QString path)
 {
     PavementFile file = PavementFile(path+".json");
     for(int i=0; i<nodeMap.length(); i++){
-        file.saveNode(nodeMap[i]);
+        if(!nodeMap[i]->getAbstraction()){
+
+            file.saveBaseNode(nodeMap[i]);
+        }
+
     }
     for(int i=0; i<relationArchive.length(); i++){
         file.saveRelation(relationArchive[i]);
@@ -538,7 +542,7 @@ void Body::openFile(QString path)
     }
 
 
-    QVector<GhostNode*> ghostPool = file.loadGhosts();
+    QVector<GhostNode*> ghostPool = file.loadSubNodes();
     for(int i=0; i<ghostPool.length(); i++){
         nodeMap.append(ghostPool[i]);
     }
@@ -1070,6 +1074,7 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
         }
     }
 
+
     for(int i=0; i<nodeMap.length(); i++){
         if(nodeMap[i]->getAbstraction() == nullptr){
             BaseNode * b = nodeMap[i]->isInside(mousePosition().x,mousePosition().y);
@@ -1077,6 +1082,7 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
             if(b){
                 if(typeid (*b) == typeid (Node)){
                     if(!b->getNodePointer()->preventingFocus()){
+
                         QVector<int> contexts = {parenting,including,creating_relation,moving_node};
 
                         if(contexts.contains(latestContext())){
@@ -1112,11 +1118,10 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
                             setSelected(g);
                             g->hover(true);
                         }
-
-                    }else{
-                        g->hover(false);
-                        g->preventFocus(false);
                     }
+
+
+
                 }
                 if(typeid (*b) == typeid (NodeArea)){
                     NodeArea * a = b->getAreaPointer();
@@ -1487,6 +1492,7 @@ GhostNode *Body::newGhostNode(Node *original,int x,int y)
     n->setPosition(c);
     n->adoptOriginal();
     nodeMap.append(n);
+
     return n;
 }
 

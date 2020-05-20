@@ -13,20 +13,26 @@ class PavementFile : public File
 {
 public:
     PavementFile(QString fileName);
-    void saveNode(BaseNode * n);
+    void saveBaseNode(BaseNode * n);
+
     void saveNode(Node * n);
     void saveGhost(GhostNode * n);
+    void saveArea(NodeArea * n);
     void saveRelation(Relation * r);
+
+     QJsonObject writeSubNode(BaseNode * n);
+
+
     QVector<Node*> loadNodes();
     Node * loadNode(QJsonObject node);
-    QVector<GhostNode*> loadGhosts();
-    GhostNode * loadGhost(QJsonObject ghost,Body::coordinate positionOffset);
+    QVector<GhostNode*> loadSubNodes();
+    GhostNode * loadSubNode(QJsonObject subNode,Body::coordinate positionOffset);
 
     QVector<Relation *> loadRelations();
     void writeJson();
     void readJson();
 
-    QJsonObject writeGhostNode(GhostNode * n);
+
 
     QVector<GhostNode*> getGhostPool(){return ghostPool;}
 

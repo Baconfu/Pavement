@@ -14,6 +14,10 @@ public:
 
     NodeArea * getAreaPointer(){return this;}
 
+
+    int getID(){return m_id;}
+    void setID(int id){m_id = id;}
+
     Body::coordinate getPosition();
     Body::coordinate getCenterPosition();
     Body::coordinate getCenterAbsolutePosition(){
@@ -36,7 +40,7 @@ public:
     BaseNode * isInside(int x,int y);
 
     //NODE INFORMATION: GETTING FUNCTIONS
-    int getID(){return m_id;}
+
 
     void transform(Body::coordinate c);
     void transformSubMap(Body::coordinate vector);
@@ -45,7 +49,7 @@ public:
     void setPosition(Body::coordinate c);
     void setPositionByCenter(Body::coordinate c);
 
-    QVector<BaseNode*> getSubMap(){return m_underMap;}
+    QVector<BaseNode*> getUnderMap(){return m_underMap;}
     void underMapAppendNode(BaseNode * b);
 
     void reFormatExpandedForm();
@@ -66,6 +70,7 @@ public:
     QQuickItem * obj(){return m_obj;}
 
 private:
+
     int m_width = 0;
     int m_height = 0;
 

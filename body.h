@@ -207,6 +207,7 @@ public:
         mouse_held = 15
     };
 
+    int allocateNewID(QString type);
 private:
     QString defaultPath = "/home/chuan/qt_projects/Pavement1.1/saves";
 
@@ -356,7 +357,7 @@ private:
 
 
 
-    int allocateNewID(QString type);
+
 signals:
     void mouseMoved();
 public slots:
