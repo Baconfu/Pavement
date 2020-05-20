@@ -1119,6 +1119,10 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
                             g->hover(true);
                         }
                     }
+                    else{
+                        g->hover(false);
+                        g->preventFocus(false);
+                    }
 
 
 
