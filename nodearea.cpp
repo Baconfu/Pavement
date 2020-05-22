@@ -99,6 +99,23 @@ void NodeArea::setPositionByCenter(Body::coordinate c)
     setPosition(m);
 }
 
+void NodeArea::setUnderMap(QVector<BaseNode *> nodes)
+{
+    m_underMap = nodes;
+    for(int i=0; i<nodes.length(); i++){
+        BaseNode * b = nodes[i];
+        Body::coordinate c = b->getPosition().subtract(this->getPosition());
+        b->obj()->setParentItem(this->obj());
+        b->setPosition(c);
+        b->setAbstraction(this);
+
+    }
+    if(!nodes.isEmpty()){
+        reFormatExpandedForm();
+        updateAbsolutePosition();
+    }
+}
+
 void NodeArea::underMapAppendNode(BaseNode *b)
 {
     m_underMap.append(b);
@@ -113,6 +130,14 @@ void NodeArea::underMapAppendNode(BaseNode *b)
 
 
 
+}
+
+void NodeArea::subNodeMoved()
+{
+    reFormatExpandedForm();
+    if(m_abstraction){
+        m_abstraction->subNodeMoved();
+    }
 }
 
 void NodeArea::reFormatExpandedForm()
@@ -166,7 +191,9 @@ void NodeArea::reFormatExpandedForm()
 
         transformIgnoreSubMap(median.subtract(geometry));
 
-
+        if(m_abstraction){
+            m_abstraction->reFormatExpandedForm();
+        }
     }
     updateRelation();
 

@@ -56,7 +56,6 @@ Window {
             pressAndHoldInterval: 200
             onPressAndHold: {
                 mouseHeld()
-                console.log("held")
             }
 
             onDoubleClicked: {

@@ -54,10 +54,12 @@ public:
     void setUnderMap(QVector<BaseNode*> subMap);
     void removeSubNode(BaseNode * b){m_underMap.removeOne(b);}
 
+    void subNodeMoved();
     void reFormatExpandedForm();
 
     void abstract();
     void expand();
+    bool isExpanded(){return m_expanded;}
 
     void setAbstraction(BaseNode * n);
     BaseNode * getAbstraction(){return m_abstraction;}
@@ -102,6 +104,8 @@ private:
     int m_width = 10;
     int m_height = 10;
 
+
+    bool m_expanded = false;
     bool m_batchSelected = false;
     bool m_hoverSelected = false;
     bool m_moving = false;

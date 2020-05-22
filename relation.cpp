@@ -104,7 +104,7 @@ Body::coordinate Relation::calculateRelationCutoff(BaseNode * originNode, BaseNo
         Body::coordinate c;
         c.x = intersectionX;
         c.y = intersectionY;
-        qDebug()<<c.x<<c.y<<"intersections";
+
         return c;
 
     }
@@ -280,7 +280,7 @@ Body::coordinate Relation::localMidPoint(){
 void Relation::updateSelf()
 {
 
-    qDebug()<<"hi";
+
 
     if(originType == node){
         if(!originNode()){
@@ -288,7 +288,7 @@ void Relation::updateSelf()
         }
         if(m_origin_node->isVisible()){
             setVisibility(true);
-            qDebug()<<m_origin_node->getCenterAbsolutePosition().x;
+
             setOrigin(m_origin_node->getCenterAbsolutePosition());
         }else{
             setVisibility(false);
@@ -384,6 +384,9 @@ void Relation::setSelected(bool b)
         m_selected = b;
         if(b){
             m_obj->findChild<QObject*>("textInput")->setProperty("focus",true);
+
+            qDebug()<<tally;
+            tally+=1;
         }
         else{
             Body * b = Body::getInstance();

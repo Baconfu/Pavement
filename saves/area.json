@@ -1,28 +1,39 @@
 {
-    "ghosts": [
+    "areas": [
         {
-            "id": 2,
-            "original": 2,
+            "id": 10,
             "subMap": [
+                {
+                    "id": 7,
+                    "original": 1,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 125,
+                    "y": 52
+                },
+                {
+                    "id": 9,
+                    "original": 2,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 3,
+                    "y": 103
+                },
+                {
+                    "id": 8,
+                    "original": 0,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 17,
+                    "y": 3
+                }
             ],
-            "x": 396,
-            "y": 554
-        },
-        {
-            "id": 2,
-            "original": 1,
-            "subMap": [
-            ],
-            "x": 483,
-            "y": 515
-        },
-        {
-            "id": 2,
-            "original": 0,
-            "subMap": [
-            ],
-            "x": 485,
-            "y": 617
+            "type": "area",
+            "x": 336,
+            "y": 611
         }
     ],
     "nodes": [
@@ -31,76 +42,67 @@
             "name": "hello",
             "parents": [
             ],
-            "submap": {
-                "subGhosts": [
-                ],
-                "subNodes": null
-            },
-            "x": 293,
-            "y": 250
+            "submap": [
+            ],
+            "x": 280,
+            "y": 282
         },
         {
             "id": 1,
-            "name": "what",
-            "parents": [
-            ],
-            "submap": {
-                "subGhosts": [
-                ],
-                "subNodes": null
-            },
-            "x": 456,
-            "y": 235
-        },
-        {
-            "id": 2,
             "name": "trol",
             "parents": [
             ],
-            "submap": {
-                "subGhosts": [
-                ],
-                "subNodes": null
-            },
-            "x": 401,
-            "y": 361
+            "submap": [
+            ],
+            "x": 184,
+            "y": 435
         },
         {
-            "id": 3,
+            "id": 2,
+            "name": "what",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 175,
+            "y": 229
+        },
+        {
+            "id": 6,
             "name": "abstraction",
             "parents": [
             ],
-            "submap": {
-                "subGhosts": [
-                    {
-                        "id": 1,
-                        "original": 1,
-                        "subMap": [
-                        ],
-                        "x": 106,
-                        "y": 16
-                    },
-                    {
-                        "id": 1,
-                        "original": 2,
-                        "subMap": [
-                        ],
-                        "x": -63,
-                        "y": 59
-                    },
-                    {
-                        "id": 1,
-                        "original": 0,
-                        "subMap": [
-                        ],
-                        "x": -22,
-                        "y": -59
-                    }
-                ],
-                "subNodes": null
-            },
-            "x": 117,
-            "y": 445
+            "submap": [
+                {
+                    "id": 4,
+                    "original": 0,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 70,
+                    "y": -34
+                },
+                {
+                    "id": 5,
+                    "original": 2,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -19,
+                    "y": 46
+                },
+                {
+                    "id": 3,
+                    "original": 1,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -27,
+                    "y": -47
+                }
+            ],
+            "x": 471,
+            "y": 442
         }
     ]
 }

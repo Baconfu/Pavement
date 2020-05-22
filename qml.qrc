@@ -6,5 +6,6 @@
         <file>relation.qml</file>
         <file>structural.qml</file>
         <file>nodeArea.qml</file>
+        <file>line.qml</file>
     </qresource>
 </RCC>

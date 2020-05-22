@@ -79,7 +79,7 @@ QSGNode * PaintRelation::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData *
     QSGGeometry::Point2D * vertices = geometry->vertexDataAsPoint2D();
 
 
-    vertices[0].set(origin.x(),origin.y());
+    vertices[0].set(float(origin.x()),float(origin.y()));
     vertices[1].set(destination.x(),destination.y());
     vertices[2].set(destination.x(),destination.y());
     vertices[3].set(armP.x(),armP.y());

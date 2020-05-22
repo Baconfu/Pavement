@@ -59,8 +59,12 @@ public:
 
     virtual QVector<BaseNode*> getUnderMap(){QVector<BaseNode*> null; return null;}
     virtual void underMapAppendNode(BaseNode*){}
+    virtual void setUnderMap(QVector<BaseNode*>){}
+    virtual void removeSubNode(BaseNode * b){qDebug()<<b;}
 
+    virtual void subNodeMoved(){}
     virtual void reFormatExpandedForm(){}
+    virtual bool isExpanded(){return false;}
 
     virtual void setAbstraction(BaseNode * b){qDebug()<<"BaseNode virtual function called. "<<b;}
     virtual BaseNode * getAbstraction();
@@ -75,6 +79,8 @@ public:
     virtual void moving(bool){}
     virtual bool isMoving(){return false;}
 
+
+    virtual void initializeObj(){}
     virtual void destroy(){}
     virtual QQuickItem * obj(){return m_obj;}
 

@@ -33,7 +33,9 @@ void Node::typeInputAccepted(QString s)
 {
     Body * b = Body::getInstance();
     setType(b->getNodeByName(s));
-
+    for(int i=0; i<m_ghosts.length(); i++){
+        m_ghosts[i]->adoptOriginal();
+    }
     b->setFocusWindow();
 }
 
@@ -309,11 +311,15 @@ void Node::setUnderMap(QVector<BaseNode *> nodes)
 void Node::underMapAppendNode(BaseNode *node)
 {
     m_underMap.append(node);
+
     Body::coordinate c = node->getPosition().subtract(this->getPosition());
     node->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
     node->setPosition(c);
     //node->setVisibility(false);
     node->setAbstraction(this);
+    for(int i=0; i<m_ghosts.length(); i++){
+        m_ghosts[i]->underMapAppendNode(node);
+    }
     reFormatExpandedForm();
 
 }
@@ -322,6 +328,14 @@ void Node::transformSubMap(Body::coordinate vector)
 {
     for(int i=0; i<m_underMap.length(); i++){
         m_underMap[i]->transform(vector);
+    }
+}
+
+void Node::subNodeMoved()
+{
+    reFormatExpandedForm();
+    if(m_abstraction){
+        m_abstraction->subNodeMoved();
     }
 }
 
@@ -395,8 +409,33 @@ void Node::setAbstraction(BaseNode *n)
 void Node::expand()
 {
     if(m_underMap.isEmpty()){
-        m_expanded = true;
-        m_obj->setProperty("expanded",true);
+        if(m_typeNode){
+            QVector<BaseNode*> subMap = m_typeNode->getUnderMap();
+            if(!subMap.isEmpty()){
+                QVector<BaseNode*> mySubMap;
+                for(int i=0; i<subMap.length(); i++){
+                    BaseNode * b = subMap[i];
+                    if(typeid (*b) == typeid (GhostNode)){
+
+                        GhostNode * g = b->getGhostPointer();
+                        GhostNode * clone = g->getOriginal()->newGhostNode();
+                        clone->setAbstraction(this);
+                        Body::coordinate geometry;
+                        geometry.x = g->getAbstraction()->width()/2;
+                        geometry.y = g->getAbstraction()->height()/2;
+                        Body::coordinate vector = g->getPosition().subtract(geometry);
+
+                        clone->setPosition(vector.add(this->getCenterAbsolutePosition()));
+
+                        mySubMap.append(clone);
+
+                    }
+                }
+                setUnderMap(mySubMap);
+            }
+
+        }
+
     }
     if(!m_expanded && !m_underMap.isEmpty()){
 
@@ -699,14 +738,13 @@ void Node::mouseReleased()
 
 void Node::geometryChanged()
 {
-    QVector<Relation*> v = getAllRelations();
-    for(int i=0; i<v.length(); i++){
-        v[i]->updateSelf();
-    }
+
+    updateRelation();
 
     updateStructural();
 
     for(int i=0; i<m_underMap.length(); i++){
+
         m_underMap[i]->geometryChanged();
     }
 

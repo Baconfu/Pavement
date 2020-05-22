@@ -105,11 +105,13 @@ public:
     void removeSubNode(BaseNode * b){m_underMap.removeOne(b);}
     void transformSubMap(Body::coordinate vector);
 
+    void subNodeMoved();
     void reFormatExpandedForm();
 
     void setAbstraction(BaseNode * n);
 
     void expand();
+    bool isExpanded(){return m_expanded;}
     void abstract();
 
 

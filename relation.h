@@ -120,8 +120,8 @@ public:
     void finalizeSelf();
     void initializeObj();
     void createObj();
-
     QQuickItem * obj(){return m_obj;}
+
 public slots:
     void updateSelf();
     void destroy();

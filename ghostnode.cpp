@@ -272,6 +272,14 @@ void GhostNode::setUnderMap(QVector<BaseNode *> subMap)
     }
 }
 
+void GhostNode::subNodeMoved()
+{
+    reFormatExpandedForm();
+    if(m_abstraction){
+        m_abstraction->subNodeMoved();
+    }
+}
+
 void GhostNode::abstract()
 {
     for(int i=0; i<m_underMap.length(); i++){
@@ -280,7 +288,9 @@ void GhostNode::abstract()
     }
     Body::coordinate center = getCenterPosition();
     m_obj->setProperty("expanded",false);
+    m_expanded = false;
     setPositionByCenterIgnoreSubMap(center);
+
 }
 
 void GhostNode::expand()
@@ -320,6 +330,7 @@ void GhostNode::expand()
     }
     //Body::coordinate center = getCenterPosition();
     m_obj->setProperty("expanded",true);
+    m_expanded = true;
 
     //setPositionByCenterIgnoreSubMap(center);
     reFormatExpandedForm();
@@ -411,12 +422,9 @@ void GhostNode::destroy()
 
     }
     if(m_abstraction){
-        if(typeid (*m_abstraction) == typeid (GhostNode)){
-            m_abstraction->getGhostPointer()->removeSubNode(this);
-        }
-        if(typeid (*m_abstraction) == typeid (Node)){
-            m_abstraction->getNodePointer()->removeSubNode(this);
-        }
+
+        m_abstraction->removeSubNode(this);
+
     }
     b->removeGhost(this);
 

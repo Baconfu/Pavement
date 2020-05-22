@@ -20,13 +20,14 @@ public:
     void saveArea(NodeArea * n);
     void saveRelation(Relation * r);
 
-     QJsonObject writeSubNode(BaseNode * n);
+    QJsonObject writeSubNode(BaseNode * n);
 
+    QVector<BaseNode*> getNodePool(){return nodePool;}
 
-    QVector<Node*> loadNodes();
+    QVector<BaseNode*> loadNodes();
     Node * loadNode(QJsonObject node);
-    QVector<GhostNode*> loadSubNodes();
-    GhostNode * loadSubNode(QJsonObject subNode,Body::coordinate positionOffset);
+    QVector<BaseNode*> loadSubNodes();
+    BaseNode * loadSubNode(QJsonObject subNode,Body::coordinate positionOffset);
 
     QVector<Relation *> loadRelations();
     void writeJson();
@@ -34,18 +35,17 @@ public:
 
 
 
-    QVector<GhostNode*> getGhostPool(){return ghostPool;}
 
 private:
     QJsonObject m_obj;
     QJsonDocument m_doc;
 
-    QVector<Node*> nodePool;
-    QVector<GhostNode*> ghostPool;
-    QVector<NodeArea*> areaPool;
+
+    QVector<BaseNode*> nodePool;
+
 
     QJsonObject findElementByID(QJsonArray elements,int id);
-    Node * findNodeByID(QVector<Node*> nodes,int id);
+    BaseNode * findNodeByID(QVector<BaseNode*> nodes,int id);
 };
 
 #endif // PAVEMENTFILE_H

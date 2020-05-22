@@ -50,9 +50,16 @@ public:
     void setPositionByCenter(Body::coordinate c);
 
     QVector<BaseNode*> getUnderMap(){return m_underMap;}
+    void setUnderMap(QVector<BaseNode*> nodes);
     void underMapAppendNode(BaseNode * b);
+    void removeSubNode(BaseNode * b){
+        m_underMap.removeOne(b);
+    }
 
+    void subNodeMoved();
     void reFormatExpandedForm();
+
+    bool isExpanded(){return m_expanded;}
 
     void setAbstraction(BaseNode * b){m_abstraction = b;}
     BaseNode * getAbstraction(){return m_abstraction;}
@@ -74,6 +81,7 @@ private:
     int m_width = 0;
     int m_height = 0;
 
+    bool m_expanded = true;
     bool m_visible = true;
     bool m_moving = false;
 
