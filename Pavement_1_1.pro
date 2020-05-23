@@ -21,6 +21,7 @@ SOURCES += \
         main.cpp \
         node.cpp \
         nodearea.cpp \
+        paintline.cpp \
         paintnode.cpp \
         paintnodearea.cpp \
         paintrelation.cpp \
@@ -51,6 +52,7 @@ HEADERS += \
     ghostnode.h \
     node.h \
     nodearea.h \
+    paintline.h \
     paintnode.h \
     paintnodearea.h \
     paintrelation.h \

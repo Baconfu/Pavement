@@ -37,13 +37,14 @@ void Node::typeInputAccepted(QString s)
         m_ghosts[i]->adoptOriginal();
     }
     b->setFocusWindow();
+    m_type = s;
 }
 
 void Node::typeInputPassivelyAccepted(QString s)
 {
     Body * b = Body::getInstance();
     setType(b->getNodeByName(s));
-
+    m_type = s;
 
 }
 
@@ -437,20 +438,27 @@ void Node::expand()
         }
 
     }
-    if(!m_expanded && !m_underMap.isEmpty()){
+    if(!m_expanded){
+        if(!m_underMap.isEmpty()){
+            m_expanded = true;
+            for(int i=0; i<m_underMap.length(); i++){
+                m_underMap[i]->setVisibility(true);
+            }
+            Body::coordinate center = getCenterPosition();
+            m_obj->setProperty("expanded",true);
 
-        m_expanded = true;
-        for(int i=0; i<m_underMap.length(); i++){
-            m_underMap[i]->setVisibility(true);
+
+            setPositionByCenterIgnoreSubMap(center);
+
+            reFormatExpandedForm();
+        }else{
+            m_expanded = true;
+            m_obj->setProperty("expanded",true);
+
         }
-        Body::coordinate center = getCenterPosition();
-        m_obj->setProperty("expanded",true);
 
-
-        setPositionByCenterIgnoreSubMap(center);
-
-        reFormatExpandedForm();
     }
+
 }
 
 void Node::abstract()

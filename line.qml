@@ -13,13 +13,13 @@ Item {
     property bool highlighted: false
     onHighlightedChanged: {
         if(highlighted)
-            line.lineWidth = 2
+            line1.lineWidth = 2
         else
-            line.lineWidth = 1
+            line1.lineWidth = 1
     }
 
-    PaintRelation {
-        id: line
+    PaintLine {
+        id: line1
         objectName: "line"
         color:"grey"
         anchors.fill:parent

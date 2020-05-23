@@ -2,10 +2,10 @@
 #include "node.h"
 #include <ghostnode.h>
 
-Relation::Relation(QObject * parent):
+Relation::Relation(QObject * parent,QString type):
     QObject (parent)
 {
-
+    m_type = type;
 }
 
 QString Relation::getName()
@@ -401,7 +401,7 @@ void Relation::finalizeSelf()
         //originNode()->registerRelation(this);
 
 
-        connect(originNode(),SIGNAL(updateRelation()),this,SLOT(updateSelf()));
+        connect(originNode(),SIGNAL(updateRelation()),this,SLOT(updateSelf()),Qt::UniqueConnection);
         connect(originNode(),SIGNAL(terminate()),this,SLOT(destroy()));
 
 
@@ -411,7 +411,7 @@ void Relation::finalizeSelf()
     }
     if(destinationNode()){
         //destinationNode()->registerIncomingRelation(this);
-        connect(destinationNode(),SIGNAL(updateRelation()),this,SLOT(updateSelf()));
+        connect(destinationNode(),SIGNAL(updateRelation()),this,SLOT(updateSelf()),Qt::UniqueConnection);
         connect(destinationNode(),SIGNAL(terminate()),this,SLOT(destroy()));
     }
     if(destinationRelation()){
@@ -422,10 +422,21 @@ void Relation::finalizeSelf()
 void Relation::initializeObj()
 {
     Body * body = Body::getInstance();
-    QQuickItem * object;
+    QQuickItem * object = nullptr;
 
-    QQmlComponent component(body->engine(),QUrl("qrc:/relation.qml"));
-    object = qobject_cast<QQuickItem*>(component.create());
+    if(m_type == "arrow"){
+        QQmlComponent component(body->engine(),QUrl("qrc:/relation.qml"));
+        object = qobject_cast<QQuickItem*>(component.create());
+    }
+    if(m_type == "line"){
+        QQmlComponent component(body->engine(),QUrl("qrc:/line.qml"));
+        object = qobject_cast<QQuickItem*>(component.create());
+    }
+
+    if(!object){
+        qDebug()<<"error: no relation type";
+        return;
+    }
     QQuickItem * item = body->getRoot();
     object->setParentItem(item->findChild<QQuickItem*>("layer"));
     object->setParent(body->engine());
@@ -445,6 +456,5 @@ void Relation::destroy(){
     m_obj = nullptr;
     Body * b = Body::getInstance();
     b->removeRelation(this);
-    disconnect();
 }
 

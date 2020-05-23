@@ -347,7 +347,7 @@ private:
     void newRelation(int id, BaseNode * origin, BaseNode * destination);
     void newRelation(int id, BaseNode * origin, Relation * destination);
     void newRelation(int id, Relation * origin, Relation * destination);
-
+    void newLine(int id, BaseNode * origin, BaseNode * destination);
 
     GhostNode * newGhostNode(Node * original,int x,int y);
 

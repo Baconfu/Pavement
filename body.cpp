@@ -66,6 +66,11 @@ void Body::initialize()
     f.commonShorthand = "nr";
     functions.append(f);
 
+    f.name = "new connection";
+    f.alias = QStringList{"connection","new line"};
+    f.commonShorthand = "nc";
+    functions.append(f);
+
     f.name = "remove node";
     f.alias = QStringList{"delete node","delete","remove"};
     f.commonShorthand = "rmv";
@@ -198,16 +203,19 @@ int Body::acceptedSelection(int n)
 
     if(latestContext() == opening_file){
 
-        QString g;
+        if(n != -1){
+            QString g;
 
-        g = displayFunctions[n].name;
-        openFile(defaultPath + "/" + g);
-        contextResolved();
+            g = displayFunctions[n].name;
+            openFile(defaultPath + "/" + g);
+            contextResolved();
 
-        setFocusWindow();
-        m_searchBar->setProperty("visible",false);
+            setFocusWindow();
+            m_searchBar->setProperty("visible",false);
 
-        return 0;
+            return 0;
+        }
+
     }
     if(latestContext() == saving_file){
         QString g;
@@ -225,9 +233,21 @@ int Body::acceptedSelection(int n)
         return 0;
     }
     if(latestContext() == node_browsing){
-        QString s = displayFunctions[n].name;
-        Node * n = getNodeByName(s);
-        newGhostNode(n,tabPosition().x,tabPosition().y);
+        if(n == -1){
+
+        }else{
+            QString s = displayFunctions[n].name;
+            Node * n = getNodeByName(s.split("-")[0]);
+
+            GhostNode * g = newGhostNode(n,tabPosition().x,tabPosition().y);
+            if(m_selectedNode){
+                if(selectedNode()->isInside(mousePosition().x,mousePosition().y)){
+                    m_selectedNode->underMapAppendNode(g);
+                }
+
+            }
+        }
+
     }
 
 
@@ -284,6 +304,15 @@ int Body::acceptedSelection(int n)
         }
 
     }
+    if(f == "new connection"){
+        int id = allocateNewID("relation");
+        if(latestContext() == node_selected){
+            Node * n = nullptr;
+            newLine(id,selectedNode(),n);
+            setSelected(n);
+            setFocusWindow();
+        }
+    }
     if(f == "parent"){
         if(latestContext() == Context::node_selected){
             Node * n = nullptr;
@@ -305,8 +334,6 @@ int Body::acceptedSelection(int n)
     }
     if(f == "remove node"){
         if(contexts.contains(latestContext())){
-
-
             selectedNode()->destroy();
         }
     }
@@ -327,10 +354,12 @@ int Body::acceptedSelection(int n)
         if(contexts.contains(latestContext())){
             if(latestContext() == relation_selected){
                 selectedRelation()->destroy();
+                delete(selectedRelation());
                 contextResolved();
             }
             if(latestContext() == structural_selected){
                 m_selectedStructural->destroy();
+                delete(m_selectedStructural);
                 contextResolved();
             }
         }
@@ -513,6 +542,13 @@ void Body::frameView()
 }
 void Body::saveFile(QString path)
 {
+    QVector<BaseNode *> temp = nodeMap;
+    nodeMap.clear();
+    for(int i=0; i<temp.length(); i++){
+        temp[i]->setID(allocateNewID("node"));
+        nodeMap.append(temp[i]);
+    }
+    nodeMap = temp;
     PavementFile file = PavementFile(path);
     for(int i=0; i<nodeMap.length(); i++){
         if(!nodeMap[i]->getAbstraction()){
@@ -724,12 +760,16 @@ void Body::registerGhost(GhostNode *g){
 
 void Body::removeNode(Node *n)
 {
-    nodeMap.removeOne(n);
+    int i = nodeMap.indexOf(n);
+    delete(nodeMap[i]);
+    nodeMap[i] = nullptr;
 }
 
 void Body::removeGhost(GhostNode *g)
 {
-    nodeMap.removeOne(g);
+    int i =  nodeMap.indexOf(g);
+    delete(nodeMap[i]);
+    nodeMap[i] = nullptr;
 }
 
 void Body::removeNode(BaseNode *b)
@@ -994,11 +1034,16 @@ void Body::mouseReleased()
 {
 
     if(latestContext() == moving_node){
+
         if(m_mouseHeld){
+
             if(highlightedNode()){
+
                 for(int i=0; i<nodeMap.length(); i++){
+
                     if(nodeMap[i]->isMoving() && nodeMap[i] != highlightedNode()){
                         highlightedNode()->underMapAppendNode(nodeMap[i]);
+
                     }
                 }
             }
@@ -1214,7 +1259,7 @@ void Body::setHoveringRelation(Relation *r)
 
 void Body::removeGhosts(QVector<GhostNode *> ghosts){
     for(int i=0; i<ghosts.length(); i++){
-        nodeMap.removeOne(ghosts[i]);
+        removeGhost(ghosts[i]);
     }
 }
 
@@ -1222,10 +1267,10 @@ void Body::removeNodes(QVector<BaseNode *> nodes){
     for(int i=0; i<nodes.length(); i++){
         BaseNode * n = nodes[i];
         if(typeid (*n) == typeid (GhostNode)){
-            nodeMap.removeOne(n->getGhostPointer());
+            removeGhost(n->getGhostPointer());
         }
         if(typeid (*n) == typeid (Node)){
-            nodeMap.removeOne(n->getNodePointer());
+            removeNode(n->getNodePointer());
         }
     }
 }
@@ -1383,7 +1428,10 @@ int Body::searching(QString input)
         pool.clear();
         QStringList nodes;
         for(int i=0; i<nodeMap.length(); i++){
-            nodes.append(nodeMap[i]->getName());
+            BaseNode * b = nodeMap[i];
+            if(typeid (*b) == typeid (Node)){
+                nodes.append(nodeMap[i]->getName() + "-" + nodeMap[i]->getNodePointer()->getTypeName());
+            }
         }
         pool = functionFromList(nodes);
     }
@@ -1466,7 +1514,33 @@ Node * Body::newNode(int id, QString name,int x, int y, Node * parent, Node * ty
 }
 void Body::newRelation(int id, BaseNode *origin, BaseNode *destination)
 {
-    Relation * r = new Relation;
+    Relation * r = new Relation(nullptr,"arrow");
+    r->initializeObj();
+    r->setID(id);
+    r->setOriginObject(origin);
+
+
+    if(destination){
+
+        r->setDestinationObject(destination);
+        r->finalizeSelf();
+    }else{
+        r->clearDestinationObject();
+        setHoveringRelation(r);
+
+        setContext(Context::creating_relation);
+
+    }
+    r->createObj();
+    r->updateSelf();
+    relationArchive.append(r);
+    //qDebug()<<r->obj();
+    r=nullptr;
+}
+
+void Body::newLine(int id, BaseNode *origin, BaseNode *destination)
+{
+    Relation * r  = new Relation(nullptr, "line");
     r->initializeObj();
     r->setID(id);
     r->setOriginObject(origin);
@@ -1522,11 +1596,11 @@ int Body::allocateNewID(QString type)
     if(type == "node"){
         for(int i=0; i<nodeMap.length(); i++){
             if(nodeMap[i] == nullptr){
-
+                qDebug()<<"id allocated: "<<i;
                 return i;
             }
         }
-
+        qDebug()<<"id: "<<nodeMap.length();
         return nodeMap.length();
     }
     if(type == "relation"){

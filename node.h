@@ -23,6 +23,8 @@ public:
     QString getName();
     void setName(QString name);
 
+    void setID(int id){m_id = id;}
+
 
     //TRANSFORM: SETTING FUNCTIONS
     void transform(Body::coordinate c);
@@ -90,6 +92,7 @@ public:
     QString typeName(){return m_type;}
 
     Node * getType(){return m_typeNode;}
+    QString getTypeName(){return m_type;}
     void setType(Node * n);
 
     QVector<Node*> members(){return m_members;}

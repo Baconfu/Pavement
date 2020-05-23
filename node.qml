@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtQuick 2.13
 import Paint 1.0
 import QtQuick.Controls 2.0
 
@@ -42,7 +43,7 @@ Item {
             expandedArea.visible = true
             typeNameContainer.y = expandedArea.y + expandedArea.height
             container.width = expandedArea.width
-            container.height = expandedArea.height + nameContainer.height + typeInput.height
+            container.height = expandedArea.height + typeInput.height
 
 
         }
@@ -78,6 +79,8 @@ Item {
     y:0
     width:10
     height: nameContainer.height + typeInput.height
+
+
 
 
     onWidthChanged: {
@@ -117,12 +120,18 @@ Item {
         TextInput {
             id: textInput
             x:5
+
             text: ""
             enabled: !ghost
             objectName: "textInput"
             activeFocusOnPress:false
             onContentWidthChanged: {
                 updateInput()
+            }
+
+            Shortcut {
+                sequence: "Ctrl+."
+
             }
 
             function updateInput(){

@@ -24,6 +24,7 @@ Body::coordinate NodeArea::getCenterPosition()
 void NodeArea::updateAbsolutePosition()
 {
     if(m_abstraction){
+
         m_absolutePosition = m_abstraction->getAbsolutePosition().add(getPosition());
     }
     else{

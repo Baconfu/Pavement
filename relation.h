@@ -11,13 +11,15 @@ class Relation: public QObject
 {
     Q_OBJECT
 public:
-    Relation(QObject * parent = nullptr);
+    Relation(QObject * parent = nullptr,QString type = "arrow");
 
     int ID(){return m_id;}
     void setID(int n){m_id = n;}
 
     QString getName();
     void setName(QString s);
+
+    QString getType(){return m_type;}
 
     bool isInside(int x,int y);
 
@@ -26,7 +28,7 @@ public:
         relation = 1,
     };
 private:
-
+    QString m_type = "arrow";
 
     int tally = 0;
 

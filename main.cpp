@@ -7,11 +7,13 @@
 #include <paintnode.h>
 #include <paintrelation.h>
 #include <paintstructural.h>
+#include <paintline.h>
 #include <expandicon.h>
 #include <paintnodearea.h>
 #include <math.h>
 #include <file.h>
 #include <pavementfile.h>
+
 
 
 extern QQmlApplicationEngine * enginePtr;
@@ -41,6 +43,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<PaintNode>("Paint",1,0,"PaintNode");
     qmlRegisterType<PaintRelation>("Paint",1,0,"PaintRelation");
     qmlRegisterType<PaintStructural>("Paint",1,0,"PaintStructural");
+    qmlRegisterType<PaintLine>("Paint",1,0,"PaintLine");
     qmlRegisterType<ExpandIcon>("Paint",1,0,"ExpandIcon");
     qmlRegisterType<PaintNodeArea>("Paint",1,0,"PaintNodeArea");
 

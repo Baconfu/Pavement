@@ -103,6 +103,8 @@ void PavementFile::saveRelation(Relation *r)
 
     relation["name"] = r->getName();
 
+    relation["type"] = r->getType();
+
     BaseNode * originNode = r->originNode();
     BaseNode * destinationNode = r->destinationNode();
     if(r->getOriginType() == Relation::node){
@@ -194,6 +196,11 @@ QVector<BaseNode*> PavementFile::loadNodes()
         if(node["expanded"].toBool() == true){
             nodePool[i]->expand();
         }
+
+        Body::coordinate c;
+        c.x = nodes[i].toObject()["x"].toInt();
+        c.y = nodes[i].toObject()["y"].toInt();
+        nodePool[i]->setPosition(c);
 
     }
     return nodePool;
@@ -287,6 +294,7 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
             n->expand();
         }
     }
+    n->setPosition(c.add(positionOffset));
 
 
 
@@ -303,12 +311,16 @@ QVector<Relation*> PavementFile::loadRelations()
 
     for(int i=0; i<relations.count(); i++){
         QJsonObject relation = relations[i].toObject();
-        Relation * r = new Relation;
+
+
+        Relation * r = new Relation(nullptr,relation["type"].toString());
         r->initializeObj();
 
         r->setID(relation["id"].toInt());
 
         r->setName(relation["name"].toString());
+
+
 
         relationPool.append(r);
     }

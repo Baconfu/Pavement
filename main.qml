@@ -25,6 +25,8 @@ Window {
         Keys.onReturnPressed: {
             myItem.enterPressed()
         }
+
+
         MouseArea {
             z:1
             objectName: "mouseArea"

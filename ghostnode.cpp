@@ -355,22 +355,22 @@ void GhostNode::reFormatExpandedForm()
             int x = b->getPosition().x;
             if(x < leftMost){
 
-                leftMost = x;
+                leftMost = x - 2;
             }
             x = b->getPosition().x + b->width();
             if(x > rightMost){
 
-                rightMost = x;
+                rightMost = x + 2;
             }
             int y = b->getPosition().y;
             if(y < topMost){
 
-                topMost = y;
+                topMost = y - 2;
             }
             y = b->getPosition().y + b->height();
             if(y > botMost){
 
-                botMost = y;
+                botMost = y + 2;
             }
 
         }
@@ -380,11 +380,17 @@ void GhostNode::reFormatExpandedForm()
 
 
         int displace = m_obj->findChild<QQuickItem*>("nameContainer")->property("height").toInt();
-        m_obj->findChild<QObject*>("expandedArea")->setProperty("width",rightMost - leftMost);
-        m_obj->findChild<QObject*>("expandedArea")->setProperty("height",botMost - topMost + displace);
+        QObject * area = m_obj->findChild<QObject*>("expandedArea");
+        area->setProperty("width",rightMost - leftMost);
+        area->setProperty("height",botMost - topMost + displace);
         Body::coordinate geometry;
         geometry.x = width()/2;
-        geometry.y = height()/2;
+
+        if(m_obj->property("expanded").toBool()){
+            geometry.y = displace+area->findChild<QObject*>("expandedRectangle")->property("height").toInt()/2;
+        }else{
+            geometry.y = height()/2;
+        }
 
 
         transformIgnoreSubMap(median.subtract(geometry));
