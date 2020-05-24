@@ -34,6 +34,8 @@ public:
     void readJson();
 
 
+    QJsonObject obj(){return m_obj;}
+
 
 
 private:

@@ -4,6 +4,7 @@
 #include <pavementfile.h>
 #include <ghostnode.h>
 #include <nodearea.h>
+#include <sync.h>
 
 using namespace std;
 
@@ -380,7 +381,8 @@ int Body::acceptedSelection(int n)
     if(f == "debug"){
         //getRoot()->findChild<QObject*>("line"+QString::number(debugTally))->setProperty("lineWidth",2);
         //getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
-
+        Sync sync;
+        sync.sync();
 
     }
     if(f == "select"){

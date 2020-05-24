@@ -29,6 +29,7 @@ SOURCES += \
         pavementfile.cpp \
         relation.cpp \
         structural.cpp \
+        sync.cpp \
         utility.cpp
 
 RESOURCES += qml.qrc
@@ -60,6 +61,7 @@ HEADERS += \
     pavementfile.h \
     relation.h \
     structural.h \
+    sync.h \
     utility.h
 
 DISTFILES += \

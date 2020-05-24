@@ -18,6 +18,7 @@ public:
 
     void write(QString path,QJsonObject obj);
 
+
 protected:
     QString m_fileName;
 
