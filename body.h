@@ -43,6 +43,8 @@ public:
     void frameView();
 
 
+
+
     void initialize();
     void saveFile(QString path);
     void openFile(QString path);
@@ -248,6 +250,8 @@ private:
     coordinate m_mouseVector;
     coordinate m_tabPosition;
     bool m_mouseHeld = false;
+    bool m_scrolling = false;
+
 
 
     QVector<BaseNode*> nodeMap;
@@ -364,6 +368,8 @@ public slots:
     void autoTab(int context);
     void tab();
     void enterPressed();
+    void scroll(int x,int y,bool ctrl);
+
     void mouseTransform(int x,int y,int offsetX,int offsetY);
     int searching(QString input);
     int acceptedSelection(int n);

@@ -35,6 +35,7 @@ void Body::initialize()
     connect(getRoot(),SIGNAL(tabPressed()),this,SLOT(tab()));
     connect(getRoot(),SIGNAL(enterPressed()),this,SLOT(enterPressed()));
 
+
     QQmlComponent component(enginePtr,QUrl("qrc:/SearchBar.qml"));
     m_searchBar = qobject_cast<QQuickItem*>(component.create());
     m_searchBar->setParentItem(getRoot()->findChild<QQuickItem*>("layer"));
@@ -50,6 +51,7 @@ void Body::initialize()
     connect(m,SIGNAL(mousePressed(int,int)),this,SLOT(mousePressed(int,int)));
     connect(m,SIGNAL(mouseReleased()),this,SLOT(mouseReleased()));
     connect(m,SIGNAL(mouseHeld()),this,SLOT(mouseHeld()));
+    connect(m,SIGNAL(scroll(int,int,bool)),this,SLOT(scroll(int,int,bool)));
 
     function f;
     f.name = "exit application";
@@ -194,7 +196,6 @@ void Body::initialize()
     f.alias = QStringList{"new area","area"};
     f.commonShorthand = "ar";
     functions.append(f);
-
 
 }
 
@@ -1003,6 +1004,46 @@ void Body::enterPressed()
     m_searchBar->setProperty("selectFirst",true);
 }
 
+void Body::scroll(int x, int y, bool ctrl)
+{
+    if(ctrl){
+        //zooming in or out
+
+    }else{
+        //panning camera
+        x*=-1;
+        y*=-1;
+
+        double xv = 0;
+        double yv = 0;
+        if(x>0){
+            xv = log(x);
+
+            m_velocity.x = int(xv*xv);
+        }
+        if(x<0){
+            xv = -1 * log(abs(x));
+
+            m_velocity.x = -1 * int(xv*xv);
+        }
+        if(y>0){
+            yv = log(y);
+            m_velocity.y = int(yv*yv);
+        }
+        if(y<0){
+            yv = -1 * log(abs(y));
+            m_velocity.y = -1 * int(yv*yv);
+        }
+
+
+        m_scrolling = true;
+        startTimer();
+    }
+
+}
+
+
+
 void Body::mouseClicked(int x, int y)
 {
 
@@ -1095,6 +1136,7 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 
         m_velocity.x = int(cos(angle) * magnitude * 10);
         m_velocity.y = int(sin(angle) * magnitude * 10);
+
         startTimer();
     }else{
         m_velocity.x = 0;
@@ -1500,6 +1542,32 @@ void Body::timeOut()
 {
     if(latestContext() != Context::tab_searching){
         pan(m_velocity.x,m_velocity.y);
+    }
+
+    if(m_scrolling){
+        if(m_velocity.x>1){
+            m_velocity.x-=2;
+        }
+        if(m_velocity.x<-1){
+            m_velocity.x+=2;
+        }
+        if(m_velocity.x <=1 && m_velocity.x >=-1){
+            m_velocity.x = 0;
+        }
+
+        if(m_velocity.y>1){
+            m_velocity.y -= 2;
+        }
+        if(m_velocity.y<-1){
+            m_velocity.y += 2;
+        }
+        if(m_velocity.y <= 1 && m_velocity.y >= -1){
+            m_velocity.y = 0;
+        }
+        if(m_velocity.y == 0  && m_velocity.x == 0){
+            m_scrolling = false;
+        }
+
     }
 
 }

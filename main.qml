@@ -16,6 +16,7 @@ Window {
         id: myItem
         signal tabPressed()
         signal enterPressed()
+
         focus: true
         Keys.onTabPressed: {
             myItem.tabPressed()
@@ -27,6 +28,7 @@ Window {
         }
 
 
+
         MouseArea {
             z:1
             objectName: "mouseArea"
@@ -36,11 +38,13 @@ Window {
             signal mouseDoubleClicked(int x,int y)
             signal mousePressed(int x,int y)
             signal mouseHeld()
+            signal scroll(int x,int y,bool ctrl)
 
             signal mouseReleased();
             hoverEnabled: true
             onMouseXChanged: {
                 mouseTransform(mouseX,mouseY,layer.x,layer.y)
+
             }
             onMouseYChanged: {
                 mouseTransform(mouseX,mouseY,layer.x,layer.y)
@@ -60,9 +64,19 @@ Window {
                 mouseHeld()
             }
 
+            onWheel: {
+
+                if(wheel.modifiers == Qt.ControlModifier){
+                    scroll(wheel.angleDelta.x,wheel.angleDelta.y,true)
+                }else{
+                    scroll(wheel.angleDelta.x,wheel.angleDelta.y,false)
+                }
+            }
+
             onDoubleClicked: {
 
             }
+
         }
 
         TextInput{
@@ -81,8 +95,6 @@ Window {
             y:0
             width:win.width
             height:win.height
-
         }
     }
-
 }
