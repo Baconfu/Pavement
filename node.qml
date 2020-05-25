@@ -43,7 +43,7 @@ Item {
             expandedArea.visible = true
             typeNameContainer.y = expandedArea.y + expandedArea.height
             container.width = expandedArea.width
-            container.height = expandedArea.height + typeInput.height
+            container.height = nameContainer.height + expandedRectangle.height + typeNameContainer.height
 
 
         }
@@ -219,12 +219,17 @@ Item {
         width: 100
         height:100
         onWidthChanged: {
-            if(expanded)
+            if(expanded){
+
                 container.width = width
+                typeNameContainer.x = width/2 - typeNameContainer.width/2
+            }
         }
         onHeightChanged: {
-            if(expanded)
-                container.height = height+ nameContainer.height + typeNameContainer.height
+            if(expanded){
+                container.height = height + typeNameContainer.height
+                typeNameContainer.y = height
+            }
         }
 
         Rectangle {

@@ -295,7 +295,7 @@ void Node::setUnderMap(QVector<BaseNode *> nodes)
     m_underMap = nodes;
     for(int i=0; i<nodes.length(); i++){
         BaseNode * b = nodes[i];
-        Body::coordinate c = b->getPosition().subtract(this->getPosition());
+        Body::coordinate c = b->getAbsolutePosition().subtract(this->getPosition());
         b->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
         b->setPosition(c);
         b->setVisibility(false);
@@ -353,7 +353,7 @@ void Node::reFormatExpandedForm()
             BaseNode * b = m_underMap[i];
 
 
-            int padding = 2;
+            int padding = 5;
             int x = b->getPosition().x;
             if(x < leftMost){
 
@@ -676,6 +676,7 @@ BaseNode * Node::isInside(int x, int y)
             BaseNode * b = m_underMap[i]->isInside(x-position.x,y-position.y);
             if(b){
                 preventFocus(false);
+                hover(false);
                 return b;
             }
         }
@@ -688,6 +689,7 @@ BaseNode * Node::isInside(int x, int y)
         return this;
     }else{
         preventFocus(false);
+        hover(false);
         return nullptr;
     }
 }
@@ -725,7 +727,12 @@ void Node::widthChanged()
 }
 void Node::heightChanged()
 {
-    m_height = m_obj->property("height").toInt();
+    if(m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt() == 0){
+        m_height = m_obj->property("height").toInt() - m_obj->findChild<QObject*>("typeNameContainer")->property("height").toInt();
+    }else{
+        m_height = m_obj->property("height").toInt();
+    }
+
 
 }
 

@@ -97,6 +97,8 @@ void GhostNode::adoptOriginal()
     m_obj->findChild<QObject*>("typeName")->setProperty("text",m_original->typeName());
     m_obj->setProperty("ghost",true);
     setName(m_original->getName());
+    heightChanged();
+
 
 }
 
@@ -122,6 +124,7 @@ BaseNode * GhostNode::isInside(int x, int y)
         return this;
     }else{
         hover(false);
+
         return nullptr;
     }
 }
@@ -205,8 +208,11 @@ void GhostNode::widthChanged()
 
 void GhostNode::heightChanged()
 {
-    m_height = m_obj->property("height").toInt();
-
+    if(m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt() == 0){
+        m_height = m_obj->property("height").toInt() - m_obj->findChild<QObject*>("typeNameContainer")->property("height").toInt();
+    }else{
+        m_height = m_obj->property("height").toInt();
+    }
 
 }
 
@@ -252,20 +258,25 @@ void GhostNode::setUnderMap(QVector<BaseNode *> subMap)
     m_underMap = subMap;
     for(int i=0; i<subMap.length(); i++){
         BaseNode * b = subMap[i];
-        if(typeid (*b) == typeid (Node)){
+        Body::coordinate c = b->getAbsolutePosition().subtract(this->getAbsolutePosition());
+        b->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
+        b->setPosition(c);
 
-            Body::coordinate c = b->getCenterPosition().subtract(this->getCenterAbsolutePosition());
-            b->getNodePointer()->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
-            b->getNodePointer()->setPosition(c);
-        }
-        if(typeid (*b) == typeid (GhostNode)){
-
-            Body::coordinate c = b->getCenterPosition().subtract(this->getCenterAbsolutePosition());
-            b->getGhostPointer()->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
-            b->getGhostPointer()->setPosition(c);
-        }
         b->setVisibility(false);
     }
+    if(!m_underMap.isEmpty()){
+        reFormatExpandedForm();
+        updateAbsolutePosition();
+    }
+}
+
+void GhostNode::underMapAppendNode(BaseNode *b)
+{
+    m_underMap.append(b);
+    Body::coordinate c = b->getAbsolutePosition().subtract(this->getAbsolutePosition());
+    b->obj()->setParentItem(this->obj());
+    b->setPosition(c);
+    b->setAbstraction(this);
     if(!m_underMap.isEmpty()){
         reFormatExpandedForm();
         updateAbsolutePosition();
@@ -351,26 +362,37 @@ void GhostNode::reFormatExpandedForm()
         for(int i=0; i<m_underMap.length(); i++){
             BaseNode * b = m_underMap[i];
 
-
-            int x = b->getPosition().x;
-            if(x < leftMost){
-
-                leftMost = x - 2;
+            int padding = 5;
+            int x;
+            if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
+                x = b->getPosition().x + b->obj()->findChild<QObject*>("typeNameContainer")->property("x").toInt();
+            }else{
+                x = b->getPosition().x;
             }
-            x = b->getPosition().x + b->width();
-            if(x > rightMost){
 
-                rightMost = x + 2;
+            if(x - padding< leftMost){
+
+                leftMost = x - padding;
+            }
+
+            if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
+                x += b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt();
+            }else{
+                x += b->width();
+            }
+            if(x + padding> rightMost){
+
+                rightMost = x + padding;
             }
             int y = b->getPosition().y;
-            if(y < topMost){
+            if(y - padding< topMost){
 
-                topMost = y - 2;
+                topMost = y - padding;
             }
             y = b->getPosition().y + b->height();
-            if(y > botMost){
+            if(y + padding> botMost){
 
-                botMost = y + 2;
+                botMost = y + padding;
             }
 
         }
@@ -380,6 +402,7 @@ void GhostNode::reFormatExpandedForm()
 
 
         int displace = m_obj->findChild<QQuickItem*>("nameContainer")->property("height").toInt();
+
         QObject * area = m_obj->findChild<QObject*>("expandedArea");
         area->setProperty("width",rightMost - leftMost);
         area->setProperty("height",botMost - topMost + displace);

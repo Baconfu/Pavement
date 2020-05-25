@@ -120,7 +120,7 @@ void NodeArea::setUnderMap(QVector<BaseNode *> nodes)
 void NodeArea::underMapAppendNode(BaseNode *b)
 {
     m_underMap.append(b);
-    Body::coordinate c = b->getPosition().subtract(this->getPosition());
+    Body::coordinate c = b->getAbsolutePosition().subtract(this->getAbsolutePosition());
     b->obj()->setParentItem(this->obj());
     b->setPosition(c);
     b->setAbstraction(this);
@@ -155,26 +155,26 @@ void NodeArea::reFormatExpandedForm()
         for(int i=0; i<m_underMap.length(); i++){
             BaseNode * b = m_underMap[i];
 
-
+            int padding = 5;
             int x = b->getPosition().x;
             if(x < leftMost){
 
-                leftMost = x - 3;
+                leftMost = x - padding;
             }
             x = b->getPosition().x + b->width();
             if(x > rightMost){
 
-                rightMost = x + 3;
+                rightMost = x + padding;
             }
             int y = b->getPosition().y;
             if(y < topMost){
 
-                topMost = y - 3;
+                topMost = y - padding;
             }
             y = b->getPosition().y + b->height();
             if(y > botMost){
 
-                botMost = y + 3;
+                botMost = y + padding;
             }
 
         }

@@ -37,6 +37,7 @@ bool Relation::isInside(int x, int y)
 
 Body::coordinate Relation::calculateRelationCutoff(BaseNode * originNode, BaseNode * destinationNode)
 {
+
     if(hovering()){
         Body::coordinate c;
         c.x=0;

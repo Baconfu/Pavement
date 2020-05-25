@@ -52,6 +52,7 @@ public:
 
     QVector<BaseNode*> getUnderMap(){return m_underMap;}
     void setUnderMap(QVector<BaseNode*> subMap);
+    void underMapAppendNode(BaseNode * b);
     void removeSubNode(BaseNode * b){m_underMap.removeOne(b);}
 
     void subNodeMoved();
