@@ -86,15 +86,46 @@ Window {
 
         }
 
+
+
         Item {
             id: layer
 
             objectName: "layer"
-            scale:1
+
+
+            transform: Scale {
+
+                objectName: "layerScale"
+                origin.x: 0
+                origin.y: 0
+
+                property int x:0
+                property int y:0
+                onXChanged: {
+                    origin.x = x
+                }
+                onYChanged: {
+                    origin.y = y
+                }
+
+
+
+                xScale: 1
+                yScale: 1
+            }
+
             x:0
             y:0
             width:win.width
             height:win.height
+            Rectangle{
+                z:10
+                objectName: "show"
+                width:10
+                height:10
+                color:"black"
+            }
         }
     }
 }

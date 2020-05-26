@@ -543,6 +543,49 @@ void Body::frameView()
     getRoot()->findChild<QObject*>("layer")->setProperty("y",-1 * c.y + getRoot()->property("height").toReal() / 2);
 
 }
+
+void Body::zoom(double deltaFactor)
+{
+
+    if(m_zoomFactor < 0.7){
+        double t = (m_zoomFactor-0.4)*2 - 0.01;
+        if(t<0.01){
+            t=0.01;
+        }
+        deltaFactor*= sqrt(t);
+
+    }
+    if(m_zoomFactor>0.7){
+        double t = (1-m_zoomFactor)*2 - 0.01;
+        if(t<0.01){
+            t=0.01;
+        }
+        deltaFactor*= sqrt(t);
+    }
+
+    m_zoomFactor += deltaFactor/3000;
+    if(m_zoomFactor<0.4){
+        m_zoomFactor = 0.4;
+    }
+    if(m_zoomFactor>1){
+        m_zoomFactor = 1;
+    }
+
+    QObject * layer = getRoot()->findChild<QObject*>("layer");
+    QObject * layerScale = getRoot()->findChild<QObject*>("layerScale");
+
+    QPoint p;
+
+    //p.setX(layer->property("x").toInt() * -1 + int((getRoot()->property("width").toDouble()/2)/m_zoomFactor));
+    //p.setY(layer->property("y").toInt() * -1 + int((getRoot()->property("height").toDouble()/2)/m_zoomFactor));
+    p.setX(int((getRoot()->property("width").toDouble()/2)) - layer->property("x").toInt());
+    p.setY(int((getRoot()->property("height").toDouble()/2)) - layer->property("y").toInt());
+
+    layerScale->setProperty("xScale",m_zoomFactor);
+    layerScale->setProperty("yScale",m_zoomFactor);
+
+
+}
 void Body::saveFile(QString path)
 {
     QVector<BaseNode *> temp = nodeMap;
@@ -1008,6 +1051,13 @@ void Body::scroll(int x, int y, bool ctrl)
 {
     if(ctrl){
         //zooming in or out
+        if(abs(y)>1){
+            m_scaling = true;
+            m_zoomVelocity = y;
+
+
+            startTimer();
+        }
 
     }else{
         //panning camera
@@ -1120,14 +1170,29 @@ void Body::mouseHeld()
 void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 {
 
-    m_mousePosition.x = x - offsetX;
-    m_mousePosition.y = y - offsetY;
+    coordinate c = getDisplayDimensions();
+    m_mouseLocalPosition.x = x - c.x/2;
+    m_mouseLocalPosition.y = y - c.y/2;
+
+    int newX = int(m_mouseLocalPosition.x / m_zoomFactor);
+    int newY = int(m_mouseLocalPosition.y / m_zoomFactor);
+    newX = newX + c.x/2;
+    newY = newY + c.y/2;
+
+    m_mousePosition.x = int(newX - offsetX);
+    m_mousePosition.y = int(newY - offsetY);
+
+    /*
+    QObject * show = getRoot()->findChild<QObject*>("show");
+
+    show->setProperty("x",m_mousePosition.x);
+    show->setProperty("y",m_mousePosition.y);
+
+*/
     m_mouseVector = m_mousePosition.subtract(m_oldMousePosition);
     m_oldMousePosition = m_mousePosition;
     if(inBounds(x,y)){
-        coordinate c = getDisplayDimensions();
-        m_mouseLocalPosition.x = x - c.x/2;
-        m_mouseLocalPosition.y = y - c.y/2;
+
 
         double angle = m_mouseLocalPosition.getAngle();
 
@@ -1566,6 +1631,21 @@ void Body::timeOut()
         }
         if(m_velocity.y == 0  && m_velocity.x == 0){
             m_scrolling = false;
+            stopTimer();
+        }
+    }
+    if(m_scaling){
+        zoom(double(m_zoomVelocity));
+        if(m_zoomVelocity >10){
+            m_zoomVelocity -= 20;
+        }
+        if(m_zoomVelocity <-10){
+            m_zoomVelocity +=20;
+        }
+        if(m_zoomVelocity <= 10 && m_zoomVelocity >= -10){
+            m_zoomVelocity = 0;
+            m_scaling = false;
+            stopTimer();
         }
 
     }
@@ -1576,6 +1656,10 @@ void Body::pan(int x, int y)
     QQuickItem * item = getRoot()->findChild<QQuickItem*>("layer");
     item->setProperty("x",item->property("x").toInt() - x);
     item->setProperty("y",item->property("y").toInt() - y);
+
+    QObject* layerScale = getRoot()->findChild<QObject*>("layerScale");
+    layerScale->setProperty("x",getRoot()->property("width").toReal()/2 - item->property("x").toInt());
+    layerScale->setProperty("y",getRoot()->property("height").toReal()/2 - item->property("y").toInt());
 }
 
 

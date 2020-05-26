@@ -42,7 +42,7 @@ public:
     void setFocusWindow();
     void frameView();
 
-
+    void zoom(double deltaFactor);
 
 
     void initialize();
@@ -244,6 +244,9 @@ private:
     Relation * hoveringRelation(){return m_hoveringRelation;}
     void setHoveringRelation(Relation * r);
 
+
+    double m_zoomFactor = 1;
+    double m_zoomVelocity = 0;
     coordinate m_mouseLocalPosition;
     coordinate m_mousePosition;
     coordinate m_oldMousePosition;
@@ -251,6 +254,7 @@ private:
     coordinate m_tabPosition;
     bool m_mouseHeld = false;
     bool m_scrolling = false;
+    bool m_scaling = false;
 
 
 
