@@ -17,6 +17,7 @@
 #include <dirent.h>
 #include <QElapsedTimer>
 #include <utility.h>
+#include <QDir>
 
 
 
@@ -211,7 +212,7 @@ public:
 
     int allocateNewID(QString type);
 private:
-    QString defaultPath = "/home/chuan/qt_projects/Pavement1.1/saves";
+    QString defaultPath = QDir::currentPath() + "/saves";
 
     QTimer timer;
     void startTimer();

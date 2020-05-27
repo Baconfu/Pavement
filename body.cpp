@@ -35,6 +35,12 @@ void Body::initialize()
     connect(getRoot(),SIGNAL(tabPressed()),this,SLOT(tab()));
     connect(getRoot(),SIGNAL(enterPressed()),this,SLOT(enterPressed()));
 
+    QDir dir = QDir(QDir::currentPath());
+    QStringList contents = dir.entryList();
+    if(!contents.contains("saves")){
+        dir.mkdir("saves");
+    }
+
 
     QQmlComponent component(enginePtr,QUrl("qrc:/SearchBar.qml"));
     m_searchBar = qobject_cast<QQuickItem*>(component.create());

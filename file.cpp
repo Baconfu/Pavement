@@ -17,6 +17,7 @@ QJsonObject File::load(QString path)
 
 void File::write(QString path,QJsonObject obj)
 {
+
     QFile file(path);
     file.open(QIODevice::WriteOnly);
     QJsonDocument saveDoc(obj);
