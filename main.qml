@@ -119,13 +119,14 @@ Window {
             y:0
             width:win.width
             height:win.height
+            /*
             Rectangle{
                 z:10
                 objectName: "show"
                 width:10
                 height:10
                 color:"black"
-            }
+            }*/
         }
     }
 }
