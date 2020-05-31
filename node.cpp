@@ -685,6 +685,10 @@ BaseNode * Node::isInside(int x, int y)
     int width = m_width;
     int height = m_height;
 
+    if(m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt() == 0){
+        height+=m_obj->findChild<QObject*>("typeNameContainer")->property("height").toInt();
+    }
+
     if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
         return this;
     }else{
@@ -711,6 +715,7 @@ void Node::updateAbsolutePosition()
 void Node::hoverSelect(int y)
 {
     int divider = obj()->findChild<QObject*>("typeNameContainer")->property("y").toInt();
+
     int localY = y - m_position.y;
     if(localY<=divider){
         giveInputFocus();
