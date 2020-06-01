@@ -311,6 +311,7 @@ void Node::setUnderMap(QVector<BaseNode *> nodes)
 
 void Node::underMapAppendNode(BaseNode *node)
 {
+    qDebug()<<"hi";
     m_underMap.append(node);
 
     Body::coordinate c = node->getPosition().subtract(this->getPosition());
@@ -322,6 +323,7 @@ void Node::underMapAppendNode(BaseNode *node)
         m_ghosts[i]->underMapAppendNode(node);
     }
     reFormatExpandedForm();
+
 
 }
 
@@ -684,6 +686,10 @@ BaseNode * Node::isInside(int x, int y)
 
     int width = m_width;
     int height = m_height;
+
+    if(m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt() == 0){
+        height+=m_obj->findChild<QObject*>("typeNameContainer")->property("height").toInt();
+    }
 
     if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
         return this;

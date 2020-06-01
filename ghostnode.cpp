@@ -194,6 +194,7 @@ void GhostNode::mouseReleased()
 void GhostNode::geometryChanged()
 {
     updateRelation();
+    qDebug()<<m_underMap;
     for(int i=0; i<m_underMap.length(); i++){
         m_underMap[i]->geometryChanged();
     }

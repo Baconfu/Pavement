@@ -115,7 +115,7 @@ Item {
         y:0
         width: 10
 
-        height: 20
+        height: textInput.contentHeight + 5
 
         TextInput {
             id: textInput
