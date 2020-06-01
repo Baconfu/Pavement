@@ -200,6 +200,24 @@ void NodeArea::reFormatExpandedForm()
 
 }
 
+void NodeArea::extract()
+{
+    Body * b = Body::getInstance();
+    Body::coordinate c = getAbsolutePosition();
+    m_obj->setParentItem(b->getRoot()->findChild<QQuickItem*>("layer"));
+    setPosition(c);
+
+}
+
+void NodeArea::exude(BaseNode * b)
+{
+    if(m_underMap.contains(b)){
+        b->extract();
+        m_underMap.removeOne(b);
+    }
+    reFormatExpandedForm();
+}
+
 void NodeArea::hover(bool b)
 {
     if(b){

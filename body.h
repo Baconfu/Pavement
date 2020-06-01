@@ -142,7 +142,7 @@ public:
 
     void removeNode(Node * n);
     void removeGhost(GhostNode * g);
-    void removeRelation(Relation * r){relationArchive.removeOne(r);}
+    void removeRelation(Relation * r);
     void removeNode(BaseNode * b);
     void removeStructural(structural * s){structuralMap.removeOne(s);}
 
@@ -385,6 +385,8 @@ public slots:
     void mousePressed(int x,int y);
     void mouseReleased();
     void mouseHeld();
+
+    void closeWindow();
 
 };
 

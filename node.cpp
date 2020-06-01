@@ -319,10 +319,23 @@ void Node::underMapAppendNode(BaseNode *node)
     //node->setVisibility(false);
     node->setAbstraction(this);
     for(int i=0; i<m_ghosts.length(); i++){
-        m_ghosts[i]->underMapAppendNode(node);
+        if(typeid (*node) == typeid (GhostNode)){
+            BaseNode * b = node->getGhostPointer()->getOriginal()->newGhostNode();
+            Body::coordinate d;
+            d.x = 5;
+            d.y = 30;
+            b->setPosition(m_ghosts[i]->getAbsolutePosition().add(d));
+            m_ghosts[i]->underMapAppendNode(b);
+        }
+
     }
     reFormatExpandedForm();
 
+}
+
+void Node::removeSubNode(BaseNode *b)
+{
+    m_underMap.removeOne(b);
 }
 
 void Node::transformSubMap(Body::coordinate vector)
@@ -479,6 +492,16 @@ void Node::abstract()
     }
 }
 
+void Node::exude(BaseNode * b)
+{
+    if(m_underMap.contains(b)){
+        b->extract();
+        m_underMap.removeOne(b);
+    }
+    reFormatExpandedForm();
+
+}
+
 void Node::deleteObj()
 {
     m_obj->deleteLater();
@@ -487,8 +510,7 @@ void Node::deleteObj()
 
 void Node::destroy()
 {
-    m_obj->deleteLater();
-    m_obj = nullptr;
+
     Body * b = Body::getInstance();
 
     b->removeNode(this);
@@ -496,6 +518,7 @@ void Node::destroy()
     QVector<BaseNode*> temp = m_underMap;
     for(int i=0; i<temp.length(); i++){
         temp[i]->destroy();
+        delete(m_underMap[i]);
     }
     if(m_abstraction){
         if(typeid (*m_abstraction) == typeid (GhostNode)){
@@ -510,6 +533,7 @@ void Node::destroy()
     for(int i=0; i<temp2.length(); i++){
         b->removeGhost(temp2[i]);
         temp2[i]->destroy();
+        delete(m_ghosts[i]);
 
     }
     for(int i=0; i<m_members.length(); i++){
@@ -525,6 +549,9 @@ void Node::destroy()
     terminate();
 
     disconnect();
+    m_obj->deleteLater();
+    delete(m_obj);
+    m_obj = nullptr;
 
 }
 

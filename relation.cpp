@@ -454,6 +454,7 @@ void Relation::createObj()
 
 void Relation::destroy(){
     m_obj->deleteLater();
+    delete(m_obj);
     m_obj = nullptr;
     Body * b = Body::getInstance();
     b->removeRelation(this);

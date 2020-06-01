@@ -64,6 +64,9 @@ public:
     void setAbstraction(BaseNode * b){m_abstraction = b;}
     BaseNode * getAbstraction(){return m_abstraction;}
 
+    void extract();
+    void exude(BaseNode * b);
+
     void hover(bool b);
     void select(bool b);
     void highlight(bool b);

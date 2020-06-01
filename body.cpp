@@ -34,6 +34,7 @@ void Body::initialize()
 
     connect(getRoot(),SIGNAL(tabPressed()),this,SLOT(tab()));
     connect(getRoot(),SIGNAL(enterPressed()),this,SLOT(enterPressed()));
+    connect(getRoot(),SIGNAL(closing()),this,SLOT(closeWindow()));
 
     QDir dir = QDir(QDir::currentPath());
     QStringList contents = dir.entryList();
@@ -203,6 +204,11 @@ void Body::initialize()
     f.commonShorthand = "ar";
     functions.append(f);
 
+    f.name = "remove from";
+    f.alias = QStringList{"extract","extract from","remove"};
+    f.commonShorthand = "NULL";
+    functions.append(f);
+
 }
 
 
@@ -345,6 +351,13 @@ int Body::acceptedSelection(int n)
             selectedNode()->destroy();
         }
     }
+    if(f == "remove from"){
+        if(selectedNode()){
+            if(selectedNode()->getAbstraction()){
+                selectedNode()->getAbstraction()->exude(selectedNode());
+            }
+        }
+    }
     if(f == "include"){
         if(latestContext() == node_selected){
             setContext(including);
@@ -362,7 +375,7 @@ int Body::acceptedSelection(int n)
         if(contexts.contains(latestContext())){
             if(latestContext() == relation_selected){
                 selectedRelation()->destroy();
-                delete(selectedRelation());
+
                 contextResolved();
             }
             if(latestContext() == structural_selected){
@@ -830,6 +843,13 @@ void Body::removeGhost(GhostNode *g)
     nodeMap[i] = nullptr;
 }
 
+void Body::removeRelation(Relation *r)
+{
+    int index = relationArchive.indexOf(r);
+    delete(relationArchive[index]);
+    relationArchive[index] = nullptr;
+}
+
 void Body::removeNode(BaseNode *b)
 {
     if(typeid (*b) == typeid (Node)){
@@ -1147,7 +1167,7 @@ void Body::mouseReleased()
                 for(int i=0; i<nodeMap.length(); i++){
 
                     if(nodeMap[i]->isMoving() && nodeMap[i] != highlightedNode()){
-
+                        qDebug()<<nodeMap[i]<<highlightedNode();
                         highlightedNode()->underMapAppendNode(nodeMap[i]);
 
                     }
@@ -1170,6 +1190,20 @@ void Body::mouseReleased()
 void Body::mouseHeld()
 {
     m_mouseHeld = true;
+}
+
+void Body::closeWindow()
+{
+    for(int i=0; i<nodeMap.length(); i++){
+        delete(nodeMap[i]);
+    }
+    for(int i=0; i<relationArchive.length(); i++){
+        delete(relationArchive[i]);
+    }
+    for(int i=0; i<structuralMap.length(); i++){
+        delete(structuralMap[i]);
+    }
+    delete(instance);
 }
 
 
@@ -1334,14 +1368,15 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 
     bool structuralSelected = false;
     for(int i=0; i<structuralMap.length(); i++){
+        if(structuralMap[i]){
+            if(structuralMap[i]->isInside(mousePosition().x,mousePosition().y)){
 
-        if(structuralMap[i]->isInside(mousePosition().x,mousePosition().y)){
-
-            structuralMap[i]->setSelected(true);
-            setSelected(structuralMap[i]);
-            structuralSelected = true;
-        }else{
-            structuralMap[i]->setSelected(false);
+                structuralMap[i]->setSelected(true);
+                setSelected(structuralMap[i]);
+                structuralSelected = true;
+            }else{
+                structuralMap[i]->setSelected(false);
+            }
         }
     }
     if(structuralSelected){
@@ -1355,14 +1390,17 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 
     bool relationSelected = false;
     for(int i=0; i<relationArchive.length(); i++){
-        if(relationArchive[i]->isInside(mousePosition().x,mousePosition().y)){
+        if(relationArchive[i]){
+            if(relationArchive[i]->isInside(mousePosition().x,mousePosition().y)){
 
-            relationArchive[i]->setSelected(true);
-            setSelected(relationArchive[i]);
-            relationSelected = true;
-        }else{
-            relationArchive[i]->setSelected(false);
+                relationArchive[i]->setSelected(true);
+                setSelected(relationArchive[i]);
+                relationSelected = true;
+            }else{
+                relationArchive[i]->setSelected(false);
+            }
         }
+
     }
     if(!relationSelected){
         Relation * r = nullptr;
@@ -1544,6 +1582,12 @@ int Body::searching(QString input)
 
     QVector<function> pool;
 
+
+    for(int i=0; i<functions.length(); i++){
+        if(functions[i].contexts.contains(latestContext())){
+                pool.append(functions[i]);
+        }
+    }
     pool = functions;
     if(latestContext() == opening_file){
         pool.clear();
@@ -1570,6 +1614,8 @@ int Body::searching(QString input)
 
         return 0;
     }
+
+
 
     for(int i=0; i<pool.length(); i++){
         pool[i].match = match(&pool[i],input);
@@ -1760,11 +1806,10 @@ NodeArea *Body::newNodeArea(QVector<BaseNode *> nodes)
 {
     NodeArea * n = new NodeArea;
     n->initializeObj();
-    for(int i=0; i<nodes.length(); i++){
-        n->underMapAppendNode(nodes[i]);
-    }
+    n->setUnderMap(nodes);
     n->reFormatExpandedForm();
     nodeMap.append(n);
+    return n;
 }
 
 int Body::allocateNewID(QString type)

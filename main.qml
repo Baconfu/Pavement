@@ -1,14 +1,26 @@
 import QtQuick 2.12
 import QtQuick.Window 2.12
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls 1.0
 import Paint 1.0
 
 
-Window {
+ApplicationWindow {
     id: win
     visible: true
     width: 640
     height: 480
+    style: ApplicationWindowStyle {
+            background: Rectangle {
+                color: "#FFFFFF"
+            }
+        }
+
     title: qsTr("Pavement 1.1")
+
+    onClosing: {
+        myItem.closing()
+    }
 
     Item {
         anchors.fill:parent
@@ -16,6 +28,7 @@ Window {
         id: myItem
         signal tabPressed()
         signal enterPressed()
+        signal closing()
 
         focus: true
         Keys.onTabPressed: {

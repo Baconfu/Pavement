@@ -272,6 +272,9 @@ void GhostNode::setUnderMap(QVector<BaseNode *> subMap)
 
 void GhostNode::underMapAppendNode(BaseNode *b)
 {
+    if(!m_obj->property("expanded").toBool()){
+        b->setVisibility(false);
+    }
     m_underMap.append(b);
     Body::coordinate c = b->getAbsolutePosition().subtract(this->getAbsolutePosition());
     b->obj()->setParentItem(this->obj());
@@ -348,6 +351,25 @@ void GhostNode::expand()
 
 
 
+}
+
+void GhostNode::extract()
+{
+    Body * b = Body::getInstance();
+    Body::coordinate c = getAbsolutePosition();
+    m_obj->setParentItem(b->getRoot()->findChild<QQuickItem*>("layer"));
+    setPosition(c);
+    setAbstraction(nullptr);
+    b->registerGhost(this);
+
+}
+
+void GhostNode::exude(BaseNode * b)
+{
+    if(m_underMap.contains(b)){
+        b->extract();
+        m_underMap.removeOne(b);
+    }
 }
 
 void GhostNode::reFormatExpandedForm()

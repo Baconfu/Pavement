@@ -61,6 +61,8 @@ public:
     void abstract();
     void expand();
     bool isExpanded(){return m_expanded;}
+    void extract();
+    void exude(BaseNode * b);
 
     void setAbstraction(BaseNode * n);
     BaseNode * getAbstraction(){return m_abstraction;}

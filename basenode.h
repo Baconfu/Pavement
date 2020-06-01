@@ -68,6 +68,8 @@ public:
 
     virtual void setAbstraction(BaseNode * b){qDebug()<<"BaseNode virtual function called. "<<b;}
     virtual BaseNode * getAbstraction();
+    virtual void extract(){} // extract node from Abstraction.
+    virtual void exude(BaseNode * b){qDebug()<<"Basenode virtual function called. "<<b;} //exude node from underMap
 
     virtual void setVisibility(bool visibility);
     virtual bool isVisible(){return true;}

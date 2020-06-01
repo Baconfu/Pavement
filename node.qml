@@ -102,7 +102,7 @@ Item {
         anchors.fill: parent
         radius: 3
         color: "grey"
-        z:1
+        z:-1
         opacity:0.2
 
     }
@@ -114,8 +114,10 @@ Item {
         x:container.width/2 - width/2
         y:0
         width: 10
+        z:-2
 
-        height: 20
+        height: textInput.contentHeight + 5
+
 
         TextInput {
             id: textInput
@@ -173,7 +175,7 @@ Item {
         y:nameContainer.height
         width:typeInput.contentWidth
         height:typeInput.contentHeight
-        z:-2
+        z:-3
         color: "white"
         TextInput {
             id: typeInput

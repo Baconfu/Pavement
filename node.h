@@ -105,7 +105,7 @@ public:
     void underMapAppendNode(QVector<BaseNode*> nodes);
     void underMapAppendNode(BaseNode * node);
     QVector<BaseNode*> getUnderMap(){return m_underMap;}
-    void removeSubNode(BaseNode * b){m_underMap.removeOne(b);}
+    void removeSubNode(BaseNode * b);
     void transformSubMap(Body::coordinate vector);
 
     void subNodeMoved();
@@ -116,6 +116,7 @@ public:
     void expand();
     bool isExpanded(){return m_expanded;}
     void abstract();
+    void exude(BaseNode * b);
 
 
 
