@@ -334,10 +334,13 @@ int Body::acceptedSelection(int n)
             setContext(Context::parenting);
             int id = selectedNode()->getID();
             Node * selected = getNodePointerByID(id);
-            selected->setHoveringStructural(selected->newStructural());
+            structural * s = selected->newStructural();
+            m_hoveringStructural = s;
+            selected->setHoveringStructural(s);
             selected->hoveringStructural()->setHovering(true);
             connect(this,SIGNAL(mouseMoved()),selected->hoveringStructural(),SLOT(update()));
             selected->hoveringStructural()->update();
+
             setSelected(n);
             setFocusWindow();
             updateStructuralMap();
@@ -1030,38 +1033,28 @@ void Body::enterPressed()
 
     }
     if(latestContext() == Context::parenting){
+
         BaseNode * b = highlightedNode();
-        if(highlightedNode() && typeid (*b) == typeid (Node)){
-            Node * n = b->getNodePointer();
-            for(int i=0; i<nodeMap.length(); i++){
-                BaseNode *b2 = nodeMap[i];
-                Node * n2 = nullptr;
-                if(typeid (*b2) == typeid (Node)){
-                    n2 = b2->getNodePointer();
-                }else{
-                    continue;
+        if(b){
+            if(typeid (*b) == typeid (Node)){
+                Node * dest = b->getNodePointer();
+                Node * origin = m_hoveringStructural->childNode();
+                if(dest != origin){
+                    origin->addParent(dest);
+                    dest->addChild(origin);
+                    m_hoveringStructural->setParentNode(dest);
+                    disconnect(this,SIGNAL(mouseMoved()),m_hoveringStructural,SLOT(update()));
+                    m_hoveringStructural->setHovering(false);
+                    m_hoveringStructural->update();
+                    updateStructuralMap();
+                    structural * s = nullptr;
+                    origin->setHoveringStructural(s);
+
+                    contextReset();
                 }
-                QVector<structural*> s = n2->getAllStructurals();
-                for(int j=0; j<s.length(); j++){
-                    if(s[j]->hovering()){
-
-
-                        n2->addParent(n);
-                        n->addChild(n2);
-                        s[j]->setParentNode(n2);
-                        disconnect(this,SIGNAL(mouseMoved()),s[j],SLOT(update()));
-                        s[j]->setHovering(false);
-                        s[j]->update();
-                        updateStructuralMap();
-
-                        structural * s = nullptr;
-                        n2->setHoveringStructural(s);
-
-                        contextReset();
-                    }
-                }
-
             }
+
+
         }
     }
     if(latestContext() == moving_node){

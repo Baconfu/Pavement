@@ -245,6 +245,9 @@ private:
     Relation * hoveringRelation(){return m_hoveringRelation;}
     void setHoveringRelation(Relation * r);
 
+    structural * m_hoveringStructural = nullptr;
+
+
 
     double m_zoomFactor = 1;
     double m_zoomVelocity = 0;

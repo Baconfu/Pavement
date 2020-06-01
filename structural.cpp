@@ -9,6 +9,7 @@ structural::structural(QObject * parent):
 
 void structural::setChildNode(Node * n)
 {
+    qDebug()<<n;
     setDisplayChildNode(n);
     setDestination(n->getCenterPosition());
     m_childNode = n;
@@ -18,7 +19,7 @@ void structural::setChildNode(Node * n)
 
 void structural::setParentNode(Node *n)
 {
-
+    qDebug()<<"parent"<<n;
     setDisplayParentNode(n);
     setOrigin(n->getCenterPosition());
     m_parentNode = n;
@@ -182,6 +183,7 @@ void structural::setStructuralCutoff()
     Body::coordinate inverseVector = origin().subtract(destination());
 
     double angle = inverseVector.getAngle();
+    qDebug()<<localVector.x<<localVector.y;
 
 
     if(displayChildNode()){
