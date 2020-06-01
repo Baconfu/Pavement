@@ -5,6 +5,7 @@
 #include <ghostnode.h>
 #include <nodearea.h>
 #include <sync.h>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -675,8 +676,9 @@ QStringList Body::getSaves(QString path)
     if(dir == nullptr){
         return s;
     }
+    struct stat statbuf;
     while((entry = readdir(dir)) != nullptr){
-        if(entry->d_type == 8){
+        if(stat(entry->d_name,&statbuf) == 0){
             s.append(QString::fromStdString(entry->d_name));
         }
 
