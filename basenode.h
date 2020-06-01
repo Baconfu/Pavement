@@ -81,6 +81,10 @@ public:
     virtual void moving(bool){}
     virtual bool isMoving(){return false;}
 
+    virtual void addParent(BaseNode*){}
+    virtual void addChild(BaseNode*){}
+
+
 
     virtual void initializeObj(){}
     virtual void destroy(){}

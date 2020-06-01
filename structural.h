@@ -13,19 +13,10 @@ class structural: public QObject
 public:
     structural(QObject * parent = nullptr);
 
-    Node * childNode(){return m_childNode;}
-    Node * parentNode(){return m_parentNode;}
-    void setChildNode(Node * n);
-    void setParentNode(Node * n);
-
-    Node * displayChildNode(){return m_displayChildNode;}
-    Node * displayParentNode(){return m_displayParentNode;}
-    void setDisplayChildNode(Node * n);
-    void setDisplayParentNode(Node * n);
-
-
-    Node * findDisplayParentNode();
-    Node * findDisplayChildNode();
+    BaseNode * childNode(){return m_childNode;}
+    BaseNode * parentNode(){return m_parentNode;}
+    void setChildNode(BaseNode * n);
+    void setParentNode(BaseNode * n);
 
     bool isInside(int x,int y);
 
@@ -53,8 +44,7 @@ public:
 
 
 private:
-    QVector<Node*> parentIncludeNodes();
-    QVector<Node*> childIncludeNodes();
+
     bool m_visible = true;
     bool m_hovering = false;
 
@@ -64,11 +54,8 @@ private:
     Body::coordinate m_origin;
     Body::coordinate m_destination;
 
-    Node * m_childNode;
-    Node * m_parentNode;
-
-    Node * m_displayChildNode;
-    Node * m_displayParentNode;
+    BaseNode * m_childNode;
+    BaseNode * m_parentNode;
 
 
     QQuickItem * m_obj = nullptr;

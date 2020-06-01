@@ -330,10 +330,10 @@ int Body::acceptedSelection(int n)
     }
     if(f == "parent"){
         if(latestContext() == Context::node_selected){
-            Node * n = nullptr;
+            BaseNode * n = nullptr;
             setContext(Context::parenting);
             int id = selectedNode()->getID();
-            Node * selected = getNodePointerByID(id);
+            BaseNode * selected = getNodePointerByID(id);
             structural * s = selected->newStructural();
             m_hoveringStructural = s;
             selected->setHoveringStructural(s);
@@ -787,24 +787,18 @@ QVector<Body::coordinate> Body::boundaries(QVector<BaseNode *> nodes)
 }
 
 
-Node *Body::getNodePointerByID(int id)
+BaseNode *Body::getNodePointerByID(int id)
 {
-    Node * n = nullptr;
     for(int i=0; i<nodeMap.length(); i++){
         BaseNode * b = nodeMap[i];
-        if(typeid (*b) == typeid (Node)){
-            if(id == nodeMap[i]->getID()){
-                n = nodeMap[i]->getNodePointer();
-                break;
-            }
+        if(b->getID() == id){
+            return b;
         }
-
     }
-    return n;
 }
-Node * Body::getNodePointerByID(int id, QVector<Node *> pool)
+BaseNode * Body::getNodePointerByID(int id, QVector<BaseNode *> pool)
 {
-    Node * n = nullptr;
+    BaseNode * n = nullptr;
     for(int i=0; i<pool.length(); i++){
         if(id == pool[i]->getID()){
             n = pool[i];
@@ -1036,23 +1030,23 @@ void Body::enterPressed()
 
         BaseNode * b = highlightedNode();
         if(b){
-            if(typeid (*b) == typeid (Node)){
-                Node * dest = b->getNodePointer();
-                Node * origin = m_hoveringStructural->childNode();
-                if(dest != origin){
-                    origin->addParent(dest);
-                    dest->addChild(origin);
-                    m_hoveringStructural->setParentNode(dest);
-                    disconnect(this,SIGNAL(mouseMoved()),m_hoveringStructural,SLOT(update()));
-                    m_hoveringStructural->setHovering(false);
-                    m_hoveringStructural->update();
-                    updateStructuralMap();
-                    structural * s = nullptr;
-                    origin->setHoveringStructural(s);
 
-                    contextReset();
-                }
+            BaseNode * dest = b;
+            BaseNode * origin = m_hoveringStructural->childNode();
+            if(dest != origin){
+                origin->addParent(dest);
+                dest->addChild(origin);
+                m_hoveringStructural->setParentNode(dest);
+                disconnect(this,SIGNAL(mouseMoved()),m_hoveringStructural,SLOT(update()));
+                m_hoveringStructural->setHovering(false);
+                m_hoveringStructural->update();
+                updateStructuralMap();
+                structural * s = nullptr;
+                origin->setHoveringStructural(s);
+
+                contextReset();
             }
+
 
 
         }
@@ -1127,11 +1121,7 @@ void Body::mouseClicked(int x, int y)
 
 void Body::mouseDoubleClicked(int x, int y)
 {
-    for(int i=0; i<nodeMap.length(); i++){
-        if(nodeMap[i]->isInside(x,y)){
-            nodeMap[i]->abstract();
-        }
-    }
+
 }
 
 void Body::mousePressed(int x, int y)

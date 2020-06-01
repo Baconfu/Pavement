@@ -7,78 +7,22 @@ structural::structural(QObject * parent):
 
 }
 
-void structural::setChildNode(Node * n)
+void structural::setChildNode(BaseNode * n)
 {
-    qDebug()<<n;
-    setDisplayChildNode(n);
     setDestination(n->getCenterPosition());
     m_childNode = n;
     connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
 
 }
 
-void structural::setParentNode(Node *n)
+void structural::setParentNode(BaseNode *n)
 {
-    qDebug()<<"parent"<<n;
-    setDisplayParentNode(n);
     setOrigin(n->getCenterPosition());
     m_parentNode = n;
     connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
     connect(n,SIGNAL(terminate()),this,SLOT(destroy()));
 }
 
-void structural::setDisplayChildNode(Node *n)
-{
-    m_displayChildNode = n;
-
-    disconnect();
-    connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
-}
-
-void structural::setDisplayParentNode(Node *n)
-{
-    m_displayParentNode = n;
-    disconnect();
-    connect(n,SIGNAL(updateStructural()),this,SLOT(update()),Qt::UniqueConnection);
-}
-
-Node *structural::findDisplayParentNode()
-{
-    /*
-    QVector<Node*> path = parentNode()->getIncludes();
-
-    if(path.isEmpty()){
-        Node * n = parentNode();
-        return n;
-    }
-    int i=0;
-    while(!path[i]->isVisible()){
-        i+=1;
-    }
-
-    return path[i];
-    */
-    return parentNode();
-
-}
-
-Node *structural::findDisplayChildNode()
-{
-    /*
-    //invalid concept for function
-    QVector<Node*> path = childNode()->getIncludes();
-    if(path.isEmpty()){
-        Node * n = childNode();
-        return n;
-    }
-    int i=0;
-    while(!path[i]->isVisible()){
-        i+=1;qDebug()<<i;
-    }
-    return path[i];
-    */
-    return childNode();
-}
 
 bool structural::isInside(int x, int y)
 {
@@ -128,21 +72,19 @@ void structural::update()
     if(hovering()){
         Body * b = Body::getInstance();
         setOrigin(b->mousePosition());
-        setDestination(displayChildNode()->getCenterPosition());
+        setDestination(childNode()->getCenterPosition());
         setStructuralCutoff();
     }else{
 
         if(childNode()->isVisible()){
             setVisibility(true);
-            setDisplayChildNode(childNode());
         }else{
             setVisibility(false);
 
         }
-        setDisplayParentNode(findDisplayParentNode());
 
-        setOrigin(displayParentNode()->getCenterPosition());
-        setDestination(displayChildNode()->getCenterPosition());
+        setOrigin(parentNode()->getCenterPosition());
+        setDestination(childNode()->getCenterPosition());
         setStructuralCutoff();
     }
 }
@@ -183,12 +125,12 @@ void structural::setStructuralCutoff()
     Body::coordinate inverseVector = origin().subtract(destination());
 
     double angle = inverseVector.getAngle();
-    qDebug()<<localVector.x<<localVector.y;
 
 
-    if(displayChildNode()){
-        Node * destinationNode = displayChildNode();
-        Node * originNode = displayParentNode();
+
+    if(childNode()){
+        BaseNode * destinationNode = childNode();
+        BaseNode * originNode = parentNode();
         double pi = 3.1415926;
         double a1 = atan(double(destinationNode->height()) / double(destinationNode->width()));
 

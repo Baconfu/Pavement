@@ -60,7 +60,7 @@ public:
 
     //NODE PARENTS AND CHILDREN
     QVector<Node*> getParents(){return m_parents;}
-    int addParent(Node * n);
+    int addParent(BaseNode * n);
     void removeParent(Node * n);
     QVector<Node*> ancestorPath(Node * target);
 

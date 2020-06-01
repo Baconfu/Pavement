@@ -132,8 +132,8 @@ public:
     }
     coordinate tabPosition(){return m_tabPosition;}
 
-    Node * getNodePointerByID(int id);
-    Node * getNodePointerByID(int id,QVector<Node*> pool);
+    BaseNode * getNodePointerByID(int id);
+    BaseNode * getNodePointerByID(int id,QVector<BaseNode*> pool);
     Node * getNodeByName(QString name);
     QVector<Node*> getNodeByType(QString type);
     QVector<Node*> getNodeByType(Node * typeNode);

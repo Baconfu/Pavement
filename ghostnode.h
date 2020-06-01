@@ -76,6 +76,10 @@ public:
     void initializeObj();
     void adoptOriginal();
 
+    void addParent(BaseNode * b);
+    void addChild(BaseNode * b);
+
+
     BaseNode * isInside(int x,int y);
 
 
