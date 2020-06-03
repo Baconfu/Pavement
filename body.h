@@ -18,6 +18,7 @@
 #include <QElapsedTimer>
 #include <utility.h>
 #include <QDir>
+#include <QSysInfo>
 
 
 
@@ -36,6 +37,9 @@ class Body: public QObject
 public:
 
     Body(QObject * parent = nullptr);
+
+    QString os(){return QSysInfo::productType();}
+
     static Body * getInstance();
     QQuickItem * getRoot();
     QQmlApplicationEngine * engine();

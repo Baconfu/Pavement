@@ -221,7 +221,9 @@ int Body::acceptedSelection(int n)
         if(n != -1){
             QString g;
 
+
             g = displayFunctions[n].name;
+
             openFile(defaultPath + "/" + g);
             contextResolved();
 
@@ -646,6 +648,7 @@ void Body::openFile(QString path)
     PavementFile file = PavementFile(path);
     file.readJson();
 
+
     QVector<BaseNode*> nodePool = file.loadNodes();
 
     for(int i=0; i<nodePool.length(); i++){
@@ -679,12 +682,24 @@ QStringList Body::getSaves(QString path)
     if(dir == nullptr){
         return s;
     }
-    struct stat statbuf;
-    while((entry = readdir(dir)) != nullptr){
-        if(stat(entry->d_name,&statbuf) == 0){
-            s.append(QString::fromStdString(entry->d_name));
-        }
+    if(os() == "windows"){
+        struct stat statbuf;
 
+        while((entry = readdir(dir)) != nullptr){
+
+            if(stat(entry->d_name,&statbuf) == 0){
+                s.append(QString::fromStdString(entry->d_name));
+            }
+
+        }
+    }
+
+    if(os() == "ubuntu" ){
+        while((entry = readdir(dir)) != nullptr){
+            if(entry->d_type == 8){
+                s.append(QString::fromStdString(entry->d_name));
+            }
+        }
     }
     closedir(dir);
     return s;
@@ -1587,6 +1602,8 @@ int Body::searching(QString input)
     if(latestContext() == opening_file){
         pool.clear();
         QStringList saves = getSaves(defaultPath);
+
+        qDebug()<<saves;
         pool = functionFromList(saves);
     }
     if(latestContext() == saving_file){

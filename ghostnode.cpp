@@ -310,6 +310,7 @@ void GhostNode::abstract()
 void GhostNode::expand()
 {
     if(m_underMap.isEmpty()){
+
         QVector<BaseNode*> subMap = m_original->getUnderMap();
 
         QVector<BaseNode*> mySubMap;
@@ -324,7 +325,7 @@ void GhostNode::expand()
                 geometry.x = g->getAbstraction()->width()/2;
                 geometry.y = g->getAbstraction()->height()/2;
                 Body::coordinate vector = g->getPosition().subtract(geometry);
-
+                qDebug()<<vector.x<<vector.y;
                 clone->setPosition(vector.add(this->getCenterAbsolutePosition()));
 
                 mySubMap.append(clone);
@@ -374,6 +375,7 @@ void GhostNode::exude(BaseNode * b)
 
 void GhostNode::reFormatExpandedForm()
 {
+
     if(!m_underMap.isEmpty()){
 
         int leftMost = 10000000;
@@ -443,6 +445,7 @@ void GhostNode::reFormatExpandedForm()
             m_abstraction->reFormatExpandedForm();
         }
     }
+
     updateRelation();
 
 }
