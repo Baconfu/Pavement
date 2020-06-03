@@ -334,12 +334,17 @@ int Body::acceptedSelection(int n)
             setContext(Context::parenting);
             int id = selectedNode()->getID();
             BaseNode * selected = getNodePointerByID(id);
-            structural * s = selected->newStructural();
+            structural * s =  new structural;
+            s->initializeObj();
+            s->setChildNode(selected);
+
+            connect(selected,SIGNAL(updateStructural()),s,SLOT(update()),Qt::UniqueConnection);
+
             m_hoveringStructural = s;
-            selected->setHoveringStructural(s);
-            selected->hoveringStructural()->setHovering(true);
-            connect(this,SIGNAL(mouseMoved()),selected->hoveringStructural(),SLOT(update()));
-            selected->hoveringStructural()->update();
+            s->setHovering(true);
+
+            connect(this,SIGNAL(mouseMoved()),s,SLOT(update()));
+            s->update();
 
             setSelected(n);
             setFocusWindow();

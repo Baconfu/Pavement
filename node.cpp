@@ -149,58 +149,6 @@ Body::coordinate Node::getCenterPosition()
     return c;
 }
 
-int Node::addParent(Node *n)
-{
-    if(!m_parents.contains(n)){
-        m_parents.append(n);
-    }
-    return 0;
-}
-
-
-void Node::removeParent(Node * n)
-{
-    m_parents.removeAt(m_parents.indexOf(n));
-}
-
-QVector<Node *> Node::ancestorPath(Node *target)
-{
-    QVector<Node*> null;
-    if(this == target){
-        QVector<Node*> path;
-        path.insert(0,this);
-        return path;
-    }
-    QVector<Node*> parents = getParents();
-    if(parents.length()==0){
-        return null;
-    }
-    for(int i=0; i<parents.length(); i++){
-        QVector<Node*> path;
-        path = parents[i]->ancestorPath(target);
-        if(!path.isEmpty()){
-            path.insert(0,this);
-            return path;
-        }
-    }
-
-    return null;
-}
-
-int Node::addChild(Node *n)
-{
-    if(!m_children.contains(n)){
-        m_children.append(n);
-    }
-    return 0;
-}
-
-void Node::removeChild(Node *n)
-{
-    m_children.removeAt(m_children.indexOf(n));
-
-}
-
 int Node::allocateGhostID()
 {
     Body * b = Body::getInstance();
@@ -539,12 +487,6 @@ void Node::destroy()
     for(int i=0; i<m_members.length(); i++){
         m_members[i]->setType(nullptr);
     }
-    for(int i=0; i<m_children.length(); i++){
-        m_children[i]->removeParent(this);
-    }
-    for(int i=0; i<m_parents.length(); i++){
-        m_parents[i]->removeChild(this);
-    }
 
     terminate();
 
@@ -624,19 +566,6 @@ void Node::registerIncomingRelation(Relation *r)
     if(r->getOriginType() == Relation::relation){
         qDebug()<<"error: invalid relation";
     }
-}
-
-structural * Node::newStructural()
-{
-
-    structural * s =  new structural;
-    s->initializeObj();
-    s->setChildNode(this);
-    s->setDisplayChildNode(this);
-
-    connect(this,SIGNAL(updateStructural()),s,SLOT(update()),Qt::UniqueConnection);
-    toParent.append(s);
-    return s;
 }
 
 void Node::updateRelations()

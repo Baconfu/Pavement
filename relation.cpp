@@ -433,6 +433,10 @@ void Relation::initializeObj()
         QQmlComponent component(body->engine(),QUrl("qrc:/line.qml"));
         object = qobject_cast<QQuickItem*>(component.create());
     }
+    if(m_type == "triangle"){
+        QQmlComponent component(body->engine(),QUrl("qrc:/relation.qml"));
+        object = qobject_cast<QQuickItem*>(component.create());
+    }
 
     if(!object){
         qDebug()<<"error: no relation type";

@@ -58,27 +58,6 @@ public:
     int getID(){return m_id;}
 
 
-    //NODE PARENTS AND CHILDREN
-    QVector<Node*> getParents(){return m_parents;}
-    int addParent(BaseNode * n);
-    void removeParent(Node * n);
-    QVector<Node*> ancestorPath(Node * target);
-
-    QVector<Node*> getChildren(){return m_children;}
-    int addChild(Node * n);
-    void removeChild(Node * n);
-
-    void getDescendants(QVector<Node*> * out){
-        if(!out->contains(this)){
-            out->append(this);
-            for(int i=0; i<m_children.length(); i++){
-                m_children[i]->getDescendants(out);
-            }
-            return;
-        }
-    }
-
-
     //NODE GHOSTS
     void registerGhost(GhostNode * n){m_ghosts.append(n);}
     void unregisterGhost(GhostNode *n){m_ghosts.removeOne(n);}
@@ -126,12 +105,6 @@ public:
     void registerIncomingRelation(Relation * r);
     void deleteRelationByTarget(Node * n);
     void deleteAllRelations();
-
-    //NODE STRUCTURALS
-    QVector<structural*> getAllStructurals(){return toParent;}
-    structural * newStructural();
-    structural * hoveringStructural(){return m_hoveringStructural;}
-    void setHoveringStructural(structural * s){m_hoveringStructural = s;}
 
     //NODE CONTROLS
     void giveInputFocus();
@@ -204,8 +177,8 @@ private:
     QVector<GhostNode*> m_ghosts;
 
     //vassalage diplomacy
-    QVector<Node*> m_parents;
-    QVector<Node*> m_children;
+    QVector<BaseNode*> m_parents;
+    QVector<BaseNode*> m_children;
     QVector<structural*> toParent;
 
 

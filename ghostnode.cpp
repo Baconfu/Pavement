@@ -102,17 +102,6 @@ void GhostNode::adoptOriginal()
 
 }
 
-void GhostNode::addParent(BaseNode *b)
-{
-
-}
-
-void GhostNode::addChild(BaseNode *b)
-{
-
-}
-
-
 BaseNode * GhostNode::isInside(int x, int y)
 {
     Body::coordinate position = m_position;

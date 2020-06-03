@@ -26,12 +26,13 @@ SOURCES += \
         paintnode.cpp \
         paintnodearea.cpp \
         paintrelation.cpp \
-        paintstructural.cpp \
         pavementfile.cpp \
         relation.cpp \
         structural.cpp \
         sync.cpp \
-        utility.cpp
+        utility.cpp \
+    paintstructural.cpp \
+    painttriangle.cpp
 
 RESOURCES += qml.qrc
 
@@ -63,7 +64,8 @@ HEADERS += \
     relation.h \
     structural.h \
     sync.h \
-    utility.h
+    utility.h \
+    painttriangle.h
 
 DISTFILES += \
     pavementmodel.qmodel
