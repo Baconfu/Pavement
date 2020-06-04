@@ -309,6 +309,7 @@ void GhostNode::abstract()
 
 void GhostNode::expand()
 {
+    Body::coordinate origin = getPosition();
     if(m_underMap.isEmpty()){
 
         QVector<BaseNode*> subMap = m_original->getUnderMap();
@@ -348,9 +349,10 @@ void GhostNode::expand()
     m_expanded = true;
 
     //setPositionByCenterIgnoreSubMap(center);
+
     reFormatExpandedForm();
 
-
+    setPosition(origin);
 
 }
 
