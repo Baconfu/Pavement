@@ -4,7 +4,6 @@
 #include <file.h>
 #include <node.h>
 #include <relation.h>
-#include <structural.h>
 #include <ghostnode.h>
 #include <nodearea.h>
 

@@ -513,10 +513,7 @@ void Node::setHidden(bool b)
     for(int i=0; i<relations.length(); i++){
         relations[i]->setVisibility(not(b));
     }
-    QVector<structural*> structurals = getAllStructurals();
-    for(int i=0; i<structurals.length(); i++){
-        structurals[i]->setVisibility(not(b));
-    }
+
 }
 
 void Node::dissolve()

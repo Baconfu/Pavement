@@ -1,6 +1,5 @@
 #include "body.h"
 #include <node.h>
-#include <structural.h>
 #include <pavementfile.h>
 #include <ghostnode.h>
 #include <nodearea.h>
@@ -81,6 +80,8 @@ void Body::initialize()
     f.alias = QStringList{"connection","new line"};
     f.commonShorthand = "nc";
     functions.append(f);
+
+
 
     f.name = "remove node";
     f.alias = QStringList{"delete node","delete","remove"};
@@ -210,6 +211,8 @@ void Body::initialize()
     f.commonShorthand = "NULL";
     functions.append(f);
 
+
+
 }
 
 
@@ -332,24 +335,10 @@ int Body::acceptedSelection(int n)
         if(latestContext() == Context::node_selected){
             BaseNode * n = nullptr;
             setContext(Context::parenting);
-            int id = selectedNode()->getID();
-            BaseNode * selected = getNodePointerByID(id);
-            structural * s =  new structural;
-            s->initializeObj();
-            s->setChildNode(selected);
-
-            connect(selected,SIGNAL(updateStructural()),s,SLOT(update()),Qt::UniqueConnection);
-
-            m_hoveringStructural = s;
-            s->setHovering(true);
-
-            connect(this,SIGNAL(mouseMoved()),s,SLOT(update()));
-            s->update();
-
+            int id = allocateNewID("relation");
+            newTriangle(id,selectedNode(),n);
             setSelected(n);
             setFocusWindow();
-            updateStructuralMap();
-
         }
         else{
             qDebug()<<"error: no node selected";
@@ -387,11 +376,7 @@ int Body::acceptedSelection(int n)
 
                 contextResolved();
             }
-            if(latestContext() == structural_selected){
-                m_selectedStructural->destroy();
-                delete(m_selectedStructural);
-                contextResolved();
-            }
+
         }
     }
 
@@ -429,8 +414,8 @@ int Body::acceptedSelection(int n)
         if(contexts.contains(latestContext())){
             if(selectedNode()->derivedType() == "node"){
                 QVector<Node*> selection;
-                Node * n = getNodeFromBase(selectedNode());
-                n->getDescendants(&selection);
+                //Node * n = getNodeFromBase(selectedNode());
+                //n->getDescendants(&selection);
                 //batchSelect(selection);
                 setContext(batch_selecting);
                 contextReset();
@@ -671,7 +656,6 @@ void Body::openFile(QString path)
     }
 
     relationArchive.append(file.loadRelations());
-    updateStructuralMap();
 
 }
 
@@ -895,11 +879,6 @@ Body::coordinate Body::getDisplayDimensions()
     return c;
 }
 
-Node *Body::getNodeFromBase(BaseNode *b)
-{
-    return getNodePointerByID(b->getID());
-}
-
 
 
 void Body::abstract(QVector<BaseNode *> nodes)
@@ -1037,19 +1016,18 @@ void Body::enterPressed()
         if(b){
 
             BaseNode * dest = b;
-            BaseNode * origin = m_hoveringStructural->childNode();
+            BaseNode * origin = hoveringRelation()->originNode();
             if(dest != origin){
-                origin->addParent(dest);
-                dest->addChild(origin);
-                m_hoveringStructural->setParentNode(dest);
-                disconnect(this,SIGNAL(mouseMoved()),m_hoveringStructural,SLOT(update()));
-                m_hoveringStructural->setHovering(false);
-                m_hoveringStructural->update();
-                updateStructuralMap();
-                structural * s = nullptr;
-                origin->setHoveringStructural(s);
-
+                origin->setAbstraction(dest);
+                dest->underMapAppendNode(origin);
+                hoveringRelation()->setDestinationObject(dest);
+                hoveringRelation()->finalizeSelf();
+                hoveringRelation()->updateSelf();
+                Relation * r = nullptr;
+                setHoveringRelation(r);
                 contextReset();
+                setHighlightedNode();
+
             }
 
 
@@ -1190,9 +1168,7 @@ void Body::closeWindow()
     for(int i=0; i<relationArchive.length(); i++){
         delete(relationArchive[i]);
     }
-    for(int i=0; i<structuralMap.length(); i++){
-        delete(structuralMap[i]);
-    }
+
     delete(instance);
 }
 
@@ -1356,26 +1332,7 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
     }
 
 
-    bool structuralSelected = false;
-    for(int i=0; i<structuralMap.length(); i++){
-        if(structuralMap[i]){
-            if(structuralMap[i]->isInside(mousePosition().x,mousePosition().y)){
 
-                structuralMap[i]->setSelected(true);
-                setSelected(structuralMap[i]);
-                structuralSelected = true;
-            }else{
-                structuralMap[i]->setSelected(false);
-            }
-        }
-    }
-    if(structuralSelected){
-        structural * s = nullptr;
-        setSelected(s);
-        if(latestContext() == structural_selected){
-            contextResolved();
-        }
-    }
 
 
     bool relationSelected = false;
@@ -1434,28 +1391,7 @@ void Body::removeNodes(QVector<BaseNode *> nodes){
     }
 }
 
-QVector<structural *> Body::getAllStructurals()
-{
-    QVector<structural*> s;
-    for(int i=0; i<nodeMap.length(); i++){
-        BaseNode * b = nodeMap[i];
-        if(typeid (*b) == typeid (Node)){
-            QVector<structural*> f = nodeMap[i]->getNodePointer()->getAllStructurals();
-            for(int j=0; j<f.length(); j++){
-                if(!s.contains(f[j])){
-                    s.append(f[j]);
-                }
-            }
-        }
 
-    }
-    return(s);
-}
-
-void Body::updateStructuralMap()
-{
-    structuralMap = getAllStructurals();
-}
 
 void Body::batchSelect(BaseNode *n){
     setContext(batch_selecting);
@@ -1773,6 +1709,26 @@ void Body::newLine(int id, BaseNode *origin, BaseNode *destination)
     r->updateSelf();
     relationArchive.append(r);
     //qDebug()<<r->obj();
+    r=nullptr;
+}
+
+void Body::newTriangle(int id, BaseNode *origin, BaseNode *destination)
+{
+    Relation * r = new Relation(nullptr,"triangle");
+    r->initializeObj();
+    r->setID(id);
+    r->setOriginObject(origin);
+    if(destination){
+        r->setDestinationObject(destination);
+        r->finalizeSelf();
+    }else{
+        r->clearDestinationObject();
+        setHoveringRelation(r);
+        setContext(creating_relation);
+    }
+    r->createObj();
+    r->updateSelf();
+    relationArchive.append(r);
     r=nullptr;
 }
 

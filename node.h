@@ -4,7 +4,6 @@
 #include <QObject>
 #include <relation.h>
 #include <body.h>
-#include <structural.h>
 #include <basenode.h>
 
 
@@ -179,7 +178,6 @@ private:
     //vassalage diplomacy
     QVector<BaseNode*> m_parents;
     QVector<BaseNode*> m_children;
-    QVector<structural*> toParent;
 
 
     //Geopolitical information.
@@ -194,7 +192,7 @@ private:
     //Domestic policy
     void setStyle();
 
-    structural * m_hoveringStructural = nullptr;
+
 
 
     Body::style m_style;

@@ -8,6 +8,7 @@
 #include <paintrelation.h>
 #include <paintstructural.h>
 #include <paintline.h>
+#include <painttriangle.h>
 #include <expandicon.h>
 #include <paintnodearea.h>
 #include <math.h>
@@ -44,6 +45,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<PaintRelation>("Paint",1,0,"PaintRelation");
     qmlRegisterType<PaintStructural>("Paint",1,0,"PaintStructural");
     qmlRegisterType<PaintLine>("Paint",1,0,"PaintLine");
+    qmlRegisterType<PaintTriangle>("Paint",1,0,"PaintTriangle");
     qmlRegisterType<ExpandIcon>("Paint",1,0,"ExpandIcon");
     qmlRegisterType<PaintNodeArea>("Paint",1,0,"PaintNodeArea");
 

@@ -28,7 +28,6 @@ SOURCES += \
         paintrelation.cpp \
         pavementfile.cpp \
         relation.cpp \
-        structural.cpp \
         sync.cpp \
         utility.cpp \
     paintstructural.cpp \
@@ -62,7 +61,6 @@ HEADERS += \
     paintstructural.h \
     pavementfile.h \
     relation.h \
-    structural.h \
     sync.h \
     utility.h \
     painttriangle.h

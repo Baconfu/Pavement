@@ -25,7 +25,6 @@ class BaseNode;
 class Node;
 class NodeArea;
 class Relation;
-class structural;
 class GhostNode;
 
 class Body: public QObject
@@ -245,7 +244,6 @@ private:
     Relation * hoveringRelation(){return m_hoveringRelation;}
     void setHoveringRelation(Relation * r);
 
-    structural * m_hoveringStructural = nullptr;
 
 
 
@@ -264,7 +262,6 @@ private:
 
     QVector<BaseNode*> nodeMap;
     QVector<Relation*> relationArchive;
-    QVector<structural*> structuralMap;
 
 
 
@@ -349,7 +346,7 @@ private:
     void newRelation(int id, BaseNode * origin, Relation * destination);
     void newRelation(int id, Relation * origin, Relation * destination);
     void newLine(int id, BaseNode * origin, BaseNode * destination);
-    void newStructural(int id, BaseNode * )
+    void newTriangle(int id, BaseNode * origin, BaseNode * destination);
 
     GhostNode * newGhostNode(Node * original,int x,int y);
 

@@ -434,7 +434,7 @@ void Relation::initializeObj()
         object = qobject_cast<QQuickItem*>(component.create());
     }
     if(m_type == "triangle"){
-        QQmlComponent component(body->engine(),QUrl("qrc:/relation.qml"));
+        QQmlComponent component(body->engine(),QUrl("qrc:/triangle.qml"));
         object = qobject_cast<QQuickItem*>(component.create());
     }
 

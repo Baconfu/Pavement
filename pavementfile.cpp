@@ -41,16 +41,6 @@ void PavementFile::saveNode(Node *n)
         node["expanded"] = false;
     }
 
-    QJsonArray parents;
-    QVector<Node*> parentNodes = n->getParents();
-    for(int i=0; i<parentNodes.length(); i++){
-        QJsonObject parent;
-        parent["id"] = parentNodes[i]->getID();
-        parent["name"] = parentNodes[i]->getName();
-        parents.append(parent);
-    }
-    node["parents"] = parents;
-
     QJsonObject subMap;
     QJsonArray subNodes = subMap["subMap"].toArray();
     QVector<BaseNode*> subMapNodes = n->getUnderMap();
@@ -154,19 +144,7 @@ QVector<BaseNode*> PavementFile::loadNodes()
     for(int i=0; i<tempPool.length(); i++){
         Node * n = nodePool[i]->getNodePointer();
         QJsonObject node = nodes[i].toObject();
-        QJsonArray parents = node["parents"].toArray();
-        for(int j=0; j<parents.count(); j++){
-            QJsonObject parent = parents[j].toObject();
-            Node * p = findNodeByID(nodePool,parent["id"].toInt())->getNodePointer();
-            if(p){
-                n->addParent(p);
-                p->addChild(n);
-                structural * s = n->newStructural();
-                s->setChildNode(n);
-                s->setParentNode(p);
-                s->update();
-            }
-        }
+
 
         for(int j=0; j<nodePool.length(); j++){
             Node * typeNode = findNodeByID(nodePool,node["typeNode"].toInt())->getNodePointer();
