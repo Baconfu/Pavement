@@ -327,15 +327,7 @@ void GhostNode::abstract()
 
 }
 
-<<<<<<< HEAD
-void GhostNode::expand()
-{
-    Body::coordinate origin = getPosition();
-    if(m_underMap.isEmpty()){
 
-        QVector<BaseNode*> subMap = m_original->getUnderMap();
-=======
->>>>>>> normalize
 
 void GhostNode::cloneSubMap(BaseNode *b)
 {
@@ -404,14 +396,6 @@ void GhostNode::expandMap()
             Body::coordinate center = getCenterPosition();
             m_obj->setProperty("expanded",true);
 
-<<<<<<< HEAD
-    //setPositionByCenterIgnoreSubMap(center);
-
-    reFormatExpandedForm();
-
-    setPosition(origin);
-=======
-
             setPositionByCenterIgnoreSubMap(center);
 
             reFormatExpandedForm();
@@ -433,7 +417,7 @@ void GhostNode::expandImage()
 {
 
 }
->>>>>>> normalize
+
 
 void GhostNode::expandText()
 {
@@ -580,6 +564,5 @@ void GhostNode::destroy()
     m_original->unregisterGhost(this);
     m_obj->deleteLater();
     m_obj = nullptr;
-
 
 }
