@@ -42,6 +42,8 @@ public:
     virtual void setID(int id);
     virtual int getID();
 
+    virtual void setText(QString){}
+    virtual QString getText(){return QString("Basenode function called");}
 
     virtual void hover(bool b){qDebug()<<b;}
     virtual void select(bool){}
@@ -56,6 +58,9 @@ public:
 
     virtual void abstract(){}
     virtual void expand(){}
+    virtual void cloneSubMap(BaseNode*){}
+    virtual void cycleExpandState(int){}
+
 
     virtual QVector<BaseNode*> getUnderMap(){QVector<BaseNode*> null; return null;}
     virtual void underMapAppendNode(BaseNode*){}
@@ -82,6 +87,7 @@ public:
     virtual bool isMoving(){return false;}
 
 
+
     virtual void initializeObj(){}
     virtual void destroy(){}
     virtual QQuickItem * obj(){return m_obj;}
@@ -90,6 +96,7 @@ public:
 
 protected:
     int m_id;
+    int m_expandState = 0;
 
     QString m_name;
 

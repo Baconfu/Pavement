@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
+<<<<<<< HEAD
 <!-- Written by QtCreator 4.8.0, 2020-06-05T08:02:46. -->
+=======
+<!-- Written by QtCreator 4.8.0, 2020-06-05T13:09:48. -->
+>>>>>>> normalize
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>

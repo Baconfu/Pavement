@@ -4,8 +4,8 @@
 #include <QObject>
 #include <relation.h>
 #include <body.h>
-#include <structural.h>
 #include <basenode.h>
+#include <QString>
 
 
 class Node: public BaseNode
@@ -58,27 +58,6 @@ public:
     int getID(){return m_id;}
 
 
-    //NODE PARENTS AND CHILDREN
-    QVector<Node*> getParents(){return m_parents;}
-    int addParent(Node * n);
-    void removeParent(Node * n);
-    QVector<Node*> ancestorPath(Node * target);
-
-    QVector<Node*> getChildren(){return m_children;}
-    int addChild(Node * n);
-    void removeChild(Node * n);
-
-    void getDescendants(QVector<Node*> * out){
-        if(!out->contains(this)){
-            out->append(this);
-            for(int i=0; i<m_children.length(); i++){
-                m_children[i]->getDescendants(out);
-            }
-            return;
-        }
-    }
-
-
     //NODE GHOSTS
     void registerGhost(GhostNode * n){m_ghosts.append(n);}
     void unregisterGhost(GhostNode *n){m_ghosts.removeOne(n);}
@@ -113,7 +92,16 @@ public:
 
     void setAbstraction(BaseNode * n);
 
+    void cloneSubMap(BaseNode * b);
+
     void expand();
+    void expandMap();
+    void expandTree();
+    void expandImage();
+    void expandText();
+
+
+    void cycleExpandState(int state);
     bool isExpanded(){return m_expanded;}
     void abstract();
     void exude(BaseNode * b);
@@ -126,12 +114,6 @@ public:
     void registerIncomingRelation(Relation * r);
     void deleteRelationByTarget(Node * n);
     void deleteAllRelations();
-
-    //NODE STRUCTURALS
-    QVector<structural*> getAllStructurals(){return toParent;}
-    structural * newStructural();
-    structural * hoveringStructural(){return m_hoveringStructural;}
-    void setHoveringStructural(structural * s){m_hoveringStructural = s;}
 
     //NODE CONTROLS
     void giveInputFocus();
@@ -151,6 +133,8 @@ public:
     void dissolve();
     void distill();
 
+    QString getText();
+    void setText(QString s);
     void highlight(bool visible);
     void hover(bool b);
     void select(bool b);
@@ -169,6 +153,7 @@ public:
 
 
 private:
+
     int tally = 0;
     enum cellStyle{
         minimal = 0,
@@ -204,9 +189,8 @@ private:
     QVector<GhostNode*> m_ghosts;
 
     //vassalage diplomacy
-    QVector<Node*> m_parents;
-    QVector<Node*> m_children;
-    QVector<structural*> toParent;
+    QVector<BaseNode*> m_parents;
+    QVector<BaseNode*> m_children;
 
 
     //Geopolitical information.
@@ -217,11 +201,12 @@ private:
     }
 
 
+    void selectTextBox();
 
     //Domestic policy
     void setStyle();
 
-    structural * m_hoveringStructural = nullptr;
+
 
 
     Body::style m_style;

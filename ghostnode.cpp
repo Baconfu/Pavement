@@ -37,6 +37,10 @@ void GhostNode::setPosition(Body::coordinate c)
 
     updateRelation();
 }
+void GhostNode::selectTextBox()
+{
+    m_obj->findChild<QObject*>("expandedText")->setProperty("focus",true);
+}
 
 
 void GhostNode::setPositionByCenter(Body::coordinate c)
@@ -102,7 +106,6 @@ void GhostNode::adoptOriginal()
 
 }
 
-
 BaseNode * GhostNode::isInside(int x, int y)
 {
     Body::coordinate position = m_position;
@@ -120,6 +123,12 @@ BaseNode * GhostNode::isInside(int x, int y)
     int height = m_height;
 
     if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
+        QObject * rect = m_obj->findChild<QObject*>("expandedTextBox");
+        y-=m_position.y;
+        if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
+            selectTextBox();
+            return nullptr;
+        }
         hover(true);
         return this;
     }else{
@@ -239,6 +248,17 @@ void GhostNode::setName(QString s)
     m_name = s;
 }
 
+
+QString GhostNode::getText()
+{
+    return m_obj->findChild<QObject*>("expandedText")->property("text").toString();
+}
+
+void GhostNode::setText(QString s)
+{
+    m_obj->findChild<QObject*>("expandedText")->setProperty("text",s);
+}
+
 Body::coordinate GhostNode::getCenterPosition()
 {
     Body::coordinate c;
@@ -307,13 +327,20 @@ void GhostNode::abstract()
 
 }
 
+<<<<<<< HEAD
 void GhostNode::expand()
 {
     Body::coordinate origin = getPosition();
     if(m_underMap.isEmpty()){
 
         QVector<BaseNode*> subMap = m_original->getUnderMap();
+=======
+>>>>>>> normalize
 
+void GhostNode::cloneSubMap(BaseNode *b)
+{
+    QVector<BaseNode*> subMap = b->getUnderMap();
+    if(!subMap.isEmpty()){
         QVector<BaseNode*> mySubMap;
         for(int i=0; i<subMap.length(); i++){
             BaseNode * b = subMap[i];
@@ -334,27 +361,92 @@ void GhostNode::expand()
             }
         }
         setUnderMap(mySubMap);
-
-
     }
+}
 
-    for(int i=0; i<m_underMap.length(); i++){
-        BaseNode * b = m_underMap[i];
-        b->setVisibility(true);
-        //b->setPositionByLocalVector();
 
-    }
-    //Body::coordinate center = getCenterPosition();
+
+void GhostNode::expand()
+{
+    Body::coordinate pos = getCenterPosition();
     m_obj->setProperty("expanded",true);
     m_expanded = true;
 
+    if(m_expandState == 0){
+        expandMap();
+    }
+    if(m_expandState == 1){
+        expandTree();
+    }
+    if(m_expandState == 2){
+        expandText();
+    }
+    setPositionByCenter(pos);
+
+}
+
+void GhostNode::expandMap()
+{
+    if(m_underMap.isEmpty()){
+        if(m_original){
+            cloneSubMap(m_original);
+
+        }
+
+    }
+    m_obj->findChild<QObject*>("expandedRectangle")->setProperty("visible",true);
+    if(!m_expanded){
+        if(!m_underMap.isEmpty()){
+            m_expanded = true;
+            for(int i=0; i<m_underMap.length(); i++){
+                m_underMap[i]->setVisibility(true);
+            }
+            Body::coordinate center = getCenterPosition();
+            m_obj->setProperty("expanded",true);
+
+<<<<<<< HEAD
     //setPositionByCenterIgnoreSubMap(center);
 
     reFormatExpandedForm();
 
     setPosition(origin);
+=======
+
+            setPositionByCenterIgnoreSubMap(center);
+
+            reFormatExpandedForm();
+        }else{
+            m_expanded = true;
+            m_obj->setProperty("expanded",true);
+
+        }
+
+    }
+}
+
+void GhostNode::expandTree()
+{
 
 }
+
+void GhostNode::expandImage()
+{
+
+}
+>>>>>>> normalize
+
+void GhostNode::expandText()
+{
+    m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",true);
+}
+
+void GhostNode::cycleExpandState(int state)
+{
+    m_expandState = state;
+    abstract();
+    expand();
+}
+
 
 void GhostNode::extract()
 {

@@ -149,58 +149,6 @@ Body::coordinate Node::getCenterPosition()
     return c;
 }
 
-int Node::addParent(Node *n)
-{
-    if(!m_parents.contains(n)){
-        m_parents.append(n);
-    }
-    return 0;
-}
-
-
-void Node::removeParent(Node * n)
-{
-    m_parents.removeAt(m_parents.indexOf(n));
-}
-
-QVector<Node *> Node::ancestorPath(Node *target)
-{
-    QVector<Node*> null;
-    if(this == target){
-        QVector<Node*> path;
-        path.insert(0,this);
-        return path;
-    }
-    QVector<Node*> parents = getParents();
-    if(parents.length()==0){
-        return null;
-    }
-    for(int i=0; i<parents.length(); i++){
-        QVector<Node*> path;
-        path = parents[i]->ancestorPath(target);
-        if(!path.isEmpty()){
-            path.insert(0,this);
-            return path;
-        }
-    }
-
-    return null;
-}
-
-int Node::addChild(Node *n)
-{
-    if(!m_children.contains(n)){
-        m_children.append(n);
-    }
-    return 0;
-}
-
-void Node::removeChild(Node *n)
-{
-    m_children.removeAt(m_children.indexOf(n));
-
-}
-
 int Node::allocateGhostID()
 {
     Body * b = Body::getInstance();
@@ -420,37 +368,64 @@ void Node::setAbstraction(BaseNode *n)
     m_abstraction = n;
 }
 
+void Node::cloneSubMap(BaseNode *b)
+{
+    QVector<BaseNode*> subMap = b->getUnderMap();
+    if(!subMap.isEmpty()){
+        QVector<BaseNode*> mySubMap;
+        for(int i=0; i<subMap.length(); i++){
+            BaseNode * b = subMap[i];
+            if(typeid (*b) == typeid (GhostNode)){
+
+                GhostNode * g = b->getGhostPointer();
+                GhostNode * clone = g->getOriginal()->newGhostNode();
+                clone->setAbstraction(this);
+                Body::coordinate geometry;
+                geometry.x = g->getAbstraction()->width()/2;
+                geometry.y = g->getAbstraction()->height()/2;
+                Body::coordinate vector = g->getPosition().subtract(geometry);
+
+                clone->setPosition(vector.add(this->getCenterAbsolutePosition()));
+
+                mySubMap.append(clone);
+
+            }
+        }
+        setUnderMap(mySubMap);
+    }
+}
+
+
+
 void Node::expand()
+{
+    Body::coordinate pos = getCenterPosition();
+    m_obj->setProperty("expanded",true);
+    m_expanded = true;
+
+    if(m_expandState == 0){
+        expandMap();
+    }
+    if(m_expandState == 1){
+        expandTree();
+    }
+    if(m_expandState == 2){
+        expandText();
+    }
+    setPositionByCenter(pos);
+
+}
+
+void Node::expandMap()
 {
     if(m_underMap.isEmpty()){
         if(m_typeNode){
-            QVector<BaseNode*> subMap = m_typeNode->getUnderMap();
-            if(!subMap.isEmpty()){
-                QVector<BaseNode*> mySubMap;
-                for(int i=0; i<subMap.length(); i++){
-                    BaseNode * b = subMap[i];
-                    if(typeid (*b) == typeid (GhostNode)){
-
-                        GhostNode * g = b->getGhostPointer();
-                        GhostNode * clone = g->getOriginal()->newGhostNode();
-                        clone->setAbstraction(this);
-                        Body::coordinate geometry;
-                        geometry.x = g->getAbstraction()->width()/2;
-                        geometry.y = g->getAbstraction()->height()/2;
-                        Body::coordinate vector = g->getPosition().subtract(geometry);
-
-                        clone->setPosition(vector.add(this->getCenterAbsolutePosition()));
-
-                        mySubMap.append(clone);
-
-                    }
-                }
-                setUnderMap(mySubMap);
-            }
+            cloneSubMap(m_typeNode);
 
         }
 
     }
+    m_obj->findChild<QObject*>("expandedRectangle")->setProperty("visible",true);
     if(!m_expanded){
         if(!m_underMap.isEmpty()){
             m_expanded = true;
@@ -471,7 +446,28 @@ void Node::expand()
         }
 
     }
+}
 
+void Node::expandTree()
+{
+
+}
+
+void Node::expandImage()
+{
+
+}
+
+void Node::expandText()
+{
+    m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",true);
+}
+
+void Node::cycleExpandState(int state)
+{
+    m_expandState = state;
+    abstract();
+    expand();
 }
 
 void Node::abstract()
@@ -480,6 +476,7 @@ void Node::abstract()
     if(m_expanded){
 
         m_expanded = false;
+
         for(int i=0; i<m_underMap.length(); i++){
             m_underMap[i]->abstract();
             m_underMap[i]->setVisibility(false);
@@ -489,6 +486,7 @@ void Node::abstract()
         m_obj->setProperty("expanded",false);
 
         setPositionByCenterIgnoreSubMap(center);
+
     }
 }
 
@@ -539,12 +537,6 @@ void Node::destroy()
     for(int i=0; i<m_members.length(); i++){
         m_members[i]->setType(nullptr);
     }
-    for(int i=0; i<m_children.length(); i++){
-        m_children[i]->removeParent(this);
-    }
-    for(int i=0; i<m_parents.length(); i++){
-        m_parents[i]->removeChild(this);
-    }
 
     terminate();
 
@@ -553,6 +545,11 @@ void Node::destroy()
     delete(m_obj);
     m_obj = nullptr;
 
+}
+
+void Node::selectTextBox()
+{
+    m_obj->findChild<QObject*>("expandedText")->setProperty("focus",true);
 }
 
 void Node::setVisibility(bool visibility)
@@ -571,10 +568,7 @@ void Node::setHidden(bool b)
     for(int i=0; i<relations.length(); i++){
         relations[i]->setVisibility(not(b));
     }
-    QVector<structural*> structurals = getAllStructurals();
-    for(int i=0; i<structurals.length(); i++){
-        structurals[i]->setVisibility(not(b));
-    }
+
 }
 
 void Node::dissolve()
@@ -591,6 +585,17 @@ void Node::distill()
     setVisibility(true);
     updateRelations();
 }
+
+QString Node::getText()
+{
+    return m_obj->findChild<QObject*>("expandedText")->property("text").toString();
+}
+
+void Node::setText(QString s)
+{
+    m_obj->findChild<QObject*>("expandedText")->setProperty("text",s);
+}
+
 
 QVector<Relation*> Node::getAllRelations()
 {
@@ -624,19 +629,6 @@ void Node::registerIncomingRelation(Relation *r)
     if(r->getOriginType() == Relation::relation){
         qDebug()<<"error: invalid relation";
     }
-}
-
-structural * Node::newStructural()
-{
-
-    structural * s =  new structural;
-    s->initializeObj();
-    s->setChildNode(this);
-    s->setDisplayChildNode(this);
-
-    connect(this,SIGNAL(updateStructural()),s,SLOT(update()),Qt::UniqueConnection);
-    toParent.append(s);
-    return s;
 }
 
 void Node::updateRelations()
@@ -716,7 +708,15 @@ BaseNode * Node::isInside(int x, int y)
         height+=m_obj->findChild<QObject*>("typeNameContainer")->property("height").toInt();
     }
 
+
     if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
+        QObject * rect = m_obj->findChild<QObject*>("expandedTextBox");
+        y-=m_position.y;
+        if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
+            selectTextBox();
+            return nullptr;
+        }
+
         return this;
     }else{
         preventFocus(false);

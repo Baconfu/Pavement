@@ -55,6 +55,8 @@ Item {
             textInput.updateInput()
 
             container.height = nameContainer.height + typeInput.height
+            expandedRectangle.visible = false
+            expandedTextBox.visible = false
         }
     }
 
@@ -85,6 +87,7 @@ Item {
 
     onWidthChanged: {
         update()
+        typeNameContainer.x = width/2 - typeInput.contentWidth/2
     }
     onHeightChanged: {
         update()
@@ -186,7 +189,9 @@ Item {
             font.pointSize: 9
             text: ""
             font.italic: false
-
+            onContentWidthChanged: {
+                typeNameContainer.x = container.width/2 - contentWidth/2
+            }
 
             onFocusChanged: {
                 if(focus == false){
@@ -233,7 +238,6 @@ Item {
                 typeNameContainer.y = height
             }
         }
-
         Rectangle {
             id: expandedRectangle
             objectName: "expandedRectangle"
@@ -246,11 +250,46 @@ Item {
             radius: 10
             border.color: "black"
             border.width: 1
-
-
-
-
         }
+        Rectangle {
+            visible: false
+            onVisibleChanged: {
+                expandedText.enabled = visible
+            }
+
+            id: expandedTextBox
+            objectName: "expandedTextBox"
+            y:nameContainer.height
+            x:0
+            width:expandedArea.width
+
+            height:expandedArea.height-y
+            z:-1
+            opacity:0.8
+            border.width:1
+            border.color:"grey"
+            TextArea {
+                enabled: parent.visible
+                id: expandedText
+                objectName: "expandedText"
+                anchors.fill: parent
+                onContentWidthChanged: {
+                    if(contentWidth > 80)
+                        expandedArea.width = contentWidth + 20
+                    else
+                        expandedArea.width = 100
+                }
+                onContentHeightChanged: {
+                    if(contentHeight > 60){
+                        expandedArea.height = contentHeight + 40
+                    }else{
+                        expandedArea.height = 100
+                    }
+                }
+            }
+        }
+
+
     }
 
 

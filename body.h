@@ -26,7 +26,6 @@ class BaseNode;
 class Node;
 class NodeArea;
 class Relation;
-class structural;
 class GhostNode;
 
 class Body: public QObject
@@ -136,8 +135,8 @@ public:
     }
     coordinate tabPosition(){return m_tabPosition;}
 
-    Node * getNodePointerByID(int id);
-    Node * getNodePointerByID(int id,QVector<Node*> pool);
+    BaseNode * getNodePointerByID(int id);
+    BaseNode * getNodePointerByID(int id,QVector<BaseNode*> pool);
     Node * getNodeByName(QString name);
     QVector<Node*> getNodeByType(QString type);
     QVector<Node*> getNodeByType(Node * typeNode);
@@ -148,7 +147,7 @@ public:
     void removeGhost(GhostNode * g);
     void removeRelation(Relation * r);
     void removeNode(BaseNode * b);
-    void removeStructural(structural * s){structuralMap.removeOne(s);}
+
 
     Relation * getRelationPointerByID(int id);
     Relation * getRelationPointerByID(int id,QVector<Relation*> pool);
@@ -249,7 +248,6 @@ private:
     Relation * hoveringRelation(){return m_hoveringRelation;}
     void setHoveringRelation(Relation * r);
 
-    structural * m_hoveringStructural = nullptr;
 
 
 
@@ -268,15 +266,11 @@ private:
 
     QVector<BaseNode*> nodeMap;
     QVector<Relation*> relationArchive;
-    QVector<structural*> structuralMap;
 
 
 
     void removeGhosts(QVector<GhostNode*> ghosts);
     void removeNodes(QVector<BaseNode*> nodes);
-
-    QVector<structural*> getAllStructurals();
-    void updateStructuralMap();
 
 
     BaseNode * m_selectedNode = nullptr;
@@ -303,19 +297,11 @@ private:
 
     Relation * m_selectedRelation = nullptr;
 
-    structural * m_selectedStructural = nullptr;
-
     BaseNode * m_highlightedNode = nullptr;
 
 
     BaseNode * selectedNode(){return m_selectedNode;}
     Relation * selectedRelation(){return m_selectedRelation;}
-    void setSelected(structural * s){
-        m_selectedStructural = s;
-        if(s && latestContext()!= creating_relation && latestContext() != parenting){
-            setContext(structural_selected);
-        }
-    }
     void setSelected(BaseNode * n);
     void setSelected(Relation * r){
         m_selectedRelation = r;
@@ -364,6 +350,7 @@ private:
     void newRelation(int id, BaseNode * origin, Relation * destination);
     void newRelation(int id, Relation * origin, Relation * destination);
     void newLine(int id, BaseNode * origin, BaseNode * destination);
+    void newTriangle(int id, BaseNode * origin, BaseNode * destination);
 
     GhostNode * newGhostNode(Node * original,int x,int y);
 
