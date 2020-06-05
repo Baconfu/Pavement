@@ -1,0 +1,865 @@
+{
+    "nodes": [
+        {
+            "expanded": false,
+            "id": 0,
+            "name": "DNA helicase",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 751,
+            "y": 158
+        },
+        {
+            "expanded": false,
+            "id": 1,
+            "name": "SSB",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 627,
+            "y": 106
+        },
+        {
+            "expanded": false,
+            "id": 2,
+            "name": "DNA polymerase",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 494,
+            "y": 274
+        },
+        {
+            "expanded": false,
+            "id": 3,
+            "name": "DNA primer",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 795,
+            "y": 286
+        },
+        {
+            "expanded": false,
+            "id": 4,
+            "name": "DNA",
+            "parents": [
+            ],
+            "submap": [
+                {
+                    "expanded": false,
+                    "id": 24,
+                    "original": 16,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -120,
+                    "y": -11
+                },
+                {
+                    "expanded": false,
+                    "id": 25,
+                    "original": 17,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 59,
+                    "y": -4
+                }
+            ],
+            "x": 1110,
+            "y": 166
+        },
+        {
+            "expanded": false,
+            "id": 5,
+            "name": "lagging strand",
+            "parents": [
+            ],
+            "submap": [
+                {
+                    "expanded": false,
+                    "id": 26,
+                    "original": 8,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -9,
+                    "y": -34
+                },
+                {
+                    "expanded": false,
+                    "id": 27,
+                    "original": 11,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 106,
+                    "y": 19
+                },
+                {
+                    "expanded": false,
+                    "id": 28,
+                    "original": 9,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -19,
+                    "y": 10
+                },
+                {
+                    "expanded": false,
+                    "id": 29,
+                    "original": 10,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 107,
+                    "y": -28
+                }
+            ],
+            "type": "DNA",
+            "typeNode": 4,
+            "x": 1225,
+            "y": 247
+        },
+        {
+            "expanded": false,
+            "id": 6,
+            "name": "leading strand",
+            "parents": [
+            ],
+            "submap": [
+                {
+                    "expanded": false,
+                    "id": 33,
+                    "original": 8,
+                    "subMap": [
+                        {
+                            "expanded": false,
+                            "id": 30,
+                            "original": 13,
+                            "subMap": [
+                            ],
+                            "type": "ghost",
+                            "x": 568,
+                            "y": 28
+                        },
+                        {
+                            "expanded": false,
+                            "id": 31,
+                            "original": 15,
+                            "subMap": [
+                            ],
+                            "type": "ghost",
+                            "x": 553,
+                            "y": -27
+                        },
+                        {
+                            "expanded": false,
+                            "id": 32,
+                            "original": 14,
+                            "subMap": [
+                            ],
+                            "type": "ghost",
+                            "x": -691,
+                            "y": -24
+                        }
+                    ],
+                    "type": "ghost",
+                    "x": 272,
+                    "y": -42
+                },
+                {
+                    "expanded": false,
+                    "id": 34,
+                    "original": 11,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -90,
+                    "y": 28
+                },
+                {
+                    "expanded": false,
+                    "id": 35,
+                    "original": 9,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -185,
+                    "y": 26
+                },
+                {
+                    "expanded": false,
+                    "id": 36,
+                    "original": 10,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -111,
+                    "y": -3
+                }
+            ],
+            "type": "DNA",
+            "typeNode": 4,
+            "x": 1299,
+            "y": 309
+        },
+        {
+            "expanded": false,
+            "id": 7,
+            "name": "nucleotide",
+            "parents": [
+            ],
+            "submap": [
+                {
+                    "expanded": false,
+                    "id": 37,
+                    "original": 13,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -71,
+                    "y": 28
+                },
+                {
+                    "expanded": false,
+                    "id": 38,
+                    "original": 15,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 26,
+                    "y": -27
+                },
+                {
+                    "expanded": false,
+                    "id": 39,
+                    "original": 14,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -42,
+                    "y": -24
+                }
+            ],
+            "type": "DNA",
+            "typeNode": 4,
+            "x": 375,
+            "y": 709
+        },
+        {
+            "expanded": false,
+            "id": 8,
+            "name": "A",
+            "parents": [
+            ],
+            "submap": [
+                {
+                    "expanded": false,
+                    "id": 40,
+                    "original": 13,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -102,
+                    "y": 28
+                },
+                {
+                    "expanded": false,
+                    "id": 41,
+                    "original": 15,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -5,
+                    "y": -27
+                },
+                {
+                    "expanded": false,
+                    "id": 42,
+                    "original": 14,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -73,
+                    "y": -24
+                }
+            ],
+            "type": "nucleotide",
+            "typeNode": 7,
+            "x": 599,
+            "y": 960
+        },
+        {
+            "expanded": false,
+            "id": 9,
+            "name": "G",
+            "parents": [
+            ],
+            "submap": [
+                {
+                    "expanded": false,
+                    "id": 43,
+                    "original": 13,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -102,
+                    "y": 28
+                },
+                {
+                    "expanded": false,
+                    "id": 44,
+                    "original": 15,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -5,
+                    "y": -27
+                },
+                {
+                    "expanded": false,
+                    "id": 45,
+                    "original": 14,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -73,
+                    "y": -24
+                }
+            ],
+            "type": "nucleotide",
+            "typeNode": 7,
+            "x": 470,
+            "y": 814
+        },
+        {
+            "expanded": false,
+            "id": 10,
+            "name": "C",
+            "parents": [
+            ],
+            "submap": [
+                {
+                    "expanded": false,
+                    "id": 46,
+                    "original": 13,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -103,
+                    "y": 28
+                },
+                {
+                    "expanded": false,
+                    "id": 47,
+                    "original": 15,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -6,
+                    "y": -27
+                },
+                {
+                    "expanded": false,
+                    "id": 48,
+                    "original": 14,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -74,
+                    "y": -24
+                }
+            ],
+            "type": "nucleotide",
+            "typeNode": 7,
+            "x": 639,
+            "y": 774
+        },
+        {
+            "expanded": false,
+            "id": 11,
+            "name": "T",
+            "parents": [
+            ],
+            "submap": [
+                {
+                    "expanded": false,
+                    "id": 49,
+                    "original": 13,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -103,
+                    "y": 28
+                },
+                {
+                    "expanded": false,
+                    "id": 50,
+                    "original": 15,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -6,
+                    "y": -27
+                },
+                {
+                    "expanded": false,
+                    "id": 51,
+                    "original": 14,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -74,
+                    "y": -24
+                }
+            ],
+            "type": "nucleotide",
+            "typeNode": 7,
+            "x": 563,
+            "y": 874
+        },
+        {
+            "expanded": true,
+            "id": 12,
+            "name": "DNA separation",
+            "parents": [
+            ],
+            "submap": [
+                {
+                    "expanded": true,
+                    "id": 68,
+                    "original": 4,
+                    "subMap": [
+                        {
+                            "expanded": true,
+                            "id": 59,
+                            "original": 16,
+                            "subMap": [
+                                {
+                                    "expanded": false,
+                                    "id": 52,
+                                    "original": 8,
+                                    "subMap": [
+                                    ],
+                                    "type": "ghost",
+                                    "x": 24,
+                                    "y": 70
+                                },
+                                {
+                                    "expanded": true,
+                                    "id": 56,
+                                    "original": 9,
+                                    "subMap": [
+                                        {
+                                            "expanded": false,
+                                            "id": 53,
+                                            "original": 13,
+                                            "subMap": [
+                                            ],
+                                            "type": "ghost",
+                                            "x": 139,
+                                            "y": 39
+                                        },
+                                        {
+                                            "expanded": false,
+                                            "id": 54,
+                                            "original": 15,
+                                            "subMap": [
+                                            ],
+                                            "type": "ghost",
+                                            "x": 84,
+                                            "y": 66
+                                        },
+                                        {
+                                            "expanded": false,
+                                            "id": 55,
+                                            "original": 14,
+                                            "subMap": [
+                                            ],
+                                            "type": "ghost",
+                                            "x": 5,
+                                            "y": 25
+                                        }
+                                    ],
+                                    "type": "ghost",
+                                    "x": 64,
+                                    "y": 96
+                                },
+                                {
+                                    "expanded": false,
+                                    "id": 57,
+                                    "original": 10,
+                                    "subMap": [
+                                    ],
+                                    "type": "ghost",
+                                    "x": 86,
+                                    "y": 25
+                                },
+                                {
+                                    "expanded": false,
+                                    "id": 58,
+                                    "original": 11,
+                                    "subMap": [
+                                    ],
+                                    "type": "ghost",
+                                    "x": 148,
+                                    "y": 27
+                                }
+                            ],
+                            "type": "ghost",
+                            "x": 5,
+                            "y": 325
+                        },
+                        {
+                            "expanded": true,
+                            "id": 67,
+                            "original": 17,
+                            "subMap": [
+                                {
+                                    "expanded": false,
+                                    "id": 60,
+                                    "original": 8,
+                                    "subMap": [
+                                    ],
+                                    "type": "ghost",
+                                    "x": 24,
+                                    "y": 25
+                                },
+                                {
+                                    "expanded": true,
+                                    "id": 64,
+                                    "original": 10,
+                                    "subMap": [
+                                        {
+                                            "expanded": false,
+                                            "id": 61,
+                                            "original": 13,
+                                            "subMap": [
+                                            ],
+                                            "type": "ghost",
+                                            "x": 81,
+                                            "y": 64
+                                        },
+                                        {
+                                            "expanded": false,
+                                            "id": 62,
+                                            "original": 15,
+                                            "subMap": [
+                                            ],
+                                            "type": "ghost",
+                                            "x": 137,
+                                            "y": 25
+                                        },
+                                        {
+                                            "expanded": false,
+                                            "id": 63,
+                                            "original": 14,
+                                            "subMap": [
+                                            ],
+                                            "type": "ghost",
+                                            "x": 5,
+                                            "y": 69
+                                        }
+                                    ],
+                                    "type": "ghost",
+                                    "x": 47,
+                                    "y": 72
+                                },
+                                {
+                                    "expanded": false,
+                                    "id": 65,
+                                    "original": 9,
+                                    "subMap": [
+                                    ],
+                                    "type": "ghost",
+                                    "x": 96,
+                                    "y": 26
+                                },
+                                {
+                                    "expanded": false,
+                                    "id": 66,
+                                    "original": 11,
+                                    "subMap": [
+                                    ],
+                                    "type": "ghost",
+                                    "x": 298,
+                                    "y": 43
+                                }
+                            ],
+                            "type": "ghost",
+                            "x": 36,
+                            "y": 25
+                        }
+                    ],
+                    "type": "ghost",
+                    "x": 5,
+                    "y": 25
+                },
+                {
+                    "expanded": true,
+                    "id": 71,
+                    "subMap": [
+                        {
+                            "expanded": false,
+                            "id": 69,
+                            "original": 16,
+                            "subMap": [
+                            ],
+                            "type": "ghost",
+                            "x": 5,
+                            "y": 5
+                        },
+                        {
+                            "expanded": false,
+                            "id": 70,
+                            "original": 17,
+                            "subMap": [
+                            ],
+                            "type": "ghost",
+                            "x": 10,
+                            "y": 157
+                        }
+                    ],
+                    "type": "area",
+                    "x": 498,
+                    "y": 158
+                }
+            ],
+            "x": 1228,
+            "y": 480
+        },
+        {
+            "expanded": false,
+            "id": 13,
+            "name": "deoxyribose sugar",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 267,
+            "y": 914
+        },
+        {
+            "expanded": false,
+            "id": 14,
+            "name": "base",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 443,
+            "y": 991
+        },
+        {
+            "expanded": false,
+            "id": 15,
+            "name": "phosphate group",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 251,
+            "y": 1020
+        },
+        {
+            "expanded": false,
+            "id": 16,
+            "name": "template strand",
+            "parents": [
+            ],
+            "submap": [
+                {
+                    "expanded": false,
+                    "id": 72,
+                    "original": 8,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -11,
+                    "y": -47
+                },
+                {
+                    "expanded": false,
+                    "id": 73,
+                    "original": 9,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 110,
+                    "y": 33
+                },
+                {
+                    "expanded": false,
+                    "id": 74,
+                    "original": 10,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 48,
+                    "y": -6
+                },
+                {
+                    "expanded": false,
+                    "id": 75,
+                    "original": 11,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 100,
+                    "y": -28
+                }
+            ],
+            "type": "DNA",
+            "typeNode": 4,
+            "x": 777,
+            "y": 819
+        },
+        {
+            "expanded": false,
+            "id": 17,
+            "name": "coding strand",
+            "parents": [
+            ],
+            "submap": [
+                {
+                    "expanded": false,
+                    "id": 76,
+                    "original": 8,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": -35,
+                    "y": -15
+                },
+                {
+                    "expanded": false,
+                    "id": 77,
+                    "original": 10,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 8,
+                    "y": -24
+                },
+                {
+                    "expanded": false,
+                    "id": 78,
+                    "original": 9,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 64,
+                    "y": 10
+                },
+                {
+                    "expanded": false,
+                    "id": 79,
+                    "original": 11,
+                    "subMap": [
+                    ],
+                    "type": "ghost",
+                    "x": 119,
+                    "y": -1
+                }
+            ],
+            "type": "DNA",
+            "typeNode": 4,
+            "x": 700,
+            "y": 887
+        },
+        {
+            "expanded": false,
+            "id": 18,
+            "name": "carbonyl",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 385,
+            "y": 1099
+        },
+        {
+            "expanded": false,
+            "id": 19,
+            "name": "amine",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 550,
+            "y": 1096
+        },
+        {
+            "expanded": false,
+            "id": 20,
+            "name": "C",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 311,
+            "y": 1158
+        },
+        {
+            "expanded": false,
+            "id": 21,
+            "name": "O",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 445,
+            "y": 1219
+        },
+        {
+            "expanded": false,
+            "id": 22,
+            "name": "N",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 564,
+            "y": 1193
+        },
+        {
+            "expanded": false,
+            "id": 23,
+            "name": "H",
+            "parents": [
+            ],
+            "submap": [
+            ],
+            "x": 650,
+            "y": 1167
+        }
+    ],
+    "relations": [
+        {
+            "destinationNode": 55,
+            "destinationRelation": -1,
+            "id": 0,
+            "name": "",
+            "originNode": 63,
+            "originRelation": -1,
+            "type": "line"
+        },
+        {
+            "destinationNode": 71,
+            "destinationRelation": -1,
+            "id": 1,
+            "name": "",
+            "originNode": 68,
+            "originRelation": -1,
+            "type": "arrow"
+        }
+    ]
+}
