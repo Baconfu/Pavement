@@ -368,37 +368,64 @@ void Node::setAbstraction(BaseNode *n)
     m_abstraction = n;
 }
 
+void Node::cloneSubMap(BaseNode *b)
+{
+    QVector<BaseNode*> subMap = b->getUnderMap();
+    if(!subMap.isEmpty()){
+        QVector<BaseNode*> mySubMap;
+        for(int i=0; i<subMap.length(); i++){
+            BaseNode * b = subMap[i];
+            if(typeid (*b) == typeid (GhostNode)){
+
+                GhostNode * g = b->getGhostPointer();
+                GhostNode * clone = g->getOriginal()->newGhostNode();
+                clone->setAbstraction(this);
+                Body::coordinate geometry;
+                geometry.x = g->getAbstraction()->width()/2;
+                geometry.y = g->getAbstraction()->height()/2;
+                Body::coordinate vector = g->getPosition().subtract(geometry);
+
+                clone->setPosition(vector.add(this->getCenterAbsolutePosition()));
+
+                mySubMap.append(clone);
+
+            }
+        }
+        setUnderMap(mySubMap);
+    }
+}
+
+
+
 void Node::expand()
+{
+    Body::coordinate pos = getCenterPosition();
+    m_obj->setProperty("expanded",true);
+    m_expanded = true;
+
+    if(m_expandState == 0){
+        expandMap();
+    }
+    if(m_expandState == 1){
+        expandTree();
+    }
+    if(m_expandState == 2){
+        expandText();
+    }
+    setPositionByCenter(pos);
+
+}
+
+void Node::expandMap()
 {
     if(m_underMap.isEmpty()){
         if(m_typeNode){
-            QVector<BaseNode*> subMap = m_typeNode->getUnderMap();
-            if(!subMap.isEmpty()){
-                QVector<BaseNode*> mySubMap;
-                for(int i=0; i<subMap.length(); i++){
-                    BaseNode * b = subMap[i];
-                    if(typeid (*b) == typeid (GhostNode)){
-
-                        GhostNode * g = b->getGhostPointer();
-                        GhostNode * clone = g->getOriginal()->newGhostNode();
-                        clone->setAbstraction(this);
-                        Body::coordinate geometry;
-                        geometry.x = g->getAbstraction()->width()/2;
-                        geometry.y = g->getAbstraction()->height()/2;
-                        Body::coordinate vector = g->getPosition().subtract(geometry);
-
-                        clone->setPosition(vector.add(this->getCenterAbsolutePosition()));
-
-                        mySubMap.append(clone);
-
-                    }
-                }
-                setUnderMap(mySubMap);
-            }
+            cloneSubMap(m_typeNode);
 
         }
 
     }
+    m_obj->findChild<QObject*>("expandedRectangle")->setProperty("visible",true);
     if(!m_expanded){
         if(!m_underMap.isEmpty()){
             m_expanded = true;
@@ -419,7 +446,28 @@ void Node::expand()
         }
 
     }
+}
 
+void Node::expandTree()
+{
+
+}
+
+void Node::expandImage()
+{
+
+}
+
+void Node::expandText()
+{
+    m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",true);
+}
+
+void Node::cycleExpandState(int state)
+{
+    m_expandState = state;
+    abstract();
+    expand();
 }
 
 void Node::abstract()
@@ -428,6 +476,7 @@ void Node::abstract()
     if(m_expanded){
 
         m_expanded = false;
+
         for(int i=0; i<m_underMap.length(); i++){
             m_underMap[i]->abstract();
             m_underMap[i]->setVisibility(false);
@@ -437,6 +486,7 @@ void Node::abstract()
         m_obj->setProperty("expanded",false);
 
         setPositionByCenterIgnoreSubMap(center);
+
     }
 }
 
@@ -497,6 +547,11 @@ void Node::destroy()
 
 }
 
+void Node::selectTextBox()
+{
+    m_obj->findChild<QObject*>("expandedText")->setProperty("focus",true);
+}
+
 void Node::setVisibility(bool visibility)
 {
     m_visible = visibility;
@@ -530,6 +585,12 @@ void Node::distill()
     setVisibility(true);
     updateRelations();
 }
+
+QString Node::getText()
+{
+    return m_obj->findChild<QObject*>("expandedText")->property("text").toString();
+}
+
 
 QVector<Relation*> Node::getAllRelations()
 {
@@ -642,7 +703,15 @@ BaseNode * Node::isInside(int x, int y)
         height+=m_obj->findChild<QObject*>("typeNameContainer")->property("height").toInt();
     }
 
+
     if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
+        QObject * rect = m_obj->findChild<QObject*>("expandedTextBox");
+        y-=m_position.y;
+        if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
+            selectTextBox();
+            return nullptr;
+        }
+
         return this;
     }else{
         preventFocus(false);

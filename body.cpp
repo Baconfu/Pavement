@@ -147,7 +147,7 @@ void Body::initialize()
 
     f.name = "expand";
     f.alias = QStringList{"expand node"};
-    f.commonShorthand = "NULL";
+    f.commonShorthand = "ex";
     f.contexts = {node_selected};
     functions.append(f);
 
@@ -211,6 +211,10 @@ void Body::initialize()
     f.commonShorthand = "NULL";
     functions.append(f);
 
+    f.name = "show text";
+    f.alias = QStringList{"expand text","text"};
+    f.commonShorthand = "txt";
+    functions.append(f);
 
 
 }
@@ -489,10 +493,19 @@ int Body::acceptedSelection(int n)
 
         if(contexts.contains(latestContext())){
 
-
-
             BaseNode * b = selectedNode();
-            b->expand();
+            if(b->isExpanded()){
+                b->cycleExpandState(0);
+            }else{
+                b->expand();
+            }
+
+
+        }
+    }
+    if(f == "show text"){
+        if(selectedNode()){
+            selectedNode()->cycleExpandState(2);
 
         }
     }
@@ -1096,9 +1109,7 @@ void Body::mouseClicked(int x, int y)
 {
 
     if(selectedNode()){
-
         batchSelect(selectedNode());
-
     }
 }
 

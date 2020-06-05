@@ -35,6 +35,8 @@ void PavementFile::saveNode(Node *n)
         node["typeNode"] = n->getType()->getID();
     }
 
+    node["text"] = n->getText();
+
     if(n->isExpanded()){
         node["expanded"] = true;
     }else{

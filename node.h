@@ -5,6 +5,7 @@
 #include <relation.h>
 #include <body.h>
 #include <basenode.h>
+#include <QString>
 
 
 class Node: public BaseNode
@@ -91,7 +92,16 @@ public:
 
     void setAbstraction(BaseNode * n);
 
+    void cloneSubMap(BaseNode * b);
+
     void expand();
+    void expandMap();
+    void expandTree();
+    void expandImage();
+    void expandText();
+
+
+    void cycleExpandState(int state);
     bool isExpanded(){return m_expanded;}
     void abstract();
     void exude(BaseNode * b);
@@ -123,6 +133,7 @@ public:
     void dissolve();
     void distill();
 
+    QString getText();
     void highlight(bool visible);
     void hover(bool b);
     void select(bool b);
@@ -141,6 +152,7 @@ public:
 
 
 private:
+
     int tally = 0;
     enum cellStyle{
         minimal = 0,
@@ -188,6 +200,7 @@ private:
     }
 
 
+    void selectTextBox();
 
     //Domestic policy
     void setStyle();
