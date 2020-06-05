@@ -134,6 +134,7 @@ public:
     void distill();
 
     QString getText();
+    void setText(QString s);
     void highlight(bool visible);
     void hover(bool b);
     void select(bool b);

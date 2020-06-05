@@ -197,6 +197,8 @@ Node *PavementFile::loadNode(QJsonObject node)
     c.x = node["x"].toInt();
     c.y = node["y"].toInt();
 
+    n->setText(node["text"].toString());
+
     n->setPosition(c);
     return n;
 }

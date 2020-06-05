@@ -39,6 +39,9 @@ public:
     void setName(QString name);
 
 
+    void setText(QString s);
+    QString getText();
+
     Body::coordinate getCenterPosition();
     int getX(){return m_position.x;}
     int getY(){return m_position.y;}
@@ -58,6 +61,16 @@ public:
     void subNodeMoved();
     void reFormatExpandedForm();
 
+    void cloneSubMap(BaseNode * b);
+
+    void expandMap();
+    void expandTree();
+    void expandImage();
+    void expandText();
+
+
+    void cycleExpandState(int state);
+
     void abstract();
     void expand();
     bool isExpanded(){return m_expanded;}
@@ -71,6 +84,8 @@ public:
 
     bool isMoving(){return m_moving;}
     void moving(bool b){m_moving = b;}
+
+    void selectTextBox();
 
     void destroy();
     void initializeObj();

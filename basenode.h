@@ -42,6 +42,7 @@ public:
     virtual void setID(int id);
     virtual int getID();
 
+    virtual void setText(QString){}
     virtual QString getText(){return QString("Basenode function called");}
 
     virtual void hover(bool b){qDebug()<<b;}

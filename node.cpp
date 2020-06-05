@@ -591,6 +591,11 @@ QString Node::getText()
     return m_obj->findChild<QObject*>("expandedText")->property("text").toString();
 }
 
+void Node::setText(QString s)
+{
+    m_obj->findChild<QObject*>("expandedText")->setProperty("text",s);
+}
+
 
 QVector<Relation*> Node::getAllRelations()
 {
