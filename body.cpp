@@ -3,6 +3,7 @@
 #include <pavementfile.h>
 #include <ghostnode.h>
 #include <nodearea.h>
+#include <note.h>
 #include <sync.h>
 #include <sys/stat.h>
 

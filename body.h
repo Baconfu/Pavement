@@ -27,6 +27,7 @@ class Node;
 class NodeArea;
 class Relation;
 class GhostNode;
+class Note;
 
 class Body: public QObject
 {

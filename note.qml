@@ -1,12 +1,18 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.0
 
-Rectangle {
+Item{
     objectName: "container"
     id: container
-    color:"white"
     width:100
     height:100
+    Rectangle {
+        objectName: "bg"
+        id: bg
+        color:"white"
+        anchors.fill: parent
+
+    }
     TextArea {
         anchors.fill: parent
         id: textArea
@@ -14,3 +20,5 @@ Rectangle {
 
     }
 }
+
+
