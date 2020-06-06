@@ -48,6 +48,7 @@ ApplicationWindow {
 
         MouseArea {
             z:1
+            propagateComposedEvents: true
             objectName: "mouseArea"
             anchors.fill: parent
             signal mouseTransform(int x,int y,int offsetX,int offsetY)

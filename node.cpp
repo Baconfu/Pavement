@@ -1,5 +1,7 @@
 #include "node.h"
 #include <ghostnode.h>
+#include <QMetaObject>
+#include <QGenericArgument>
 
 Node::Node(QObject * parent, int id)
 {
@@ -466,6 +468,15 @@ void Node::expandImage()
 void Node::expandText()
 {
     m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",true);
+}
+
+bool Node::clickAction(int x,int y)
+{
+    if(textBoxSelected()){
+
+        return false;
+    }
+    return true;
 }
 
 void Node::cycleExpandState(int state)

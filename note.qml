@@ -11,6 +11,8 @@ Item{
         id: bg
         color:"white"
         anchors.fill: parent
+        border.width: 1
+        border.color: "grey"
 
     }
     TextArea {

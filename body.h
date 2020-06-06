@@ -279,7 +279,6 @@ private:
     QVector<Relation*> relationArchive;
 
 
-
     void removeGhosts(QVector<GhostNode*> ghosts);
     void removeNodes(QVector<BaseNode*> nodes);
 
@@ -367,6 +366,7 @@ private:
 
     NodeArea * newNodeArea(QVector<BaseNode*> nodes);
 
+    Note * newNote(int id,int x,int y);
 
 
 

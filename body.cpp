@@ -212,6 +212,11 @@ void Body::initialize()
     f.commonShorthand = "g";
     functions.append(f);
 
+    f.name = "note";
+    f.alias = QStringList{"create note","new note"};
+    f.commonShorthand = "nt";
+    functions.append(f);
+
     f.name = "abstract";
     f.alias = QStringList{};
     f.commonShorthand = "ab";
@@ -502,6 +507,9 @@ int Body::acceptedSelection(int n)
     if(f == "create ghost"){
         autoTab(node_browsing);
 
+    }
+    if(f == "note"){
+        newNote(allocateNewID("node"),tabPosition().x,tabPosition().y);
     }
 
     if(f == "abstract"){
@@ -852,6 +860,7 @@ BaseNode *Body::getNodePointerByID(int id)
             return b;
         }
     }
+    return nullptr;
 }
 BaseNode * Body::getNodePointerByID(int id, QVector<BaseNode *> pool)
 {
@@ -1173,7 +1182,10 @@ void Body::mouseClicked(int x, int y)
 {
 
     if(selectedNode()){
-        batchSelect(selectedNode());
+        if(selectedNode()->clickAction(x,y)){
+            batchSelect(selectedNode());
+        }
+
     }
 }
 
@@ -1399,6 +1411,10 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
                                 setSelected(a);
                                 a->hover(true);
                             }
+                        }
+                        if(typeid (*b) == typeid (Note)){
+                            setSelected(b);
+                            b->hover(true);
                         }
 
                     }
@@ -1835,6 +1851,20 @@ NodeArea *Body::newNodeArea(QVector<BaseNode *> nodes)
     n->initializeObj();
     n->setUnderMap(nodes);
     n->reFormatExpandedForm();
+    nodeMap.append(n);
+    return n;
+}
+
+Note *Body::newNote(int id,int x, int y)
+{
+    Note * n = new Note;
+    n->initializeObj();
+    n->setID(id);
+    coordinate c;
+    c.x = x;
+    c.y = y;
+    n->setPosition(c);
+
     nodeMap.append(n);
     return n;
 }

@@ -1,9 +1,14 @@
 #include "note.h"
 
-Note::Note(QObject * parent):
-    QObject (parent)
+Note::Note(QObject * parent)
 {
 
+}
+
+void Note::setPosition(Body::coordinate c)
+{
+    m_obj->setProperty("x",c.x);
+    m_obj->setProperty("y",c.y);
 }
 
 QString Note::text()
@@ -16,7 +21,7 @@ void Note::setText(QString s)
     m_obj->findChild<QObject*>("textArea")->setProperty("text",s);
 }
 
-bool Note::isInside(int x,int y)
+BaseNode * Note::isInside(int x,int y)
 {
 
 }

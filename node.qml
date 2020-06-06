@@ -11,6 +11,11 @@ Item {
     property int absX
     property int absY
 
+    function textEdit(x,y){
+        expandedText.cursorPosition = expandedText.positionAt(x,y)
+
+    }
+
     onNameChanged: {
         textInput.text = name
 
@@ -253,8 +258,10 @@ Item {
         }
         Rectangle {
             visible: false
+
             onVisibleChanged: {
                 expandedText.enabled = visible
+                expandedRectangle.visible = !visible
             }
 
             id: expandedTextBox
@@ -270,6 +277,14 @@ Item {
             border.color:"grey"
             TextArea {
 
+                selectByMouse: true
+                onFocusChanged: {
+                    if(focus){
+                        cursorPosition = -1
+                    }
+                }
+
+                tabStopDistance: 8
                 enabled: parent.visible
                 id: expandedText
                 objectName: "expandedText"

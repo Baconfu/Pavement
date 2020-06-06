@@ -8,7 +8,7 @@ Sync::Sync()
 
 void Sync::sync()
 {
-    QUrl url("http://192.168.20.18:5000/data");
+    QUrl url("http://127.0.0.1:5000/echo");
     QNetworkRequest request(url);
 
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");

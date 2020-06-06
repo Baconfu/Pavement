@@ -3,25 +3,29 @@
 
 #include <QObject>
 #include <body.h>
+#include <basenode.h>
 
-class Note: public QObject
+class Note: public BaseNode
 {
     Q_OBJECT
 public:
     Note(QObject * parent = nullptr);
+    void setID(int id){m_id = id;}
+
+    void setPosition(Body::coordinate c);
+
 
     QString text();
     void setText(QString s);
 
-    bool isInside(int x,int y);
+    BaseNode * isInside(int x,int y);
 
-
+    //void hover(bool b);
 
     void initializeObj();
 private:
     bool m_preventFocus = false;
 
-    QQuickItem * m_obj = nullptr;
 
 public slots:
     void widthChanged();
