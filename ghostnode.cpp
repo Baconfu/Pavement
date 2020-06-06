@@ -123,12 +123,17 @@ BaseNode * GhostNode::isInside(int x, int y)
     int height = m_height;
 
     if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
+
+
         QObject * rect = m_obj->findChild<QObject*>("expandedTextBox");
-        y-=m_position.y;
-        if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
-            selectTextBox();
-            return nullptr;
+        if(rect->property("visible").toBool()){
+            y-=m_position.y;
+            if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
+                selectTextBox();
+                return nullptr;
+            }
         }
+
         hover(true);
         return this;
     }else{
@@ -387,25 +392,25 @@ void GhostNode::expandMap()
 
     }
     m_obj->findChild<QObject*>("expandedRectangle")->setProperty("visible",true);
-    if(!m_expanded){
-        if(!m_underMap.isEmpty()){
-            m_expanded = true;
-            for(int i=0; i<m_underMap.length(); i++){
-                m_underMap[i]->setVisibility(true);
-            }
-            Body::coordinate center = getCenterPosition();
-            m_obj->setProperty("expanded",true);
 
-            setPositionByCenterIgnoreSubMap(center);
-
-            reFormatExpandedForm();
-        }else{
-            m_expanded = true;
-            m_obj->setProperty("expanded",true);
-
+    if(!m_underMap.isEmpty()){
+        m_expanded = true;
+        for(int i=0; i<m_underMap.length(); i++){
+            m_underMap[i]->setVisibility(true);
         }
+        Body::coordinate center = getCenterPosition();
+        m_obj->setProperty("expanded",true);
+
+        setPositionByCenterIgnoreSubMap(center);
+
+        reFormatExpandedForm();
+    }else{
+        m_expanded = true;
+        m_obj->setProperty("expanded",true);
 
     }
+
+
 }
 
 void GhostNode::expandTree()
@@ -558,11 +563,12 @@ void GhostNode::destroy()
         m_abstraction->removeSubNode(this);
 
     }
-    b->removeGhost(this);
+
 
     terminate();
     m_original->unregisterGhost(this);
     m_obj->deleteLater();
     m_obj = nullptr;
+    b->removeGhost(this);
 
 }

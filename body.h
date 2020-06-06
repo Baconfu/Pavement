@@ -43,6 +43,7 @@ public:
     QQuickItem * getRoot();
     QQmlApplicationEngine * engine();
     QQuickWindow * window();
+    void fullscreen(bool b);
     void setFocusWindow();
     void frameView();
 
@@ -215,7 +216,16 @@ public:
 
     int allocateNewID(QString type);
 private:
+    int sessionLength = 0;
+
+    QString currentFile = "";
     QString defaultPath = QDir::currentPath() + "/saves";
+
+    QTimer autosaveTimer;
+    void startAutosaveTimer();
+    void stopAutosaveTimer();
+
+
 
     QTimer timer;
     void startTimer();
@@ -364,9 +374,11 @@ private:
 signals:
     void mouseMoved();
 public slots:
+    void autosave();
     void autoTab(int context);
     void tab();
     void enterPressed();
+    void escapePressed();
     void scroll(int x,int y,bool ctrl);
 
     void mouseTransform(int x,int y,int offsetX,int offsetY);

@@ -29,6 +29,7 @@ ApplicationWindow {
         signal tabPressed()
         signal enterPressed()
         signal closing()
+        signal escapePressed()
 
         focus: true
         Keys.onTabPressed: {
@@ -38,6 +39,9 @@ ApplicationWindow {
 
         Keys.onReturnPressed: {
             myItem.enterPressed()
+        }
+        Keys.onEscapePressed: {
+            myItem.escapePressed()
         }
 
 

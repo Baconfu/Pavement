@@ -269,6 +269,7 @@ Item {
             border.width:1
             border.color:"grey"
             TextArea {
+
                 enabled: parent.visible
                 id: expandedText
                 objectName: "expandedText"

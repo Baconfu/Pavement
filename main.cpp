@@ -68,6 +68,8 @@ int main(int argc, char *argv[])
     body->initialize();
 
     windowPtr->show();
+    windowPtr->showFullScreen();
+    windowPtr->showNormal();
 
 
 

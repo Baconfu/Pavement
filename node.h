@@ -201,7 +201,8 @@ private:
     }
 
 
-    void selectTextBox();
+    void selectTextBox(bool b);
+    bool textBoxSelected(){return m_obj->findChild<QObject*>("expandedText")->property("focus").toBool();}
 
     //Domestic policy
     void setStyle();

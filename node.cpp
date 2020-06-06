@@ -259,6 +259,11 @@ void Node::setUnderMap(QVector<BaseNode *> nodes)
 
 void Node::underMapAppendNode(BaseNode *node)
 {
+    if(typeid (*node) == typeid (GhostNode)){
+        if(node->getGhostPointer()->getOriginal() == this){
+            return;
+        }
+    }
     m_underMap.append(node);
 
     Body::coordinate c = node->getPosition().subtract(this->getPosition());
@@ -426,26 +431,26 @@ void Node::expandMap()
 
     }
     m_obj->findChild<QObject*>("expandedRectangle")->setProperty("visible",true);
-    if(!m_expanded){
-        if(!m_underMap.isEmpty()){
-            m_expanded = true;
-            for(int i=0; i<m_underMap.length(); i++){
-                m_underMap[i]->setVisibility(true);
-            }
-            Body::coordinate center = getCenterPosition();
-            m_obj->setProperty("expanded",true);
 
-
-            setPositionByCenterIgnoreSubMap(center);
-
-            reFormatExpandedForm();
-        }else{
-            m_expanded = true;
-            m_obj->setProperty("expanded",true);
-
+    if(!m_underMap.isEmpty()){
+        m_expanded = true;
+        for(int i=0; i<m_underMap.length(); i++){
+            m_underMap[i]->setVisibility(true);
         }
+        Body::coordinate center = getCenterPosition();
+        m_obj->setProperty("expanded",true);
+
+
+        setPositionByCenterIgnoreSubMap(center);
+
+        reFormatExpandedForm();
+    }else{
+        m_expanded = true;
+        m_obj->setProperty("expanded",true);
 
     }
+
+
 }
 
 void Node::expandTree()
@@ -508,15 +513,15 @@ void Node::deleteObj()
 
 void Node::destroy()
 {
-
+    disconnect();
     Body * b = Body::getInstance();
 
-    b->removeNode(this);
+
 
     QVector<BaseNode*> temp = m_underMap;
     for(int i=0; i<temp.length(); i++){
         temp[i]->destroy();
-        delete(m_underMap[i]);
+
     }
     if(m_abstraction){
         if(typeid (*m_abstraction) == typeid (GhostNode)){
@@ -529,9 +534,10 @@ void Node::destroy()
 
     QVector<GhostNode*> temp2 = m_ghosts;
     for(int i=0; i<temp2.length(); i++){
-        b->removeGhost(temp2[i]);
+
         temp2[i]->destroy();
-        delete(m_ghosts[i]);
+
+
 
     }
     for(int i=0; i<m_members.length(); i++){
@@ -540,16 +546,17 @@ void Node::destroy()
 
     terminate();
 
-    disconnect();
+
     m_obj->deleteLater();
     delete(m_obj);
     m_obj = nullptr;
+    b->removeNode(this);
 
 }
 
-void Node::selectTextBox()
+void Node::selectTextBox(bool b)
 {
-    m_obj->findChild<QObject*>("expandedText")->setProperty("focus",true);
+    m_obj->findChild<QObject*>("expandedText")->setProperty("focus",b);
 }
 
 void Node::setVisibility(bool visibility)
@@ -710,15 +717,23 @@ BaseNode * Node::isInside(int x, int y)
 
 
     if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
+
         QObject * rect = m_obj->findChild<QObject*>("expandedTextBox");
-        y-=m_position.y;
-        if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
-            selectTextBox();
-            return nullptr;
+        if(rect->property("visible").toBool()){
+            y-=m_position.y;
+            if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
+                selectTextBox(true);
+                return nullptr;
+            }
         }
+
 
         return this;
     }else{
+        if(textBoxSelected()){
+            selectTextBox(false);
+            hoverSelect(10);
+        }
         preventFocus(false);
         hover(false);
         return nullptr;

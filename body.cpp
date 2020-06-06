@@ -32,9 +32,14 @@ void Body::initialize()
     timer.setInterval(17);
     connect(&timer,SIGNAL(timeout()),this,SLOT(timeOut()));
 
+    autosaveTimer.setInterval(1000 * 60);
+    connect(&autosaveTimer,SIGNAL(timeout()),this,SLOT(autosave()));
+    startAutosaveTimer();
+
     connect(getRoot(),SIGNAL(tabPressed()),this,SLOT(tab()));
     connect(getRoot(),SIGNAL(enterPressed()),this,SLOT(enterPressed()));
     connect(getRoot(),SIGNAL(closing()),this,SLOT(closeWindow()));
+    connect(getRoot(),SIGNAL(escapePressed()),this,SLOT(escapePressed()));
 
     QDir dir = QDir(QDir::currentPath());
     QStringList contents = dir.entryList();
@@ -64,6 +69,16 @@ void Body::initialize()
     f.name = "exit application";
     f.alias = QStringList{"quit","exit","quit application","close","close application"};
     f.commonShorthand = "Null";
+    functions.append(f);
+
+    f.name = "fullscreen";
+    f.alias = QStringList{};
+    f.commonShorthand = "full";
+    functions.append(f);
+
+    f.name = "exit fullscreen";
+    f.alias = QStringList{};
+    f.commonShorthand = "NULL";
     functions.append(f);
 
     f.name = "new node";
@@ -217,6 +232,7 @@ void Body::initialize()
     functions.append(f);
 
 
+
 }
 
 
@@ -230,7 +246,14 @@ int Body::acceptedSelection(int n)
 
 
             g = displayFunctions[n].name;
+            if(currentFile == ""){
+                QString sub = g;
+                if(g.contains(".json")){
 
+                    sub.chop(5);
+                }
+                currentFile = sub;
+            }
             openFile(defaultPath + "/" + g);
             contextResolved();
 
@@ -304,6 +327,13 @@ int Body::acceptedSelection(int n)
 
     }
 
+    if(f == "fullscreen"){
+        fullscreen(true);
+    }
+
+    if(f == "exit fullscreen"){
+        fullscreen(false);
+    }
 
 
     if(f=="new node"){
@@ -546,6 +576,15 @@ QQmlApplicationEngine * Body::engine(){
 }
 QQuickWindow * Body::window(){
     return windowPtr;
+}
+
+void Body::fullscreen(bool b)
+{
+    if(b){
+        windowPtr->showFullScreen();
+    }else{
+        windowPtr->showNormal();
+    }
 }
 
 void Body::setFocusWindow()
@@ -829,12 +868,15 @@ Node *Body::getNodeByName(QString name)
 {
     Node * n = nullptr;
     for(int i=0; i<nodeMap.length(); i++){
-        n = nodeMap[i]->getNodePointer();
-        if(n){
-            if(n->getName() == name){
-                return n;
+        if(nodeMap[i]){
+            n = nodeMap[i]->getNodePointer();
+            if(n){
+                if(n->getName() == name){
+                    return n;
+                }
             }
         }
+
     }
     return nullptr;
 }
@@ -1009,6 +1051,7 @@ void Body::tab()
     m_searchBar->findChild<QObject*>("textInput")->setProperty("focus",true);
 
     //qDebug()<<latestContext();
+
     setContext(Context::tab_searching);
 
 }
@@ -1071,6 +1114,11 @@ void Body::enterPressed()
     }
 
     m_searchBar->setProperty("selectFirst",true);
+}
+
+void Body::escapePressed()
+{
+    fullscreen(false);
 }
 
 void Body::scroll(int x, int y, bool ctrl)
@@ -1159,12 +1207,14 @@ void Body::mouseReleased()
             if(highlightedNode()){
 
                 for(int i=0; i<nodeMap.length(); i++){
+                    if(nodeMap[i]){
+                        if(nodeMap[i]->isMoving() && nodeMap[i] != highlightedNode()){
+                            qDebug()<<nodeMap[i]<<highlightedNode();
+                            highlightedNode()->underMapAppendNode(nodeMap[i]);
 
-                    if(nodeMap[i]->isMoving() && nodeMap[i] != highlightedNode()){
-                        qDebug()<<nodeMap[i]<<highlightedNode();
-                        highlightedNode()->underMapAppendNode(nodeMap[i]);
-
+                        }
                     }
+
                 }
             }
         }
@@ -1188,6 +1238,8 @@ void Body::mouseHeld()
 
 void Body::closeWindow()
 {
+    stopAutosaveTimer();
+    stopTimer();
     for(int i=0; i<nodeMap.length(); i++){
         delete(nodeMap[i]);
     }
@@ -1786,6 +1838,33 @@ NodeArea *Body::newNodeArea(QVector<BaseNode *> nodes)
     return n;
 }
 
+void Body::autosave()
+{
+    qDebug()<<"lol";
+    if(currentFile == ""){
+        return;
+    }
+    sessionLength+=1;
+    QString divider = "/";
+    QDir dir = defaultPath;
+    QStringList folder = dir.entryList();
+    if(!folder.contains(currentFile + "-autosave")){
+        dir.mkdir(currentFile + "-autosave");
+    }
+    saveFile(defaultPath + divider + currentFile + "-autosave" + divider + "1-minute-ago.json");
+    if(sessionLength % 5 == 0){
+        saveFile(defaultPath + divider + currentFile + "-autosave" + divider + "5-minutes-ago.json");
+    }
+    if(sessionLength % 10 == 0){
+        saveFile(defaultPath + divider + currentFile + "-autosave" + divider + "10-minutes-ago.json");
+    }
+    if(sessionLength % 20 == 0){
+        saveFile(defaultPath + divider + "saves" + divider + currentFile + "-autosave" + divider + "autosave-"
+                 + QString::number(sessionLength%20));
+    }
+
+}
+
 int Body::allocateNewID(QString type)
 {
     if(type == "node"){
@@ -1807,6 +1886,16 @@ int Body::allocateNewID(QString type)
         return relationArchive.length();
     }
     return -1;
+}
+
+void Body::startAutosaveTimer()
+{
+    autosaveTimer.start();
+}
+
+void Body::stopAutosaveTimer()
+{
+    autosaveTimer.stop();
 }
 
 void Body::autoTab(int context)

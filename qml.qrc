@@ -8,5 +8,6 @@
         <file>nodeArea.qml</file>
         <file>line.qml</file>
         <file>triangle.qml</file>
+        <file>note.qml</file>
     </qresource>
 </RCC>
