@@ -470,7 +470,7 @@ void Node::expandText()
     m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",true);
 }
 
-bool Node::clickAction(int x,int y)
+bool Node::clickAction()
 {
     if(textBoxSelected()){
 
@@ -734,7 +734,6 @@ BaseNode * Node::isInside(int x, int y)
             y-=m_position.y;
             if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
                 selectTextBox(true);
-                return nullptr;
             }
         }
 

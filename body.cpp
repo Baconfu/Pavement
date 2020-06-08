@@ -278,6 +278,12 @@ int Body::acceptedSelection(int n)
             g = displayFunctions[n].name;
         }
 
+        QString sub = g;
+        if(g.contains(".json")){
+            sub.chop(5);
+        }
+        currentFile = sub;
+
         saveFile(defaultPath + "/" + g);
         contextResolved();
         setFocusWindow();
@@ -718,6 +724,7 @@ void Body::openFile(QString path)
             nodeMap.append(subPool[i]);
         }
     }
+    nodeMap.append(file.loadNotes());
 
     relationArchive.append(file.loadRelations());
 
@@ -1182,7 +1189,7 @@ void Body::mouseClicked(int x, int y)
 {
 
     if(selectedNode()){
-        if(selectedNode()->clickAction(x,y)){
+        if(selectedNode()->clickAction()){
             batchSelect(selectedNode());
         }
 
@@ -1198,13 +1205,20 @@ void Body::mousePressed(int x, int y)
 {
 
     if(selectedNode()){
+        if(selectedNode()->clickAction()){
 
-        selectedNode()->moving(true);
-        setContext(moving_node);
+            selectedNode()->moving(true);
+            setContext(moving_node);
 
-        for(int i=0; i<m_batchSelected.length(); i++){
-            m_batchSelected[i]->moving(true);
+            for(int i=0; i<m_batchSelected.length(); i++){
+                m_batchSelected[i]->moving(true);
+            }
+            getRoot()->setProperty("acceptMouseEvent",true);
+        }else{
+            getRoot()->setProperty("acceptMouseEvent",false);
+
         }
+
 
     }
 }
@@ -1222,7 +1236,7 @@ void Body::mouseReleased()
                 for(int i=0; i<nodeMap.length(); i++){
                     if(nodeMap[i]){
                         if(nodeMap[i]->isMoving() && nodeMap[i] != highlightedNode()){
-                            qDebug()<<nodeMap[i]<<highlightedNode();
+
                             highlightedNode()->underMapAppendNode(nodeMap[i]);
 
                         }
@@ -1358,10 +1372,13 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 
                                     highlighted = true;
                                 }else{
-                                    b->getNodePointer()->hoverSelect(mousePosition().y);
+                                    if(b->getNodePointer()->clickAction()){
+                                        b->getNodePointer()->hoverSelect(mousePosition().y);
 
-                                    highlighted = true;
-                                    setSelected(b);
+                                        highlighted = true;
+                                        setSelected(b);
+                                    }
+
                                 }
 
                             }
@@ -1614,7 +1631,8 @@ int Body::searching(QString input)
         pool.clear();
         QStringList saves = getSaves(defaultPath);
 
-        qDebug()<<saves;
+
+
         pool = functionFromList(saves);
     }
     if(latestContext() == saving_file){
@@ -1871,7 +1889,6 @@ Note *Body::newNote(int id,int x, int y)
 
 void Body::autosave()
 {
-    qDebug()<<"lol";
     if(currentFile == ""){
         return;
     }
@@ -1901,11 +1918,11 @@ int Body::allocateNewID(QString type)
     if(type == "node"){
         for(int i=0; i<nodeMap.length(); i++){
             if(nodeMap[i] == nullptr){
-                qDebug()<<"id allocated: "<<i;
+
                 return i;
             }
         }
-        qDebug()<<"id: "<<nodeMap.length();
+
         return nodeMap.length();
     }
     if(type == "relation"){

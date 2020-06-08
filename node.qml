@@ -11,10 +11,6 @@ Item {
     property int absX
     property int absY
 
-    function textEdit(x,y){
-        expandedText.cursorPosition = expandedText.positionAt(x,y)
-
-    }
 
     onNameChanged: {
         textInput.text = name
@@ -276,6 +272,13 @@ Item {
             border.width:1
             border.color:"grey"
             TextArea {
+                MouseArea{
+                    anchors.fill:parent
+                    onPressed: {
+                        expandedText.cursorPosition = expandedText.positionAt(mouseX,mouseY)
+                        mouse.accepted = true
+                    }
+                }
 
                 selectByMouse: true
                 onFocusChanged: {
@@ -289,6 +292,7 @@ Item {
                 id: expandedText
                 objectName: "expandedText"
                 anchors.fill: parent
+                font.pointSize: 9
                 onContentWidthChanged: {
                     if(contentWidth > 80)
                         expandedArea.width = contentWidth + 20

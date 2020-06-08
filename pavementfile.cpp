@@ -17,6 +17,10 @@ void PavementFile::saveBaseNode(BaseNode *n)
     if(typeid (*n) == typeid (NodeArea)){
         saveArea(n->getAreaPointer());
     }
+    if(typeid (*n) == typeid (Note)){
+        saveNote(n);
+    }
+
 }
 
 void PavementFile::saveNode(Node *n)
@@ -130,6 +134,21 @@ void PavementFile::saveRelation(Relation *r)
 
 }
 
+void PavementFile::saveNote(BaseNode *b)
+{
+    QJsonArray notes = m_obj["notes"].toArray();
+    QJsonObject note;
+    note["id"] = b->getID();
+    note["text"] = b->getText();
+    Body::coordinate c = b->getPosition();
+    note["x"] = c.x;
+    note["y"] = c.y;
+    note["width"] = b->width();
+    note["height"] = b->height();
+    notes.append(note);
+    m_obj["notes"] = notes;
+}
+
 QVector<BaseNode*> PavementFile::loadNodes()
 {
     QJsonArray nodes = m_obj["nodes"].toArray();
@@ -149,11 +168,15 @@ QVector<BaseNode*> PavementFile::loadNodes()
 
 
         for(int j=0; j<nodePool.length(); j++){
-            Node * typeNode = findNodeByID(nodePool,node["typeNode"].toInt())->getNodePointer();
-            if(typeNode && typeNode->getName() == node["type"].toString()){
-                n->setType(typeNode);
-                typeNode->registerMember(n);
+
+            if(node["typeNode"].toString() == "Null"){
+                Node * typeNode = findNodeByID(nodePool,node["typeNode"].toInt())->getNodePointer();
+                if(typeNode && typeNode->getName() == node["type"].toString()){
+                    n->setType(typeNode);
+                    typeNode->registerMember(n);
+                }
             }
+
         }
     }
     for(int i=0; i<tempPool.length(); i++){
@@ -282,6 +305,34 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
 
     //n->reFormatExpandedForm();
     nodePool.append(n);
+    return n;
+}
+
+QVector<BaseNode*> PavementFile::loadNotes()
+{
+    QJsonArray notes = m_obj["notes"].toArray();
+
+    QVector<BaseNode*> notePool;
+    for(int i=0; i<notes.count(); i++){
+        notePool.append(loadNote(notes[i].toObject()));
+    }
+    return notePool;
+}
+BaseNode *PavementFile::loadNote(QJsonObject note)
+{
+    Note * n = new Note;
+    n->initializeObj();
+    n->setID(note["id"].toInt());
+    n->setText(note["text"].toString());
+    Body::coordinate c;
+    c.x = note["x"].toInt();
+    c.y = note["y"].toInt();
+
+    QObject * t = n->obj()->findChild<QObject*>("textArea");
+    t->setProperty("implicitWidth",note["width"].toInt());
+    t->setProperty("implicitHeight",note["height"].toInt());
+
+    n->setPosition(c);
     return n;
 }
 

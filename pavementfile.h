@@ -6,6 +6,7 @@
 #include <relation.h>
 #include <ghostnode.h>
 #include <nodearea.h>
+#include <note.h>
 
 
 class PavementFile : public File
@@ -18,6 +19,7 @@ public:
     void saveGhost(GhostNode * n);
     void saveArea(NodeArea * n);
     void saveRelation(Relation * r);
+    void saveNote(BaseNode * b);
 
     QJsonObject writeSubNode(BaseNode * n);
 
@@ -28,6 +30,8 @@ public:
     QVector<BaseNode*> loadSubNodes();
     BaseNode * loadSubNode(QJsonObject subNode,Body::coordinate positionOffset);
 
+    QVector<BaseNode*> loadNotes();
+    BaseNode * loadNote(QJsonObject note);
     QVector<Relation *> loadRelations();
     void writeJson();
     void readJson();

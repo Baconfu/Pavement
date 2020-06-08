@@ -44,10 +44,14 @@ ApplicationWindow {
             myItem.escapePressed()
         }
 
+        property bool acceptMouseEvent: true
+        onAcceptMouseEventChanged: {
 
+        }
 
         MouseArea {
             z:1
+            id:mouseArea
             propagateComposedEvents: true
             objectName: "mouseArea"
             anchors.fill: parent
@@ -69,9 +73,12 @@ ApplicationWindow {
             }
             onClicked: {
                 mouseClicked(mouseX - layer.x, mouseY - layer.y)
+
             }
             onPressed: {
                 mousePressed(mouseX - layer.x, mouseY - layer.y)
+
+                mouse.accepted = myItem.acceptMouseEvent
             }
 
             onReleased: {

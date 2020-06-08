@@ -35,8 +35,8 @@ public:
     bool expandable(){return m_expandable;}
     void setExpandable(bool b){m_expandable = b;}
 
-    double angle(){qDebug()<<m_angle;return m_angle;}
-    void setAngle(double a){qDebug()<<"setting angle"<<a;m_angle = a;}
+    double angle(){return m_angle;}
+    void setAngle(double a){m_angle = a;}
 
     int lineWidth(){return m_lineWidth;}
     void setLineWidth(int n);

@@ -386,8 +386,7 @@ void Relation::setSelected(bool b)
         if(b){
             m_obj->findChild<QObject*>("textInput")->setProperty("focus",true);
 
-            qDebug()<<tally;
-            tally+=1;
+
         }
         else{
             Body * b = Body::getInstance();

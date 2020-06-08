@@ -101,7 +101,7 @@ public:
     void expandText();
 
 
-    bool clickAction(int x,int y);
+    bool clickAction();
 
 
     void cycleExpandState(int state);

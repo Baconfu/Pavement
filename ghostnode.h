@@ -68,6 +68,8 @@ public:
     void expandImage();
     void expandText();
 
+    bool clickAction();
+
 
     void cycleExpandState(int state);
 
@@ -115,6 +117,8 @@ public:
 
 
 private:
+    void selectTextBox(bool b);
+    bool textBoxSelected(){return m_obj->findChild<QObject*>("expandedText")->property("focus").toBool();}
     int tally = 0;
     Node * m_original;
 

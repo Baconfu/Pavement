@@ -61,7 +61,7 @@ public:
     virtual void cloneSubMap(BaseNode*){}
     virtual void cycleExpandState(int){}
 
-    virtual bool clickAction(int,int){return true;}
+    virtual bool clickAction(){return true;}
 
     virtual QVector<BaseNode*> getUnderMap(){QVector<BaseNode*> null; return null;}
     virtual void underMapAppendNode(BaseNode*){}

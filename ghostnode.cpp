@@ -190,6 +190,15 @@ void GhostNode::setVisibility(bool b)
     }
 }
 
+void GhostNode::selectTextBox(bool b)
+{
+    m_obj->findChild<QObject*>("expandedText")->setProperty("focus",b);
+    if(!b){
+        Body * b = Body::getInstance();
+        b->setFocusWindow();
+    }
+}
+
 void GhostNode::mouseClicked()
 {
 
@@ -350,7 +359,7 @@ void GhostNode::cloneSubMap(BaseNode *b)
                 geometry.x = g->getAbstraction()->width()/2;
                 geometry.y = g->getAbstraction()->height()/2;
                 Body::coordinate vector = g->getPosition().subtract(geometry);
-                qDebug()<<vector.x<<vector.y;
+
                 clone->setPosition(vector.add(this->getCenterAbsolutePosition()));
 
                 mySubMap.append(clone);
@@ -427,6 +436,14 @@ void GhostNode::expandImage()
 void GhostNode::expandText()
 {
     m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",true);
+}
+
+bool GhostNode::clickAction()
+{
+    if(textBoxSelected()){
+        return false;
+    }
+    return true;
 }
 
 void GhostNode::cycleExpandState(int state)
