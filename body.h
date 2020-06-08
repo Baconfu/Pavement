@@ -137,6 +137,22 @@ public:
     }
     coordinate tabPosition(){return m_tabPosition;}
 
+    Node * newNode(int id, QString name,int x, int y,Node * parent, Node * typeNode);
+    Node * newNode(int id, QString name, int x, int y);
+    Relation * newRelation(int id, BaseNode * origin, BaseNode * destination);
+    Relation * newRelation(int id, BaseNode * origin, Relation * destination);
+    Relation * newRelation(int id, Relation * origin, Relation * destination);
+    Relation * newLine(int id, BaseNode * origin, BaseNode * destination);
+    Relation * newTriangle(int id, BaseNode * origin, BaseNode * destination);
+
+    GhostNode * newGhostNode(Node * original,int x,int y);
+
+    NodeArea * newNodeArea(QVector<BaseNode*> nodes);
+
+    Note * newNote(int id,int x,int y);
+
+
+
     BaseNode * getNodePointerByID(int id);
     BaseNode * getNodePointerByID(int id,QVector<BaseNode*> pool);
     Node * getNodeByName(QString name);
@@ -353,20 +369,6 @@ private:
 
     bool tabAccepted = false; //mutual exclusion: tabaccepted and enterPressed
 
-
-    Node * newNode(int id, QString name,int x, int y,Node * parent, Node * typeNode);
-    Node * newNode(int id, QString name, int x, int y);
-    Relation * newRelation(int id, BaseNode * origin, BaseNode * destination);
-    Relation * newRelation(int id, BaseNode * origin, Relation * destination);
-    Relation * newRelation(int id, Relation * origin, Relation * destination);
-    Relation * newLine(int id, BaseNode * origin, BaseNode * destination);
-    Relation * newTriangle(int id, BaseNode * origin, BaseNode * destination);
-
-    GhostNode * newGhostNode(Node * original,int x,int y);
-
-    NodeArea * newNodeArea(QVector<BaseNode*> nodes);
-
-    Note * newNote(int id,int x,int y);
 
 
 

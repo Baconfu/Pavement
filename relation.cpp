@@ -457,10 +457,7 @@ void Relation::initializeObj()
     m_obj = object;
 }
 
-void Relation::createObj()
-{
 
-}
 
 
 

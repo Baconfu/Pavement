@@ -692,7 +692,10 @@ void Body::saveFile(QString path)
 
     }
     for(int i=0; i<relationArchive.length(); i++){
-        file.saveRelation(relationArchive[i]);
+        if(relationArchive[i]){
+            file.saveRelation(relationArchive[i]);
+        }
+
     }
 
     file.writeJson();
@@ -1775,7 +1778,7 @@ Node * Body::newNode(int id, QString name,int x, int y, Node * parent, Node * ty
     nodeMap.append(n);
     return n;
 }
-void Body::newRelation(int id, BaseNode *origin, BaseNode *destination)
+Relation * Body::newRelation(int id, BaseNode *origin, BaseNode *destination)
 {
     Relation * r = new Relation(nullptr,"arrow");
     r->initializeObj();
@@ -1787,6 +1790,7 @@ void Body::newRelation(int id, BaseNode *origin, BaseNode *destination)
 
         r->setDestinationObject(destination);
         r->finalizeSelf();
+
     }else{
         r->clearDestinationObject();
         setHoveringRelation(r);
@@ -1794,14 +1798,13 @@ void Body::newRelation(int id, BaseNode *origin, BaseNode *destination)
         setContext(Context::creating_relation);
 
     }
-    r->createObj();
     r->updateSelf();
     relationArchive.append(r);
     //qDebug()<<r->obj();
-    r=nullptr;
+    return r;
 }
 
-void Body::newLine(int id, BaseNode *origin, BaseNode *destination)
+Relation * Body::newLine(int id, BaseNode *origin, BaseNode *destination)
 {
     Relation * r  = new Relation(nullptr, "line");
     r->initializeObj();
@@ -1820,14 +1823,14 @@ void Body::newLine(int id, BaseNode *origin, BaseNode *destination)
         setContext(Context::creating_relation);
 
     }
-    r->createObj();
+
     r->updateSelf();
     relationArchive.append(r);
     //qDebug()<<r->obj();
-    r=nullptr;
+    return r;
 }
 
-void Body::newTriangle(int id, BaseNode *origin, BaseNode *destination)
+Relation * Body::newTriangle(int id, BaseNode *origin, BaseNode *destination)
 {
     Relation * r = new Relation(nullptr,"triangle");
     r->initializeObj();
@@ -1841,10 +1844,9 @@ void Body::newTriangle(int id, BaseNode *origin, BaseNode *destination)
         setHoveringRelation(r);
         setContext(creating_relation);
     }
-    r->createObj();
     r->updateSelf();
     relationArchive.append(r);
-    r=nullptr;
+    return r;
 }
 
 GhostNode *Body::newGhostNode(Node *original,int x,int y)
