@@ -8,6 +8,11 @@ Item{
     y:0
     width:textArea.contentWidth + 20
     height:textArea.contentHeight + 10
+    property bool highlighted: false
+    onHighlightedChanged: {
+        highlight.visible = highlighted
+
+    }
 
     signal update()
 
@@ -18,6 +23,14 @@ Item{
     onHeightChanged: {
 
         update()
+    }
+    Rectangle{
+        anchors.fill:parent
+        id:highlight
+        color:"grey"
+        opacity: 0.2
+        z:1
+        visible: false
     }
 
     Rectangle {

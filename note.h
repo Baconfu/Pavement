@@ -17,14 +17,22 @@ public:
     int height(){return m_height;}
 
     void setPosition(Body::coordinate c);
+    void transform(Body::coordinate c);
     Body::coordinate getPosition(){return m_position;}
 
     void hover(bool b);
+    void highlight(bool b);
+    bool textBoxSelected();
+
+    bool clickAction();
 
     QString getText();
     void setText(QString s);
 
     BaseNode * isInside(int x,int y);
+
+    void moving(bool b){m_moving = b;}
+    bool isMoving(){return m_moving;}
 
     //void hover(bool b);
 
@@ -35,6 +43,8 @@ private:
 
     int m_width;
     int m_height;
+
+    bool m_moving =  false;
 
 public slots:
     void widthChanged();

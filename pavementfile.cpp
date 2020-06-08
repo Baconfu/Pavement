@@ -372,6 +372,8 @@ QVector<Relation*> PavementFile::loadRelations()
         r->setOriginObject(findNodeByID(nodePool,relation["originNode"].toInt()));
         r->setDestinationObject(findNodeByID(nodePool,relation["destinationNode"].toInt()));
 
+
+
         r->finalizeSelf();
         r->updateSelf();
     }

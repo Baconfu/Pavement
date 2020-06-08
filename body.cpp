@@ -1431,7 +1431,7 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
                         }
                         if(typeid (*b) == typeid (Note)){
                             setSelected(b);
-                            b->hover(true);
+
                         }
 
                     }

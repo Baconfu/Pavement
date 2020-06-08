@@ -356,11 +356,11 @@ private:
 
     Node * newNode(int id, QString name,int x, int y,Node * parent, Node * typeNode);
     Node * newNode(int id, QString name, int x, int y);
-    void newRelation(int id, BaseNode * origin, BaseNode * destination);
-    void newRelation(int id, BaseNode * origin, Relation * destination);
-    void newRelation(int id, Relation * origin, Relation * destination);
-    void newLine(int id, BaseNode * origin, BaseNode * destination);
-    void newTriangle(int id, BaseNode * origin, BaseNode * destination);
+    Relation * newRelation(int id, BaseNode * origin, BaseNode * destination);
+    Relation * newRelation(int id, BaseNode * origin, Relation * destination);
+    Relation * newRelation(int id, Relation * origin, Relation * destination);
+    Relation * newLine(int id, BaseNode * origin, BaseNode * destination);
+    Relation * newTriangle(int id, BaseNode * origin, BaseNode * destination);
 
     GhostNode * newGhostNode(Node * original,int x,int y);
 

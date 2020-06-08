@@ -417,6 +417,15 @@ void Relation::finalizeSelf()
     if(destinationRelation()){
         //destinationRelation()->registerIncomingRelation(this);
     }
+    if(originNode() && destinationNode()){
+        if(originNode()->getAbstraction() == destinationNode()->getAbstraction()){
+            BaseNode * b = originNode()->getAbstraction();
+            if(typeid (*b) == typeid (Node)){
+                b->getNodePointer()->registerUnderRelation(this);
+                setAbstraction(b);
+            }
+        }
+    }
 }
 
 void Relation::initializeObj()

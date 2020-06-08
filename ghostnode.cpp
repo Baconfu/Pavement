@@ -368,6 +368,13 @@ void GhostNode::cloneSubMap(BaseNode *b)
         }
         setUnderMap(mySubMap);
     }
+    if(typeid (*b) == typeid (Node)){
+        QVector<Relation*> subRelations = b->getNodePointer()->getUnderRelation();
+        for(int i=0; i<subRelations.length(); i++){
+            subRelations[i]->
+        }
+    }
+
 }
 
 

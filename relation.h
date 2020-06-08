@@ -23,6 +23,9 @@ public:
 
     bool isInside(int x,int y);
 
+    void setAbstraction(BaseNode * b){m_abstraction = b;}
+    BaseNode * getAbstraction(){return m_abstraction;}
+
     enum type{
         node = 0,
         relation = 1,
@@ -48,6 +51,8 @@ private:
     QVector<Relation*> fromRelation_relation;
     QVector<Relation*> fromNode;
     QVector<Node*> fromNode_node;*/
+
+    BaseNode * m_abstraction = nullptr;
 
     int originType;
     int destinationType;
