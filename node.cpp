@@ -581,10 +581,7 @@ void Node::setVisibility(bool visibility)
 void Node::setHidden(bool b)
 {
     m_hidden = b;
-    QVector<Relation*> relations = getAllRelations();
-    for(int i=0; i<relations.length(); i++){
-        relations[i]->setVisibility(not(b));
-    }
+
 
 }
 
@@ -613,40 +610,6 @@ void Node::setText(QString s)
     m_obj->findChild<QObject*>("expandedText")->setProperty("text",s);
 }
 
-
-QVector<Relation*> Node::getAllRelations()
-{
-    QVector<Relation*> v;
-    v+=toNode;
-    v+=toRelation;
-    v+=fromNode;
-    return v;
-}
-
-void Node::registerRelation(Relation *r)
-{
-    if(r->getDestinationType() == Relation::node){
-        toNode.append(r);
-        toNode_node.append(r->destinationNode());
-
-    }
-    if(r->getDestinationType() == Relation::relation){
-        toRelation.append(r);
-        toRelation_relation.append(r->destinationRelation());
-
-    }
-
-}
-void Node::registerIncomingRelation(Relation *r)
-{
-    if(r->getOriginType() == Relation::node){
-        fromNode.append(r);
-        fromNode_node.append(r->originNode());
-    }
-    if(r->getOriginType() == Relation::relation){
-        qDebug()<<"error: invalid relation";
-    }
-}
 
 void Node::updateRelations()
 {

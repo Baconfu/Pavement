@@ -12,6 +12,11 @@ void Note::setPosition(Body::coordinate c)
     m_position = c;
 }
 
+void Note::transform(Body::coordinate c)
+{
+    setPosition(m_position.add(c));
+}
+
 void Note::hover(bool b)
 {
     if(b != m_obj->findChild<QObject*>("textArea")->property("focus").toBool()){
@@ -21,6 +26,24 @@ void Note::hover(bool b)
             b->setFocusWindow();
         }
     }
+}
+
+void Note::highlight(bool b)
+{
+    m_obj->setProperty("highlighted",b);
+}
+
+bool Note::textBoxSelected()
+{
+    return m_obj->findChild<QObject*>("textArea")->property("focus").toBool();
+}
+
+bool Note::clickAction()
+{
+    if(textBoxSelected()){
+        return false;
+    }
+    return true;
 }
 
 QString Note::getText()
@@ -39,11 +62,26 @@ BaseNode * Note::isInside(int x,int y)
 
     int width = m_width;
     int height = m_height;
-    if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
-
+    int s = 15;
+    bool horizontalbound = ((x>position.x-s && x<position.x) || (x>position.x+width && x<position.x + width + s)) &&
+            (y>position.y-s && y<position.y+height+s);
+    bool verticalbound = ((y>position.y - s && y<position.y) || (y>position.y+height && y<position.y + height + s)) &&
+            (x > position.x-s && x<position.x + width + s);
+    bool highlighted = false;
+    if(horizontalbound || verticalbound){
+        highlight(true);
+        highlighted = true;
+        hover(false);
         return this;
-    }else{
-
+    }
+    if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
+        highlighted = true;
+        highlight(false);
+        hover(true);
+        return this;
+    }
+    if(!highlighted){
+        highlight(false);
         hover(false);
         return nullptr;
     }
