@@ -72,6 +72,7 @@ void NodeArea::transform(Body::coordinate c)
 void NodeArea::transformSubMap(Body::coordinate vector)
 {
     for(int i=0; i<m_underMap.length(); i++){
+
         m_underMap[i]->transform(vector);
     }
 }

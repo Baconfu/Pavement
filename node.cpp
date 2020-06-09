@@ -84,9 +84,7 @@ void Node::setName(QString name)
 void Node::transform(Body::coordinate c)
 {
     setPosition(getPosition().add(c));
-    if(m_abstraction){
-        m_abstraction->reFormatExpandedForm();
-    }
+
 }
 
 void Node::transformIgnoreSubMap(Body::coordinate c)
@@ -134,6 +132,7 @@ void Node::setPositionByCenterIgnoreSubMap(Body::coordinate c)
 Body::coordinate Node::getPosition()
 {
     Body::coordinate c;
+
     c.x = m_obj->property("x").toInt();
     c.y = m_obj->property("y").toInt();
     m_position = c;
@@ -707,7 +706,7 @@ void Node::initializeObj()
 BaseNode * Node::isInside(int x, int y)
 {
     Body::coordinate position = m_position;
-
+    heightChanged();
     if(m_obj->property("expanded").toBool()){
         for(int i=0; i<m_underMap.length(); i++){
             BaseNode * b = m_underMap[i]->isInside(x-position.x,y-position.y);
@@ -733,15 +732,17 @@ BaseNode * Node::isInside(int x, int y)
         if(rect->property("visible").toBool()){
             y-=m_position.y;
             if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
+
                 selectTextBox(true);
+            }else{
+                selectTextBox(false);
             }
         }
-
-
         return this;
     }else{
         if(textBoxSelected()){
             selectTextBox(false);
+
             hoverSelect(10);
         }
         preventFocus(false);
@@ -768,8 +769,13 @@ void Node::hoverSelect(int y)
 {
     int divider = obj()->findChild<QObject*>("typeNameContainer")->property("y").toInt();
 
+    qDebug()<<tally<<"wow";
+    tally+=1;
     int localY = y - m_position.y;
     if(localY<=divider){
+        qDebug()<<"selected";
+
+
         giveInputFocus();
     }else{
         giveTypeInputFocus();
@@ -784,7 +790,7 @@ void Node::widthChanged()
 }
 void Node::heightChanged()
 {
-    if(m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt() == 0){
+    if(m_obj->findChild<QObject*>("typeName")->property("contentWidth").toInt() == 0){
         m_height = m_obj->property("height").toInt() - m_obj->findChild<QObject*>("typeNameContainer")->property("height").toInt();
     }else{
         m_height = m_obj->property("height").toInt();

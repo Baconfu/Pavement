@@ -296,6 +296,9 @@ int Body::acceptedSelection(int n)
 
         }else{
             QString s = displayFunctions[n].name;
+            if(s.split("-").length() > 2){
+                qDebug()<<"error: your node name has symbol '-' in it";
+            }
             Node * n = getNodeByName(s.split("-")[0]);
 
             GhostNode * g = newGhostNode(n,tabPosition().x,tabPosition().y);
@@ -1644,10 +1647,13 @@ int Body::searching(QString input)
         pool.clear();
         QStringList nodes;
         for(int i=0; i<nodeMap.length(); i++){
-            BaseNode * b = nodeMap[i];
-            if(typeid (*b) == typeid (Node)){
-                nodes.append(nodeMap[i]->getName() + "-" + nodeMap[i]->getNodePointer()->getTypeName());
+            if(nodeMap[i]){
+                BaseNode * b = nodeMap[i];
+                if(typeid (*b) == typeid (Node)){
+                    nodes.append(nodeMap[i]->getName() + "-" + nodeMap[i]->getNodePointer()->getTypeName());
+                }
             }
+
         }
         pool = functionFromList(nodes);
     }
