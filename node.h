@@ -79,6 +79,14 @@ public:
     void removeMember(Node * n);
     bool memberExists(Node * n);
 
+    //NODE SUBMAP RELATIONS
+    void registerUnderRelation(Relation * r){
+        if(!m_underRelation.contains(r)){
+            m_underRelation.append(r);
+        }
+    }
+    QVector<Relation*> getUnderRelation(){return m_underRelation;}
+
     //NODE SUBMAP
     void setUnderMap(QVector<BaseNode*> nodes);
     void underMapAppendNode(QVector<BaseNode*> nodes);
@@ -108,15 +116,6 @@ public:
     bool isExpanded(){return m_expanded;}
     void abstract();
     void exude(BaseNode * b);
-
-
-
-    //NODE RELATIONS
-    QVector<Relation*> getAllRelations();
-    void registerRelation(Relation * r);
-    void registerIncomingRelation(Relation * r);
-    void deleteRelationByTarget(Node * n);
-    void deleteAllRelations();
 
     //NODE CONTROLS
     void giveInputFocus();
@@ -172,17 +171,11 @@ private:
 
 
     QVector<BaseNode*> m_underMap;
+    QVector<Relation*> m_underRelation;
 
     BaseNode * m_abstraction = nullptr;
 
-
     //Foreign diplomacy
-    QVector<Relation*> toNode;
-    QVector<BaseNode*> toNode_node;
-    QVector<Relation*> fromNode;
-    QVector<BaseNode*> fromNode_node;
-    QVector<Relation*> toRelation;
-    QVector<Relation*> toRelation_relation;
 
     QString m_type;
     Node * m_typeNode = nullptr;

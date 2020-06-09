@@ -345,6 +345,26 @@ void GhostNode::abstract()
 
 void GhostNode::cloneSubMap(BaseNode *b)
 {
+    QVector<Relation*> buffer;
+    if(typeid (*b) == typeid (Node)){
+        QVector<Relation*> subRelations = b->getNodePointer()->getUnderRelation();
+        for(int i=0; i<subRelations.length(); i++){
+            Body * body = Body::getInstance();
+            Relation * r = subRelations[i];
+            Relation * clone;
+            if(r->getType() == "arrow"){
+                clone = body->newRelation(body->allocateNewID("relation"),r->originNode(),r->destinationNode());
+            }
+            if(r->getType() == "line"){
+                clone = body->newLine(body->allocateNewID("relation"),r->originNode(),r->destinationNode());
+            }
+            if(r->getType() == "triangle"){
+                clone = body->newTriangle(body->allocateNewID("relation"),r->originNode(),r->destinationNode());
+            }
+            buffer.append(clone);
+            buffer[i]->disconnect();
+        }
+    }
     QVector<BaseNode*> subMap = b->getUnderMap();
     if(!subMap.isEmpty()){
         QVector<BaseNode*> mySubMap;
@@ -363,11 +383,27 @@ void GhostNode::cloneSubMap(BaseNode *b)
                 clone->setPosition(vector.add(this->getCenterAbsolutePosition()));
 
                 mySubMap.append(clone);
+                for(int j=0; j<buffer.length(); j++){
+
+                    if(buffer[j]->originNode() == b){
+                        buffer[j]->setOriginObject(clone);
+                        buffer[j]->updateSelf();
+                    }
+                    if(buffer[j]->destinationNode() == b){
+                        buffer[j]->setDestinationObject(clone);
+                        buffer[j]->updateSelf();
+                    }
+                }
+                for(int j=0; j<buffer.length(); j++){
+                    buffer[j]->finalizeSelf();
+                }
 
             }
         }
         setUnderMap(mySubMap);
     }
+
+
 }
 
 
