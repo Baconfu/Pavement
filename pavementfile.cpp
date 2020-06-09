@@ -169,7 +169,7 @@ QVector<BaseNode*> PavementFile::loadNodes()
 
         for(int j=0; j<nodePool.length(); j++){
 
-            if(node["typeNode"].toString() == "Null"){
+            if(node["typeNode"].toString() != "Null"){
                 Node * typeNode = findNodeByID(nodePool,node["typeNode"].toInt())->getNodePointer();
                 if(typeNode && typeNode->getName() == node["type"].toString()){
                     n->setType(typeNode);
@@ -219,6 +219,7 @@ Node *PavementFile::loadNode(QJsonObject node)
     Body::coordinate c;
     c.x = node["x"].toInt();
     c.y = node["y"].toInt();
+
 
     n->setText(node["text"].toString());
 
