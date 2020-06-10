@@ -732,13 +732,8 @@ void Node::hoverSelect(int y)
 {
     int divider = obj()->findChild<QObject*>("typeNameContainer")->property("y").toInt();
 
-    qDebug()<<tally<<"wow";
-    tally+=1;
     int localY = y - m_position.y;
     if(localY<=divider){
-        qDebug()<<"selected";
-
-
         giveInputFocus();
     }else{
         giveTypeInputFocus();

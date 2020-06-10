@@ -361,6 +361,7 @@ void GhostNode::cloneSubMap(BaseNode *b)
             if(r->getType() == "triangle"){
                 clone = body->newTriangle(body->allocateNewID("relation"),r->originNode(),r->destinationNode());
             }
+            clone->setName(r->getName());
             buffer.append(clone);
             buffer[i]->disconnect();
         }
