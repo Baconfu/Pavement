@@ -36,6 +36,8 @@ public:
     //NODE DIMENSIONS: GETTING FUNCTIONS
     int width(){return m_width;}
     int height(){return m_height;}
+    int displayWidth(){return m_width;}
+    int displayHeight(){return m_height;}
 
     BaseNode * isInside(int x,int y);
 

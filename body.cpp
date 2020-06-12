@@ -432,7 +432,7 @@ int Body::acceptedSelection(int n)
     }
 
     if(f == "save"){
-        saveFile("/home/chuan/qt_projects/Pavement_1_1/saves/data.txt");
+        saveFile(QDir::currentPath() + "/saves/"+ currentFile + ".json");
     }
     if(f == "open"){
         //qDebug()<<10;

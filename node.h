@@ -17,9 +17,6 @@ public:
 
     Node * getNodePointer(){return this;}
 
-
-    QString derivedType(){return "node";}
-
     QString getName();
     void setName(QString name);
 
@@ -52,11 +49,14 @@ public:
     //NODE DIMENSIONS: GETTING FUNCTIONS
     int width(){return m_width;}
     int height(){return m_height;}
+    int displayWidth();
+    int displayHeight();
 
 
     //NODE INFORMATION: GETTING FUNCTIONS
     int getID(){return m_id;}
 
+    bool typeVisible(){return m_obj->findChild<QObject*>("typeName")->property("visible").toBool();}
 
     //NODE GHOSTS
     void registerGhost(GhostNode * n){m_ghosts.append(n);}

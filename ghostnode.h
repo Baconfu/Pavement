@@ -39,6 +39,8 @@ public:
     void setName(QString name);
 
 
+    bool typeVisible(){return m_obj->findChild<QObject*>("typeName")->property("visible").toBool();}
+
     void setText(QString s);
     QString getText();
 
@@ -50,6 +52,8 @@ public:
 
     int width(){return m_width;}
     int height(){return m_height;}
+    int displayWidth(){return m_width;}
+    int displayHeight();
 
     int getID(){return m_id;}
 

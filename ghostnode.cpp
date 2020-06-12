@@ -286,6 +286,15 @@ Body::coordinate GhostNode::getCenterPosition()
     return c;
 }
 
+int GhostNode::displayHeight()
+{
+    int out = m_height;
+    if(!typeVisible()){
+        out -= m_obj->findChild<QObject*>("typeName")->property("height").toInt();
+    }
+    return out;
+}
+
 void GhostNode::setUnderMap(QVector<BaseNode *> subMap)
 {
     updateAbsolutePosition();
@@ -550,7 +559,7 @@ void GhostNode::reFormatExpandedForm()
 
                 topMost = y - padding;
             }
-            y = b->getPosition().y + b->height();
+            y = b->getPosition().y + b->displayHeight();
             if(y + padding> botMost){
 
                 botMost = y + padding;

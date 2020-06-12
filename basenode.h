@@ -33,6 +33,8 @@ public:
 
     virtual int width();
     virtual int height();
+    virtual int displayHeight(){return 0;}
+    virtual int displayWidth(){return 0;}
 
     virtual void registerRelation(Relation * r);
     virtual void registerIncomingRelation(Relation * r);

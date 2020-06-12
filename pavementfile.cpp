@@ -168,8 +168,8 @@ QVector<BaseNode*> PavementFile::loadNodes()
 
 
         for(int j=0; j<nodePool.length(); j++){
+            if(node["typeNode"].toString() != "Null" && node["typeNode"].toString() != ""){
 
-            if(node["typeNode"].toString() != "Null"){
                 Node * typeNode = findNodeByID(nodePool,node["typeNode"].toInt())->getNodePointer();
                 if(typeNode && typeNode->getName() == node["type"].toString()){
                     n->setType(typeNode);

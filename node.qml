@@ -6,19 +6,10 @@ import QtQuick.Controls 2.0
 Item {
     id: container;
     objectName: "container"
-    property string name
-    property string type
     property int absX
     property int absY
 
 
-    onNameChanged: {
-        textInput.text = name
-
-    }
-    onTypeChanged: {
-        typeInput.text = type
-    }
 
 
 
@@ -189,15 +180,24 @@ Item {
             anchors.fill:parent
             font.pointSize: 9
             text: ""
+            visible: false
             font.italic: false
             onContentWidthChanged: {
                 typeNameContainer.x = container.width/2 - contentWidth/2
+                if(contentWidth==0){
+                    visible = false
+                }else{
+                    visible = true
+                }
             }
 
             onFocusChanged: {
                 if(focus == false){
                     typePassivelyAccepted(typeInput.text)
                 }
+            }
+            onVisibleChanged: {
+                console.log("what")
             }
 
             property bool italic: false

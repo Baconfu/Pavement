@@ -78,7 +78,7 @@ void Node::preventFocus(bool b)
 void Node::setName(QString name)
 {
     m_name = name;
-    m_obj->setProperty("name",name);
+    m_obj->findChild<QObject*>("textInput")->setProperty("text",name);
 }
 
 void Node::transform(Body::coordinate c)
@@ -150,6 +150,20 @@ Body::coordinate Node::getCenterPosition()
     return c;
 }
 
+int Node::displayWidth()
+{
+    return m_width;
+}
+
+int Node::displayHeight()
+{
+    int out = m_height;
+    if(!typeVisible()){
+        out -= m_obj->findChild<QObject*>("typeName")->property("height").toInt();
+    }
+    return out;
+}
+
 int Node::allocateGhostID()
 {
     Body * b = Body::getInstance();
@@ -197,9 +211,8 @@ void Node::setType(Node *n)
         Body * b = Body::getInstance();
 
         m_typeNode = nullptr;
-        m_type = "";
         m_style = b->defaultStyle();
-        obj()->setProperty("type",m_type);
+
         obj()->findChild<QObject*>("typeName")->setProperty("italic",false);
     }
 
@@ -321,23 +334,35 @@ void Node::reFormatExpandedForm()
 
 
             int padding = 5;
-            int x = b->getPosition().x;
-            if(x < leftMost){
+            int x;
+            if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
+                x = b->getPosition().x + b->obj()->findChild<QObject*>("typeNameContainer")->property("x").toInt();
+            }else{
+                x = b->getPosition().x;
+            }
+
+            if(x - padding< leftMost){
 
                 leftMost = x - padding;
             }
-            x = b->getPosition().x + b->width();
-            if(x > rightMost){
+
+            if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
+                x += b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt();
+            }else{
+                x += b->width();
+            }
+            if(x + padding> rightMost){
 
                 rightMost = x + padding;
             }
             int y = b->getPosition().y;
-            if(y < topMost){
+            if(y - padding< topMost){
 
                 topMost = y - padding;
             }
-            y = b->getPosition().y + b->height();
-            if(y > botMost){
+
+            y = b->getPosition().y + b->displayHeight();
+            if(y + padding> botMost){
 
                 botMost = y + padding;
             }
@@ -631,6 +656,7 @@ void Node::giveTypeInputFocus()
 {
     if(!preventingFocus()){
         obj()->findChild<QObject*>("typeName")->setProperty("focus",true);
+        obj()->findChild<QObject*>("typeName")->setProperty("visible",true);
     }
 }
 
@@ -681,15 +707,10 @@ BaseNode * Node::isInside(int x, int y)
         }
     }
 
-    int width = m_width;
-    int height = m_height;
+    int wt = width();
+    int ht = height();
 
-    if(m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt() == 0){
-        height+=m_obj->findChild<QObject*>("typeNameContainer")->property("height").toInt();
-    }
-
-
-    if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
+    if(x>position.x && x<position.x + wt && y > position.y && y < position.y + ht){
 
         QObject * rect = m_obj->findChild<QObject*>("expandedTextBox");
         if(rect->property("visible").toBool()){
@@ -748,13 +769,7 @@ void Node::widthChanged()
 }
 void Node::heightChanged()
 {
-    if(m_obj->findChild<QObject*>("typeName")->property("contentWidth").toInt() == 0){
-        m_height = m_obj->property("height").toInt() - m_obj->findChild<QObject*>("typeNameContainer")->property("height").toInt();
-    }else{
-        m_height = m_obj->property("height").toInt();
-    }
-
-
+    m_height = m_obj->property("height").toInt();
 }
 
 void Node::mouseClicked()
