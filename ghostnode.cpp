@@ -289,8 +289,8 @@ Body::coordinate GhostNode::getCenterPosition()
 int GhostNode::displayHeight()
 {
     int out = m_height;
-    if(!typeVisible()){
-        out -= m_obj->findChild<QObject*>("typeName")->property("height").toInt();
+    if(typeVisible()){
+        out += m_obj->findChild<QObject*>("typeName")->property("height").toInt();
     }
     return out;
 }

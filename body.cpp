@@ -303,9 +303,7 @@ int Body::acceptedSelection(int n)
 
             GhostNode * g = newGhostNode(n,tabPosition().x,tabPosition().y);
             if(m_selectedNode){
-                if(selectedNode()->isInside(mousePosition().x,mousePosition().y)){
-                    m_selectedNode->underMapAppendNode(g);
-                }
+                m_selectedNode->underMapAppendNode(g);
 
             }
         }
@@ -351,12 +349,15 @@ int Body::acceptedSelection(int n)
     }
 
 
-    if(f=="new node"){
+    if(f== "new node"){
         int id = allocateNewID("node");
         int x = m_tabPosition.x;
         int y = m_tabPosition.y;
+        BaseNode * n = newNode(id,"",x,y,nullptr,nullptr);
+        if(selectedNode()){
+            selectedNode()->underMapAppendNode(n);
+        }
 
-        newNode(id,"",x,y,nullptr,nullptr);
     }
     if(f=="new relation"){
         int id = allocateNewID("relation");
@@ -1359,6 +1360,7 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 
     }
 
+    bool control = false;
 
     if(latestContext() != relation_selected){
         for(int i=0; i<nodeMap.length(); i++){
@@ -1367,6 +1369,7 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
                     BaseNode * b = nodeMap[i]->isInside(mousePosition().x,mousePosition().y);
 
                     if(b){
+                        control = true;
                         if(typeid (*b) == typeid (Node)){
                             if(!b->getNodePointer()->preventingFocus()){
 
@@ -1441,6 +1444,7 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
                         }
 
                     }
+
                 }
             }
 
@@ -1449,7 +1453,10 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 
     }
 
-
+    if(!control){
+        BaseNode * null = nullptr;
+        setSelected(null);
+    }
 
 
 
