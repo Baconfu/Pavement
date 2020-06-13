@@ -92,6 +92,7 @@ public:
     void underMapAppendNode(QVector<BaseNode*> nodes);
     void underMapAppendNode(BaseNode * node);
     QVector<BaseNode*> getUnderMap(){return m_underMap;}
+    bool underMapContains(BaseNode * b);
     void removeSubNode(BaseNode * b);
     void transformSubMap(Body::coordinate vector);
 

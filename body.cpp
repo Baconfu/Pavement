@@ -1242,8 +1242,10 @@ void Body::mouseReleased()
 
                 for(int i=0; i<nodeMap.length(); i++){
                     if(nodeMap[i]){
-                        if(nodeMap[i]->isMoving() && nodeMap[i] != highlightedNode()){
-
+                        if(nodeMap[i]->isMoving() && nodeMap[i] != highlightedNode() && !highlightedNode()->underMapContains(nodeMap[i])){
+                            if(nodeMap[i]->getAbstraction()){
+                                nodeMap[i]->getAbstraction()->exude(nodeMap[i]);
+                            }
                             highlightedNode()->underMapAppendNode(nodeMap[i]);
 
                         }
@@ -1394,22 +1396,22 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
                         }
                         if(typeid (*b) == typeid (GhostNode)){
                             GhostNode * g = b->getGhostPointer();
+
                             if(!g->preventingFocus()){
-                                if(g->isMoving()){
-                                    continue;
-                                }
+                                if(!g->isMoving()){
 
+                                    QVector<int> contexts = {including,creating_relation,moving_node};
+                                    if(contexts.contains(latestContext())){
+                                        setHighlightedNode(g);
 
-                                QVector<int> contexts = {including,creating_relation,moving_node};
-                                if(contexts.contains(latestContext())){
-                                    setHighlightedNode(g);
-                                    highlighted = true;
+                                        highlighted = true;
 
-                                }else{
+                                    }else{
 
-                                    highlighted = true;
-                                    setSelected(g);
-                                    g->hover(true);
+                                        highlighted = true;
+                                        setSelected(g);
+                                        g->hover(true);
+                                    }
                                 }
                             }
                             else{
@@ -1422,21 +1424,21 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
                         }
                         if(typeid (*b) == typeid (NodeArea)){
                             NodeArea * a = b->getAreaPointer();
-                            if(a->isMoving()){
-                                continue;
-                            }
-                            QVector<int> contexts = {including,creating_relation,moving_node};
-                            if(contexts.contains(latestContext())){
-                                setHighlightedNode(a);
+                            if(!a->isMoving()){
+                                QVector<int> contexts = {including,creating_relation,moving_node};
+                                if(contexts.contains(latestContext())){
+                                    setHighlightedNode(a);
 
-                                highlighted = true;
+                                    highlighted = true;
 
+                                }
+                                else{
+                                    highlighted = true;
+                                    setSelected(a);
+                                    a->hover(true);
+                                }
                             }
-                            else{
-                                highlighted = true;
-                                setSelected(a);
-                                a->hover(true);
-                            }
+
                         }
                         if(typeid (*b) == typeid (Note)){
                             setSelected(b);

@@ -57,6 +57,7 @@ public:
     void removeSubNode(BaseNode * b){
         m_underMap.removeOne(b);
     }
+    bool underMapContains(BaseNode * b);
 
     void subNodeMoved();
     void reFormatExpandedForm();

@@ -134,6 +134,19 @@ void NodeArea::underMapAppendNode(BaseNode *b)
 
 }
 
+bool NodeArea::underMapContains(BaseNode *b)
+{
+    for(int i=0; i<m_underMap.length(); i++){
+        if(m_underMap[i] == b){
+            return true;
+        }
+        if(m_underMap[i]->underMapContains(b)){
+            return true;
+        }
+    }
+    return false;
+}
+
 void NodeArea::subNodeMoved()
 {
     reFormatExpandedForm();

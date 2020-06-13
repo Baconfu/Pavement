@@ -300,6 +300,19 @@ void Node::underMapAppendNode(BaseNode *node)
 
 }
 
+bool Node::underMapContains(BaseNode *b)
+{
+    for(int i=0; i<m_underMap.length(); i++){
+        if(m_underMap[i] == b){
+            return true;
+        }
+        if(m_underMap[i]->underMapContains(b)){
+            return true;
+        }
+    }
+    return false;
+}
+
 void Node::removeSubNode(BaseNode *b)
 {
     m_underMap.removeOne(b);
@@ -697,13 +710,22 @@ BaseNode * Node::isInside(int x, int y)
     Body::coordinate position = m_position;
     heightChanged();
     if(m_obj->property("expanded").toBool()){
+        BaseNode * move = nullptr;
         for(int i=0; i<m_underMap.length(); i++){
             BaseNode * b = m_underMap[i]->isInside(x-position.x,y-position.y);
             if(b){
-                preventFocus(false);
-                hover(false);
-                return b;
+                if(!b->isMoving()){
+                    preventFocus(false);
+                    hover(false);
+                    return b;
+                }else{
+                    move = b;
+                }
+
             }
+        }
+        if(move){
+            return move;
         }
     }
 

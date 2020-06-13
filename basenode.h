@@ -69,6 +69,7 @@ public:
     virtual void underMapAppendNode(BaseNode*){}
     virtual void setUnderMap(QVector<BaseNode*>){}
     virtual void removeSubNode(BaseNode * b){qDebug()<<b;}
+    virtual bool underMapContains(BaseNode*){return false;}
 
     virtual void subNodeMoved(){}
     virtual void reFormatExpandedForm(){}

@@ -109,14 +109,24 @@ void GhostNode::adoptOriginal()
 BaseNode * GhostNode::isInside(int x, int y)
 {
     Body::coordinate position = m_position;
+    if(getName() == "sperm head"){
 
+    }
     if(m_obj->property("expanded").toBool()){
+        BaseNode * move = nullptr;
         for(int i=0; i<m_underMap.length(); i++){
             BaseNode * b = m_underMap[i]->isInside(x-position.x,y-position.y);
             if(b){
-                hover(false);
-                return b;
+                if(!b->isMoving()){
+                    hover(false);
+                    return b;
+                }else{
+                    move = b;
+                }
             }
+        }
+        if(move){
+            return move;
         }
     }
     int width = m_width;
@@ -327,6 +337,19 @@ void GhostNode::underMapAppendNode(BaseNode *b)
         reFormatExpandedForm();
         updateAbsolutePosition();
     }
+}
+
+bool GhostNode::underMapContains(BaseNode *b)
+{
+    for(int i=0; i<m_underMap.length(); i++){
+        if(m_underMap[i] == b){
+            return true;
+        }
+        if(m_underMap[i]->underMapContains(b)){
+            return true;
+        }
+    }
+    return false;
 }
 
 void GhostNode::subNodeMoved()
