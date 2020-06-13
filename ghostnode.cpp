@@ -399,6 +399,8 @@ void GhostNode::cloneSubMap(BaseNode *b)
         }
     }
     QVector<BaseNode*> subMap = b->getUnderMap();
+    qDebug()<<b;
+    qDebug()<<subMap;
     if(!subMap.isEmpty()){
         QVector<BaseNode*> mySubMap;
         for(int i=0; i<subMap.length(); i++){
@@ -433,6 +435,7 @@ void GhostNode::cloneSubMap(BaseNode *b)
 
             }
         }
+
         setUnderMap(mySubMap);
     }
 
@@ -464,6 +467,7 @@ void GhostNode::expandMap()
 {
     if(m_underMap.isEmpty()){
         if(m_original){
+            qDebug()<<"hi";
             cloneSubMap(m_original);
 
         }

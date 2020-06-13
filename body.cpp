@@ -533,8 +533,11 @@ int Body::acceptedSelection(int n)
         }else{
 
             BaseNode * b = selectedNode();
-            b->expand();
-            b->abstract();
+            if(b){
+                b->expand();
+                b->abstract();
+            }
+
 
         }
 

@@ -202,12 +202,14 @@ void Node::setType(Node *n)
         m_typeNode = n;
         m_type = n->getName();
 
-        obj()->setProperty("type",m_type);
+
+        obj()->findChild<QObject*>("typeName")->setProperty("text",m_type);
         obj()->findChild<QObject*>("typeName")->setProperty("italic",true);
 
 
         n->registerMember(this);
     }else{
+        qDebug()<<"type removed";
         Body * b = Body::getInstance();
 
         m_typeNode = nullptr;

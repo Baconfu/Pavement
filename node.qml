@@ -197,7 +197,7 @@ Item {
                 }
             }
             onVisibleChanged: {
-                console.log("what")
+
             }
 
             property bool italic: false

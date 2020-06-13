@@ -175,6 +175,7 @@ QVector<BaseNode*> PavementFile::loadNodes()
                 if(typeNode && typeNode->getName() == node["type"].toString()){
                     n->setType(typeNode);
                     typeNode->registerMember(n);
+
                 }
             }
 
