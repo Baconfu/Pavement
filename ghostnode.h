@@ -80,7 +80,7 @@ public:
 
     void abstract();
     void expand();
-    bool isExpanded(){return m_expanded;}
+    int isExpanded(){return m_expanded;}
     void extract();
     void exude(BaseNode * b);
 
@@ -133,7 +133,7 @@ private:
     int m_height = 10;
 
 
-    bool m_expanded = false;
+    int m_expanded = -1;
     bool m_batchSelected = false;
     bool m_hoverSelected = false;
     bool m_moving = false;

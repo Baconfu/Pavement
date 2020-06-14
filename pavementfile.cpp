@@ -41,11 +41,7 @@ void PavementFile::saveNode(Node *n)
 
     node["text"] = n->getText();
 
-    if(n->isExpanded()){
-        node["expanded"] = true;
-    }else{
-        node["expanded"] = false;
-    }
+    node["expanded"] = n->isExpanded();
 
     QJsonObject subMap;
     QJsonArray subNodes = subMap["subMap"].toArray();
@@ -198,8 +194,10 @@ QVector<BaseNode*> PavementFile::loadNodes()
 
 
         nodePool[i]->getNodePointer()->setUnderMap(sub);
-        if(node["expanded"].toBool() == true){
+        if(node["expanded"].toInt() != -1){
+
             nodePool[i]->expand();
+            nodePool[i]->cycleExpandState(node["expanded"].toInt());
         }
 
         Body::coordinate c;
@@ -298,8 +296,9 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
     n->setUnderMap(subNodes);
     if(type == "ghost"){
         n->getGhostPointer()->adoptOriginal();
-        if(node["expanded"].toBool()){
+        if(node["expanded"].toInt() != -1){
             n->expand();
+            n->cycleExpandState(node["expanded"].toInt());
         }
     }
     n->setPosition(c.add(positionOffset));

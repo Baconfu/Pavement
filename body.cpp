@@ -447,8 +447,8 @@ int Body::acceptedSelection(int n)
     if(f == "debug"){
         //getRoot()->findChild<QObject*>("line"+QString::number(debugTally))->setProperty("lineWidth",2);
         //getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
-        Sync sync;
-        sync.sync();
+        Node * n = new Node;
+        n->initializeObj();
 
     }
     if(f == "select"){
@@ -548,7 +548,7 @@ int Body::acceptedSelection(int n)
         if(contexts.contains(latestContext())){
 
             BaseNode * b = selectedNode();
-            if(b->isExpanded()){
+            if(b->isExpanded() != 0){
                 b->cycleExpandState(0);
             }else{
                 b->expand();

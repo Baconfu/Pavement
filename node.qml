@@ -293,15 +293,18 @@ Item {
                 objectName: "expandedText"
                 anchors.fill: parent
                 font.pointSize: 9
+
                 onContentWidthChanged: {
                     if(contentWidth > 80)
-                        expandedArea.width = contentWidth + 20
+                        if(expandedTextBox.visible)
+                            expandedArea.width = contentWidth + 20
                     else
                         expandedArea.width = 100
                 }
                 onContentHeightChanged: {
                     if(contentHeight > 60){
-                        expandedArea.height = contentHeight + 40
+                        if(expandedTextBox.visible)
+                            expandedArea.height = contentHeight + 40
                     }else{
                         expandedArea.height = 100
                     }

@@ -73,7 +73,7 @@ public:
 
     virtual void subNodeMoved(){}
     virtual void reFormatExpandedForm(){}
-    virtual bool isExpanded(){return false;}
+    virtual int isExpanded(){return -1;}
 
     virtual void setAbstraction(BaseNode * b){qDebug()<<"BaseNode virtual function called. "<<b;}
     virtual BaseNode * getAbstraction();

@@ -2,6 +2,7 @@
 #include <ghostnode.h>
 #include <QMetaObject>
 #include <QGenericArgument>
+#include <QNetworkAccessManager>
 
 Node::Node(QObject * parent, int id)
 {
@@ -199,17 +200,22 @@ GhostNode *Node::newGhostNode()
 void Node::setType(Node *n)
 {
     if(n){
-        m_typeNode = n;
-        m_type = n->getName();
+        if(n != m_typeNode){
+            if(m_typeNode){
+                m_typeNode->removeMember(this);
+            }
+            m_typeNode = n;
+            m_type = n->getName();
 
 
-        obj()->findChild<QObject*>("typeName")->setProperty("text",m_type);
-        obj()->findChild<QObject*>("typeName")->setProperty("italic",true);
+            obj()->findChild<QObject*>("typeName")->setProperty("text",m_type);
+            obj()->findChild<QObject*>("typeName")->setProperty("italic",true);
 
 
-        n->registerMember(this);
+            n->registerMember(this);
+        }
     }else{
-        qDebug()<<"type removed";
+
         Body * b = Body::getInstance();
 
         m_typeNode = nullptr;
@@ -447,7 +453,8 @@ void Node::expand()
 {
     Body::coordinate pos = getCenterPosition();
     m_obj->setProperty("expanded",true);
-    m_expanded = true;
+
+    m_expanded = m_expandState;
 
     if(m_expandState == 0){
         expandMap();
@@ -474,7 +481,7 @@ void Node::expandMap()
     m_obj->findChild<QObject*>("expandedRectangle")->setProperty("visible",true);
 
     if(!m_underMap.isEmpty()){
-        m_expanded = true;
+        m_expanded = 0;
         for(int i=0; i<m_underMap.length(); i++){
             m_underMap[i]->setVisibility(true);
         }
@@ -486,7 +493,7 @@ void Node::expandMap()
 
         reFormatExpandedForm();
     }else{
-        m_expanded = true;
+        m_expanded = 0;
         m_obj->setProperty("expanded",true);
 
     }
@@ -506,7 +513,11 @@ void Node::expandImage()
 
 void Node::expandText()
 {
+    int width = m_obj->findChild<QObject*>("expandedText")->property("contentWidth").toInt() + 20;
+    int height = m_obj->findChild<QObject*>("expandedText")->property("contentHeight").toInt() + 40;
     m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",true);
+    m_obj->findChild<QObject*>("expandedArea")->setProperty("width",width);
+    m_obj->findChild<QObject*>("expandedArea")->setProperty("height",height);
 }
 
 bool Node::clickAction()
@@ -521,6 +532,7 @@ bool Node::clickAction()
 void Node::cycleExpandState(int state)
 {
     m_expandState = state;
+    m_expanded = state;
     abstract();
     expand();
 }
@@ -528,9 +540,9 @@ void Node::cycleExpandState(int state)
 void Node::abstract()
 {
 
-    if(m_expanded){
+    if(m_expanded != -1){
 
-        m_expanded = false;
+        m_expanded = -1;
 
         for(int i=0; i<m_underMap.length(); i++){
             m_underMap[i]->abstract();
@@ -685,6 +697,13 @@ void Node::initializeObj()
     Body * body = Body::getInstance();
     QQuickItem * object;
 
+    /*
+    QNetworkAccessManager * manager = new QNetworkAccessManager();
+    QObject::connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(requestFinished(QNetworkReply*)));
+
+    QUrl url("http://127.0.0.1:5000/user/data");
+    QNetworkRequest request(url);
+    manager->get(request);*/
     QQmlComponent component(body->engine(),QUrl("qrc:/node.qml"));
     object = qobject_cast<QQuickItem*>(component.create());
     QQuickItem * item = body->getRoot();
@@ -794,6 +813,13 @@ void Node::widthChanged()
 void Node::heightChanged()
 {
     m_height = m_obj->property("height").toInt();
+}
+
+void Node::requestFinished(QNetworkReply *reply)
+{
+    QByteArray data = reply->readAll();
+    qDebug()<<data;
+
 }
 
 void Node::mouseClicked()
