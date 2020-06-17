@@ -325,9 +325,19 @@ void GhostNode::setUnderMap(QVector<BaseNode *> subMap)
 
 void GhostNode::underMapAppendNode(BaseNode *b)
 {
+    if(m_underMap.contains(b)){
+        return;
+    }
     if(!m_obj->property("expanded").toBool()){
         b->setVisibility(false);
     }
+    appendToUnderMap(b);
+    syncOriginal(b);
+
+}
+
+void GhostNode::appendToUnderMap(BaseNode *b)
+{
     m_underMap.append(b);
     Body::coordinate c = b->getAbsolutePosition().subtract(this->getAbsolutePosition());
     b->obj()->setParentItem(this->obj());
@@ -336,6 +346,18 @@ void GhostNode::underMapAppendNode(BaseNode *b)
     if(!m_underMap.isEmpty()){
         reFormatExpandedForm();
         updateAbsolutePosition();
+    }
+}
+
+void GhostNode::syncOriginal(BaseNode * b)
+{
+    if(typeid (*b) == typeid (GhostNode)){
+        BaseNode * g = b->getGhostPointer()->getOriginal()->newGhostNode();
+        Body::coordinate d;
+        d.x = 5;
+        d.y = 30;
+        g->setPosition(m_original->getAbsolutePosition().add(d));
+        m_original->appendToUnderMap(g);
     }
 }
 

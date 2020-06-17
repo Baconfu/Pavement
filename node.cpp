@@ -190,6 +190,7 @@ GhostNode *Node::newGhostNode()
     n->setID(allocateGhostID());
     n->initializeObj();
     n->adoptOriginal();
+    n->setPosition(getPosition());
     Body * body = Body::getInstance();
     body->registerGhost(n);
 
@@ -269,6 +270,16 @@ void Node::setUnderMap(QVector<BaseNode *> nodes)
         b->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
         b->setPosition(c);
         b->setVisibility(false);
+        for(int i=0; i<m_ghosts.length(); i++){
+            if(typeid (*b) == typeid (GhostNode)){
+                BaseNode * node = b->getGhostPointer()->getOriginal()->newGhostNode();
+                Body::coordinate d;
+                d.x = 5;
+                d.y = 30;
+                node->setPosition(m_ghosts[i]->getAbsolutePosition().add(d));
+                m_ghosts[i]->underMapAppendNode(node);
+            }
+        }
 
     }
     if(!nodes.isEmpty()){
@@ -281,11 +292,27 @@ void Node::setUnderMap(QVector<BaseNode *> nodes)
 
 void Node::underMapAppendNode(BaseNode *node)
 {
+    if(m_underMap.contains(node)){
+        return;
+    }
+    BaseNode * append = node;
     if(typeid (*node) == typeid (GhostNode)){
         if(node->getGhostPointer()->getOriginal() == this){
             return;
         }
     }
+    if(typeid (*node) == typeid (Node)){
+        Node * n = node->getNodePointer();
+        GhostNode * g = n->newGhostNode();
+        append = g;
+    }
+    appendToUnderMap(append);
+
+
+}
+
+void Node::appendToUnderMap(BaseNode *node)
+{
     m_underMap.append(node);
 
     Body::coordinate c = node->getPosition().subtract(this->getPosition());
@@ -293,6 +320,13 @@ void Node::underMapAppendNode(BaseNode *node)
     node->setPosition(c);
     //node->setVisibility(false);
     node->setAbstraction(this);
+
+    syncGhosts(node);
+    reFormatExpandedForm();
+}
+
+void Node::syncGhosts(BaseNode *node)
+{
     for(int i=0; i<m_ghosts.length(); i++){
         if(typeid (*node) == typeid (GhostNode)){
             BaseNode * b = node->getGhostPointer()->getOriginal()->newGhostNode();
@@ -300,12 +334,9 @@ void Node::underMapAppendNode(BaseNode *node)
             d.x = 5;
             d.y = 30;
             b->setPosition(m_ghosts[i]->getAbsolutePosition().add(d));
-            m_ghosts[i]->underMapAppendNode(b);
+            m_ghosts[i]->appendToUnderMap(b);
         }
-
     }
-    reFormatExpandedForm();
-
 }
 
 bool Node::underMapContains(BaseNode *b)
@@ -689,7 +720,12 @@ void Node::giveTypeInputFocus()
 
 void Node::moving(bool b)
 {
-    m_moving = b;
+    if(m_moving!=b){
+        m_moving = b;
+        if(b){
+            positionBeforeDragged = getPosition();
+        }
+    }
 }
 
 void Node::initializeObj()

@@ -1309,17 +1309,13 @@ void Body::mouseReleased()
                                     nodeMap[i]->getAbstraction()->exude(nodeMap[i]);
                                 }
                                 highlightedNode()->underMapAppendNode(nodeMap[i]);
-
                             }
                         }
-
                     }
                 }
-
             }
         }
         contextResolved();
-
     }
     for(int i=0; i<nodeMap.length(); i++){
         if(nodeMap[i]){
@@ -1709,9 +1705,6 @@ int Body::searching(QString input)
     if(latestContext() == opening_file){
         pool.clear();
         QStringList saves = getSaves(defaultPath);
-
-
-
         pool = functionFromList(saves);
     }
     if(latestContext() == saving_file){
@@ -1734,20 +1727,11 @@ int Body::searching(QString input)
         pool = functionFromList(nodes);
     }
     if(pool.length()==0){
-
         return 0;
     }
-
-
-
     for(int i=0; i<pool.length(); i++){
-
         pool[i].match += match(&pool[i],input);
-        qDebug()<<pool[i].match;
     }
-
-
-
     QVector<function> temp = pool;
     displayFunctions.clear();
 

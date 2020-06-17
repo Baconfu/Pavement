@@ -60,6 +60,8 @@ public:
     QVector<BaseNode*> getUnderMap(){return m_underMap;}
     void setUnderMap(QVector<BaseNode*> subMap);
     void underMapAppendNode(BaseNode * b);
+    void appendToUnderMap(BaseNode * b);
+    void syncOriginal(BaseNode * b);
     void removeSubNode(BaseNode * b){m_underMap.removeOne(b);}
     bool underMapContains(BaseNode * b);
 

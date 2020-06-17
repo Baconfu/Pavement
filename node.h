@@ -92,6 +92,8 @@ public:
     void setUnderMap(QVector<BaseNode*> nodes);
     void underMapAppendNode(QVector<BaseNode*> nodes);
     void underMapAppendNode(BaseNode * node);
+    void appendToUnderMap(BaseNode * b);
+    void syncGhosts(BaseNode * b);
     QVector<BaseNode*> getUnderMap(){return m_underMap;}
     bool underMapContains(BaseNode * b);
     void removeSubNode(BaseNode * b);
@@ -124,6 +126,7 @@ public:
     void giveTypeInputFocus();
 
     //NODE STATE VARIABLES
+    Body::coordinate positionBeforeDragged;
     void moving(bool b);
     bool isMoving(){return m_moving;}
 
