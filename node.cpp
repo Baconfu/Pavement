@@ -818,7 +818,7 @@ void Node::heightChanged()
 void Node::requestFinished(QNetworkReply *reply)
 {
     QByteArray data = reply->readAll();
-    qDebug()<<data;
+
 
 }
 
