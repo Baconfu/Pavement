@@ -260,6 +260,9 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
         Node * originalNode = findNodeByID(nodePool,original)->getNodePointer();
         n = new GhostNode(originalNode);
         originalNode->registerGhost(n->getGhostPointer());
+        if(originalNode->getName() == "hahaha"){
+            qDebug()<<"hi";
+        }
 
     }
 
@@ -297,6 +300,7 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
     if(type == "ghost"){
         n->getGhostPointer()->adoptOriginal();
         if(node["expanded"].toInt() != -1){
+
             n->expand();
             n->cycleExpandState(node["expanded"].toInt());
         }

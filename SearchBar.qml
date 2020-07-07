@@ -34,9 +34,14 @@ Item {
 
     Rectangle {
         id: rectangle
+        objectName: "rectangle"
         x: 0
         y: 0
         width: 186
+        onWidthChanged: {
+            console.log(width)
+        }
+
         height: 33 + displayCount * 30
         color: "lightGrey"
         property int displayCount:0;
@@ -60,12 +65,10 @@ Item {
             y: 7
             width: contentWidth
             onWidthChanged: {
-                if(width>166){
+                if(width+20>rectangle.width){
                     rectangle.width = width + 20
                 }
-                else{
-                    rectangle.width = 186
-                }
+
             }
 
             height: 20

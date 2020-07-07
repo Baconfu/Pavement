@@ -277,7 +277,7 @@ void Node::setUnderMap(QVector<BaseNode *> nodes)
                 d.x = 5;
                 d.y = 30;
                 node->setPosition(m_ghosts[i]->getAbsolutePosition().add(d));
-                m_ghosts[i]->underMapAppendNode(node);
+                //m_ghosts[i]->underMapAppendNode(node);
             }
         }
 

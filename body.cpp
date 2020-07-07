@@ -94,7 +94,7 @@ void Body::initialize()
     f.name = "new relation";
     f.alias = QStringList{"relation"};
     f.commonShorthand = "nr";
-    f.match = 10;
+    f.match = 1;
     functions.append(f);
 
     f.name = "new connection";
@@ -112,11 +112,12 @@ void Body::initialize()
     f.match = 0;
     functions.append(f);
 
+    /*
     f.name = "relationship mode";
     f.alias = QStringList{"rel mode"};
     f.commonShorthand = "Null";
     f.match=0;
-    functions.append(f);
+    functions.append(f);*/
 
     f.name = "move node";
     f.alias = QStringList{"move","transform","shift node"};
@@ -273,7 +274,7 @@ void Body::initialize()
     f.name = "migrate real nodes";
     f.alias = QStringList{};
     f.commonShorthand = "NULL";
-    f.match = 0;
+    f.match = -2;
     functions.append(f);
 
 
@@ -399,7 +400,8 @@ int Body::acceptedSelection(int n)
     }
     if(f=="new relation"){
         int id = allocateNewID("relation");
-        if(latestContext() == Context::node_selected){
+
+        if(latestContext() == Context::node_selected && selectedNode()){
             Node * n = nullptr;
 
             newRelation(id,selectedNode(),n);
@@ -785,12 +787,14 @@ void Body::openFile(QString path)
     QVector<BaseNode*> subPool = file.loadSubNodes();
     for(int i=0; i<subPool.length(); i++){
         nodeMap.append(subPool[i]);
+
     }
 
     subPool = file.getNodePool();
     for(int i=0; i<subPool.length(); i++){
         if(!nodeMap.contains(subPool[i])){
             nodeMap.append(subPool[i]);
+            qDebug()<<subPool[i]->getName();
         }
     }
     nodeMap.append(file.loadNotes());
@@ -1682,6 +1686,7 @@ QVector<Body::function> Body::functionFromList(QStringList l)
 int Body::searching(QString input)
 {
     if(input == "" || input == " " || input.length()==0){
+        m_searchBar->findChild<QObject*>("rectangle")->setProperty("width",186);
         clearSearch();
         return 0;
     }
@@ -1751,12 +1756,25 @@ int Body::searching(QString input)
     }
 
     int n = 0;
+    int longestContentWidth = 0;
     for(int i=0; i<displayFunctions.length(); i++){
         if(displayFunctions[i].match>2){
             QString t = "option" + QString::number(i);
-            m_searchBar->findChild<QObject*>(t)->setProperty("text",displayFunctions[i].name);
+            QObject * opt = m_searchBar->findChild<QObject*>(t);
+            opt->setProperty("text",displayFunctions[i].name);
+            if(opt->property("contentWidth").toInt() > longestContentWidth){
+                longestContentWidth = opt->property("contentWidth").toInt();
+            }
             n+=1;
         }
+    }
+    if(longestContentWidth+13> 186){
+        //if(longestContentWidth +13> m_searchBar->findChild<QObject*>("rectangle")->property("width").toInt()){
+
+        m_searchBar->findChild<QObject*>("rectangle")->setProperty("width",longestContentWidth+13);
+
+    }else{
+        m_searchBar->findChild<QObject*>("rectangle")->setProperty("width",186);
     }
     m_searchBar->setProperty("optionCount",n);
     return 0;
