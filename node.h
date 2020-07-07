@@ -5,6 +5,7 @@
 #include <relation.h>
 #include <body.h>
 #include <basenode.h>
+#include <QNetworkReply>
 #include <QString>
 
 
@@ -91,6 +92,8 @@ public:
     void setUnderMap(QVector<BaseNode*> nodes);
     void underMapAppendNode(QVector<BaseNode*> nodes);
     void underMapAppendNode(BaseNode * node);
+    void appendToUnderMap(BaseNode * b);
+    void syncGhosts(BaseNode * b);
     QVector<BaseNode*> getUnderMap(){return m_underMap;}
     bool underMapContains(BaseNode * b);
     void removeSubNode(BaseNode * b);
@@ -114,7 +117,7 @@ public:
 
 
     void cycleExpandState(int state);
-    bool isExpanded(){return m_expanded;}
+    int isExpanded(){return m_expanded;}
     void abstract();
     void exude(BaseNode * b);
 
@@ -123,6 +126,7 @@ public:
     void giveTypeInputFocus();
 
     //NODE STATE VARIABLES
+    Body::coordinate positionBeforeDragged;
     void moving(bool b);
     bool isMoving(){return m_moving;}
 
@@ -216,7 +220,7 @@ private:
     bool m_visible = true;
     bool m_hidden = false;
     bool m_dissolve = false;
-    bool m_expanded = false;
+    int m_expanded = -1;
     bool m_moving = false;
 
     bool m_preventFocus = false;
@@ -241,6 +245,7 @@ public slots:
     void widthChanged();
     void heightChanged();
 
+    void requestFinished(QNetworkReply*reply);
 
     void mouseClicked();
     void mousePressed();

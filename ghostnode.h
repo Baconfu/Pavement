@@ -60,6 +60,8 @@ public:
     QVector<BaseNode*> getUnderMap(){return m_underMap;}
     void setUnderMap(QVector<BaseNode*> subMap);
     void underMapAppendNode(BaseNode * b);
+    void appendToUnderMap(BaseNode * b);
+    void syncOriginal(BaseNode * b);
     void removeSubNode(BaseNode * b){m_underMap.removeOne(b);}
     bool underMapContains(BaseNode * b);
 
@@ -80,7 +82,7 @@ public:
 
     void abstract();
     void expand();
-    bool isExpanded(){return m_expanded;}
+    int isExpanded(){return m_expanded;}
     void extract();
     void exude(BaseNode * b);
 
@@ -133,7 +135,7 @@ private:
     int m_height = 10;
 
 
-    bool m_expanded = false;
+    int m_expanded = -1;
     bool m_batchSelected = false;
     bool m_hoverSelected = false;
     bool m_moving = false;

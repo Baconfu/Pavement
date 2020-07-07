@@ -420,10 +420,13 @@ void Relation::finalizeSelf()
     if(originNode() && destinationNode()){
         if(originNode()->getAbstraction() == destinationNode()->getAbstraction()){
             BaseNode * b = originNode()->getAbstraction();
-            if(typeid (*b) == typeid (Node)){
-                b->getNodePointer()->registerUnderRelation(this);
-                setAbstraction(b);
+            if(b){
+                if(typeid (*b) == typeid (Node)){
+                    b->getNodePointer()->registerUnderRelation(this);
+                    setAbstraction(b);
+                }
             }
+
         }
     }
 }

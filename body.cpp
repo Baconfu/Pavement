@@ -70,31 +70,37 @@ void Body::initialize()
     f.name = "exit application";
     f.alias = QStringList{"quit","exit","quit application","close","close application"};
     f.commonShorthand = "Null";
+    f.match = 0;
     functions.append(f);
 
     f.name = "fullscreen";
     f.alias = QStringList{};
     f.commonShorthand = "full";
+    f.match = 0;
     functions.append(f);
 
     f.name = "exit fullscreen";
     f.alias = QStringList{};
     f.commonShorthand = "NULL";
+    f.match = 0;
     functions.append(f);
 
     f.name = "new node";
     f.alias = QStringList{"new"};
     f.commonShorthand = "n";
+    f.match = 0;
     functions.append(f);
 
     f.name = "new relation";
     f.alias = QStringList{"relation"};
     f.commonShorthand = "nr";
+    f.match = 10;
     functions.append(f);
 
     f.name = "new connection";
     f.alias = QStringList{"connection","new line"};
     f.commonShorthand = "nc";
+    f.match = 0;
     functions.append(f);
 
 
@@ -103,140 +109,172 @@ void Body::initialize()
     f.alias = QStringList{"delete node","delete","remove"};
     f.commonShorthand = "rmv";
     f.contexts = {node_selected};
+    f.match = 0;
     functions.append(f);
 
     f.name = "relationship mode";
     f.alias = QStringList{"rel mode"};
     f.commonShorthand = "Null";
+    f.match=0;
     functions.append(f);
 
     f.name = "move node";
     f.alias = QStringList{"move","transform","shift node"};
     f.contexts = {node_selected};
     f.commonShorthand = "mv";
+    f.match = 0;
     functions.append(f);
 
     f.name = "parent";
     f.alias = QStringList{"set parent"};
     f.commonShorthand = "p";
+    f.match = 0;
     functions.append(f);
 
     f.name = "save";
     f.alias = QStringList{"savestate"};
     f.commonShorthand = "sv";
+    f.match = 0;
     functions.append(f);
 
     f.name = "open";
     f.alias = QStringList{"open file","load","load file"};
     f.commonShorthand = "op";
+    f.match = 0;
     functions.append(f);
 
     f.name = "save as";
     f.alias = QStringList{"save file"};
     f.commonShorthand = "sf";
+    f.match = 0;
     functions.append(f);
 
     f.name = "frame";
     f.alias = QStringList{"frame view","reset view","frame camera"};
     f.commonShorthand = "f";
+    f.match = 0;
     functions.append(f);
 
     f.name = "dissolve";
     f.alias = QStringList{"dissolve node"};
     f.commonShorthand = "d";
+    f.match = 0;
     functions.append(f);
 
     f.name = "include";
     f.alias = QStringList{"add include","include node"};
     f.commonShorthand = "inc";
+    f.match = 0;
     functions.append(f);
+
     f.name = "debug";
     f.alias = QStringList{};
     f.commonShorthand = "NULL";
+    f.match = 0;
     functions.append(f);
 
     f.name = "break";
     f.alias = QStringList{};
     f.commonShorthand = "NULL";
     f.contexts = {relation_selected,structural_selected};
+    f.match = 0;
     functions.append(f);
 
     f.name = "expand";
     f.alias = QStringList{"expand node"};
     f.commonShorthand = "ex";
     f.contexts = {node_selected};
+    f.match = 0;
     functions.append(f);
 
     f.name = "toggle batch select";
     f.alias = QStringList{"toggle batch select"};
     f.commonShorthand = "NULL";
+    f.match = 0;
     functions.append(f);
 
     f.name = "select all children";
     f.alias = QStringList{"select children"};
     f.commonShorthand = "NULL";
     f.contexts = {node_selected};
+    f.match = 0;
     functions.append(f);
 
     f.name = "clear batch selection";
     f.alias = QStringList{"clear selection","clear","empty batch"};
     f.commonShorthand = "NULL";
     f.contexts = {batch_selecting};
+    f.match = 0;
     functions.append(f);
 
     f.name = "deselect batch";
     f.alias = QStringList{"deselect all","deselect"};
     f.commonShorthand = "NULL";
+    f.match = 0;
     functions.append(f);
 
     f.name = "select";
     f.alias = QStringList{"select node","add","append","batch select"};
     f.commonShorthand = "s";
     f.contexts = {node_selected};
+    f.match = 0;
     functions.append(f);
 
     f.name = "deselect";
     f.alias = QStringList{"deselect node"};
     f.commonShorthand = "ds";
     f.contexts = {node_selected};
+    f.match = 0;
     functions.append(f);
 
     f.name = "ghost node";
     f.alias = QStringList{"ghost"};
     f.commonShorthand = "gh";
     f.contexts = {node_selected};
+    f.match = 0;
     functions.append(f);
 
     f.name = "create ghost";
     f.alias = QStringList{"create ghost node","new ghost node"};
     f.commonShorthand = "g";
+    f.match = 0;
     functions.append(f);
 
     f.name = "note";
     f.alias = QStringList{"create note","new note"};
     f.commonShorthand = "nt";
+    f.match = 0;
     functions.append(f);
 
     f.name = "abstract";
     f.alias = QStringList{};
     f.commonShorthand = "ab";
+    f.match = 0;
     functions.append(f);
 
     f.name = "create area";
     f.alias = QStringList{"new area","area"};
     f.commonShorthand = "ar";
+    f.match = 0;
     functions.append(f);
 
     f.name = "remove from";
     f.alias = QStringList{"extract","extract from","remove"};
     f.commonShorthand = "NULL";
+    f.match = 0;
     functions.append(f);
 
     f.name = "show text";
     f.alias = QStringList{"expand text","text"};
     f.commonShorthand = "txt";
+    f.match = 0;
     functions.append(f);
 
+    f.name = "migrate real nodes";
+    f.alias = QStringList{};
+    f.commonShorthand = "NULL";
+    f.match = 0;
+    functions.append(f);
 
 
 }
@@ -447,8 +485,8 @@ int Body::acceptedSelection(int n)
     if(f == "debug"){
         //getRoot()->findChild<QObject*>("line"+QString::number(debugTally))->setProperty("lineWidth",2);
         //getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
-        Sync sync;
-        sync.sync();
+        Node * n = new Node;
+        n->initializeObj();
 
     }
     if(f == "select"){
@@ -533,8 +571,11 @@ int Body::acceptedSelection(int n)
         }else{
 
             BaseNode * b = selectedNode();
-            b->expand();
-            b->abstract();
+            if(b){
+                b->expand();
+                b->abstract();
+            }
+
 
         }
 
@@ -545,7 +586,7 @@ int Body::acceptedSelection(int n)
         if(contexts.contains(latestContext())){
 
             BaseNode * b = selectedNode();
-            if(b->isExpanded()){
+            if(b->isExpanded() != 0){
                 b->cycleExpandState(0);
             }else{
                 b->expand();
@@ -576,6 +617,27 @@ int Body::acceptedSelection(int n)
             contextReset();
         }else{
 
+        }
+    }
+    if(f == "migrate real nodes"){
+        Body::coordinate pos;
+        pos.x=0;
+        pos.y=0;
+        int highest=0;
+        for(int i=0; i<nodeMap.length(); i++){
+            BaseNode * b = nodeMap[i];
+            if(typeid (*b) == typeid (Node)){
+                b->setPosition(m_mousePosition.add(pos));
+                if(b->height()>highest){
+                    highest=b->height();
+                }
+                pos.x+=b->width()+10;
+                if(pos.x>1300){
+                    pos.x=0;
+                    pos.y+=highest+10;
+                    highest = 0;
+                }
+            }
         }
     }
 
@@ -1239,23 +1301,21 @@ void Body::mouseReleased()
         if(m_mouseHeld){
 
             if(highlightedNode()){
-
-                for(int i=0; i<nodeMap.length(); i++){
-                    if(nodeMap[i]){
-                        if(nodeMap[i]->isMoving() && nodeMap[i] != highlightedNode() && !highlightedNode()->underMapContains(nodeMap[i])){
-                            if(nodeMap[i]->getAbstraction()){
-                                nodeMap[i]->getAbstraction()->exude(nodeMap[i]);
+                if(!m_batchSelected.contains(highlightedNode())){
+                    for(int i=0; i<nodeMap.length(); i++){
+                        if(nodeMap[i]){
+                            if(nodeMap[i]->isMoving() && nodeMap[i] != highlightedNode() && !highlightedNode()->underMapContains(nodeMap[i])){
+                                if(nodeMap[i]->getAbstraction()){
+                                    nodeMap[i]->getAbstraction()->exude(nodeMap[i]);
+                                }
+                                highlightedNode()->underMapAppendNode(nodeMap[i]);
                             }
-                            highlightedNode()->underMapAppendNode(nodeMap[i]);
-
                         }
                     }
-
                 }
             }
         }
         contextResolved();
-
     }
     for(int i=0; i<nodeMap.length(); i++){
         if(nodeMap[i]){
@@ -1645,9 +1705,6 @@ int Body::searching(QString input)
     if(latestContext() == opening_file){
         pool.clear();
         QStringList saves = getSaves(defaultPath);
-
-
-
         pool = functionFromList(saves);
     }
     if(latestContext() == saving_file){
@@ -1670,19 +1727,11 @@ int Body::searching(QString input)
         pool = functionFromList(nodes);
     }
     if(pool.length()==0){
-
         return 0;
     }
-
-
-
     for(int i=0; i<pool.length(); i++){
-        pool[i].match = match(&pool[i],input);
-
+        pool[i].match += match(&pool[i],input);
     }
-
-
-
     QVector<function> temp = pool;
     displayFunctions.clear();
 
@@ -1917,14 +1966,14 @@ void Body::autosave()
         dir.mkdir(currentFile + "-autosave");
     }
     saveFile(defaultPath + divider + currentFile + "-autosave" + divider + "1-minute-ago.json");
-    if(sessionLength % 5 == 0){
+    if(sessionLength % 5 == 0 && sessionLength != 0){
         saveFile(defaultPath + divider + currentFile + "-autosave" + divider + "5-minutes-ago.json");
     }
-    if(sessionLength % 10 == 0){
+    if(sessionLength % 10 == 0 && sessionLength != 0){
         saveFile(defaultPath + divider + currentFile + "-autosave" + divider + "10-minutes-ago.json");
     }
-    if(sessionLength % 20 == 0){
-        saveFile(defaultPath + divider + "saves" + divider + currentFile + "-autosave" + divider + "autosave-"
+    if(sessionLength % 20 == 0 && sessionLength != 0){
+        saveFile(defaultPath + divider + currentFile + "-autosave" + divider + "autosave-"
                  + QString::number(sessionLength%20));
     }
 
@@ -1992,11 +2041,17 @@ int Body::match(function * f,QString input)
         return 100;
     }
 
+
     QStringList name = f->name.split(" ");
     for(int i=0; i<name.length(); i++){
         match+=matchString(name[i],input);
 
     }
+    QString nospace = "";
+    for(int i=0; i<name.length(); i++){
+        nospace+=name[i];
+    }
+    match+=matchString(nospace,input);
 
     int tempMatch = 0;
 

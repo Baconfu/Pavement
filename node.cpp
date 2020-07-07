@@ -2,6 +2,7 @@
 #include <ghostnode.h>
 #include <QMetaObject>
 #include <QGenericArgument>
+#include <QNetworkAccessManager>
 
 Node::Node(QObject * parent, int id)
 {
@@ -189,6 +190,7 @@ GhostNode *Node::newGhostNode()
     n->setID(allocateGhostID());
     n->initializeObj();
     n->adoptOriginal();
+    n->setPosition(getPosition());
     Body * body = Body::getInstance();
     body->registerGhost(n);
 
@@ -199,15 +201,22 @@ GhostNode *Node::newGhostNode()
 void Node::setType(Node *n)
 {
     if(n){
-        m_typeNode = n;
-        m_type = n->getName();
+        if(n != m_typeNode){
+            if(m_typeNode){
+                m_typeNode->removeMember(this);
+            }
+            m_typeNode = n;
+            m_type = n->getName();
 
-        obj()->setProperty("type",m_type);
-        obj()->findChild<QObject*>("typeName")->setProperty("italic",true);
+
+            obj()->findChild<QObject*>("typeName")->setProperty("text",m_type);
+            obj()->findChild<QObject*>("typeName")->setProperty("italic",true);
 
 
-        n->registerMember(this);
+            n->registerMember(this);
+        }
     }else{
+
         Body * b = Body::getInstance();
 
         m_typeNode = nullptr;
@@ -261,6 +270,16 @@ void Node::setUnderMap(QVector<BaseNode *> nodes)
         b->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
         b->setPosition(c);
         b->setVisibility(false);
+        for(int i=0; i<m_ghosts.length(); i++){
+            if(typeid (*b) == typeid (GhostNode)){
+                BaseNode * node = b->getGhostPointer()->getOriginal()->newGhostNode();
+                Body::coordinate d;
+                d.x = 5;
+                d.y = 30;
+                node->setPosition(m_ghosts[i]->getAbsolutePosition().add(d));
+                m_ghosts[i]->underMapAppendNode(node);
+            }
+        }
 
     }
     if(!nodes.isEmpty()){
@@ -273,11 +292,27 @@ void Node::setUnderMap(QVector<BaseNode *> nodes)
 
 void Node::underMapAppendNode(BaseNode *node)
 {
+    if(m_underMap.contains(node)){
+        return;
+    }
+    BaseNode * append = node;
     if(typeid (*node) == typeid (GhostNode)){
         if(node->getGhostPointer()->getOriginal() == this){
             return;
         }
     }
+    if(typeid (*node) == typeid (Node)){
+        Node * n = node->getNodePointer();
+        GhostNode * g = n->newGhostNode();
+        append = g;
+    }
+    appendToUnderMap(append);
+
+
+}
+
+void Node::appendToUnderMap(BaseNode *node)
+{
     m_underMap.append(node);
 
     Body::coordinate c = node->getPosition().subtract(this->getPosition());
@@ -285,6 +320,13 @@ void Node::underMapAppendNode(BaseNode *node)
     node->setPosition(c);
     //node->setVisibility(false);
     node->setAbstraction(this);
+
+    syncGhosts(node);
+    reFormatExpandedForm();
+}
+
+void Node::syncGhosts(BaseNode *node)
+{
     for(int i=0; i<m_ghosts.length(); i++){
         if(typeid (*node) == typeid (GhostNode)){
             BaseNode * b = node->getGhostPointer()->getOriginal()->newGhostNode();
@@ -292,12 +334,9 @@ void Node::underMapAppendNode(BaseNode *node)
             d.x = 5;
             d.y = 30;
             b->setPosition(m_ghosts[i]->getAbsolutePosition().add(d));
-            m_ghosts[i]->underMapAppendNode(b);
+            m_ghosts[i]->appendToUnderMap(b);
         }
-
     }
-    reFormatExpandedForm();
-
 }
 
 bool Node::underMapContains(BaseNode *b)
@@ -445,7 +484,8 @@ void Node::expand()
 {
     Body::coordinate pos = getCenterPosition();
     m_obj->setProperty("expanded",true);
-    m_expanded = true;
+
+    m_expanded = m_expandState;
 
     if(m_expandState == 0){
         expandMap();
@@ -472,7 +512,7 @@ void Node::expandMap()
     m_obj->findChild<QObject*>("expandedRectangle")->setProperty("visible",true);
 
     if(!m_underMap.isEmpty()){
-        m_expanded = true;
+        m_expanded = 0;
         for(int i=0; i<m_underMap.length(); i++){
             m_underMap[i]->setVisibility(true);
         }
@@ -484,7 +524,7 @@ void Node::expandMap()
 
         reFormatExpandedForm();
     }else{
-        m_expanded = true;
+        m_expanded = 0;
         m_obj->setProperty("expanded",true);
 
     }
@@ -504,7 +544,11 @@ void Node::expandImage()
 
 void Node::expandText()
 {
+    int width = m_obj->findChild<QObject*>("expandedText")->property("contentWidth").toInt() + 20;
+    int height = m_obj->findChild<QObject*>("expandedText")->property("contentHeight").toInt() + 40;
     m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",true);
+    m_obj->findChild<QObject*>("expandedArea")->setProperty("width",width);
+    m_obj->findChild<QObject*>("expandedArea")->setProperty("height",height);
 }
 
 bool Node::clickAction()
@@ -519,6 +563,7 @@ bool Node::clickAction()
 void Node::cycleExpandState(int state)
 {
     m_expandState = state;
+    m_expanded = state;
     abstract();
     expand();
 }
@@ -526,9 +571,9 @@ void Node::cycleExpandState(int state)
 void Node::abstract()
 {
 
-    if(m_expanded){
+    if(m_expanded != -1){
 
-        m_expanded = false;
+        m_expanded = -1;
 
         for(int i=0; i<m_underMap.length(); i++){
             m_underMap[i]->abstract();
@@ -675,7 +720,12 @@ void Node::giveTypeInputFocus()
 
 void Node::moving(bool b)
 {
-    m_moving = b;
+    if(m_moving!=b){
+        m_moving = b;
+        if(b){
+            positionBeforeDragged = getPosition();
+        }
+    }
 }
 
 void Node::initializeObj()
@@ -683,6 +733,13 @@ void Node::initializeObj()
     Body * body = Body::getInstance();
     QQuickItem * object;
 
+    /*
+    QNetworkAccessManager * manager = new QNetworkAccessManager();
+    QObject::connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(requestFinished(QNetworkReply*)));
+
+    QUrl url("http://127.0.0.1:5000/user/data");
+    QNetworkRequest request(url);
+    manager->get(request);*/
     QQmlComponent component(body->engine(),QUrl("qrc:/node.qml"));
     object = qobject_cast<QQuickItem*>(component.create());
     QQuickItem * item = body->getRoot();
@@ -792,6 +849,13 @@ void Node::widthChanged()
 void Node::heightChanged()
 {
     m_height = m_obj->property("height").toInt();
+}
+
+void Node::requestFinished(QNetworkReply *reply)
+{
+    QByteArray data = reply->readAll();
+
+
 }
 
 void Node::mouseClicked()
