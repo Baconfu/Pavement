@@ -364,8 +364,10 @@ private:
     int matchString(QString s, QString input);
 
     QQuickItem * m_searchBar = nullptr;
+    int m_searchBar_defaultWidth = 186;
     void updateSearchBar(QStringList topMatches);
     void clearSearch();
+    void cycleSearchBarSelection();
 
     bool tabAccepted = false; //mutual exclusion: tabaccepted and enterPressed
 

@@ -54,6 +54,7 @@ void Body::initialize()
     m_searchBar->setParentItem(getRoot()->findChild<QQuickItem*>("layer"));
     m_searchBar->setParent(enginePtr);
     m_searchBar->setProperty("visible",false);
+    m_searchBar->findChild<QObject*>("rectangle")->setProperty("width",m_searchBar_defaultWidth);
 
     QObject * m = getRoot()->findChild<QObject*>("mouseArea");
     connect(m,SIGNAL(mouseTransform(int,int,int,int)),this,SLOT(mouseTransform(int,int,int,int)));
@@ -94,7 +95,7 @@ void Body::initialize()
     f.name = "new relation";
     f.alias = QStringList{"relation"};
     f.commonShorthand = "nr";
-    f.match = 10;
+    f.match = 1;
     functions.append(f);
 
     f.name = "new connection";
@@ -112,11 +113,12 @@ void Body::initialize()
     f.match = 0;
     functions.append(f);
 
+    /*
     f.name = "relationship mode";
     f.alias = QStringList{"rel mode"};
     f.commonShorthand = "Null";
     f.match=0;
-    functions.append(f);
+    functions.append(f);*/
 
     f.name = "move node";
     f.alias = QStringList{"move","transform","shift node"};
@@ -273,7 +275,7 @@ void Body::initialize()
     f.name = "migrate real nodes";
     f.alias = QStringList{};
     f.commonShorthand = "NULL";
-    f.match = 0;
+    f.match = -2;
     functions.append(f);
 
 
@@ -399,7 +401,8 @@ int Body::acceptedSelection(int n)
     }
     if(f=="new relation"){
         int id = allocateNewID("relation");
-        if(latestContext() == Context::node_selected){
+
+        if(latestContext() == Context::node_selected && selectedNode()){
             Node * n = nullptr;
 
             newRelation(id,selectedNode(),n);
@@ -785,12 +788,14 @@ void Body::openFile(QString path)
     QVector<BaseNode*> subPool = file.loadSubNodes();
     for(int i=0; i<subPool.length(); i++){
         nodeMap.append(subPool[i]);
+
     }
 
     subPool = file.getNodePool();
     for(int i=0; i<subPool.length(); i++){
         if(!nodeMap.contains(subPool[i])){
             nodeMap.append(subPool[i]);
+            qDebug()<<subPool[i]->getName();
         }
     }
     nodeMap.append(file.loadNotes());
@@ -1686,8 +1691,7 @@ int Body::searching(QString input)
         return 0;
     }
     if(input[input.length()-1]==" "){ // maybe make getter and setter functions for option highlighted.
-        int n = m_searchBar->property("optionHighlighted").toInt();
-        m_searchBar->setProperty("optionHighlighted",n+1);
+        cycleSearchBarSelection();
     }
 
     input = Utility::trimString(input," ");
@@ -1751,12 +1755,25 @@ int Body::searching(QString input)
     }
 
     int n = 0;
+    int longestContentWidth = 0;
     for(int i=0; i<displayFunctions.length(); i++){
         if(displayFunctions[i].match>2){
             QString t = "option" + QString::number(i);
-            m_searchBar->findChild<QObject*>(t)->setProperty("text",displayFunctions[i].name);
+            QObject * opt = m_searchBar->findChild<QObject*>(t);
+            opt->setProperty("text",displayFunctions[i].name);
+            if(opt->property("contentWidth").toInt() > longestContentWidth){
+                longestContentWidth = opt->property("contentWidth").toInt();
+            }
             n+=1;
         }
+    }
+    if(longestContentWidth+13> 186){
+        //if(longestContentWidth +13> m_searchBar->findChild<QObject*>("rectangle")->property("width").toInt()){
+
+        m_searchBar->findChild<QObject*>("rectangle")->setProperty("width",longestContentWidth+13);
+
+    }else{
+        m_searchBar->findChild<QObject*>("rectangle")->setProperty("width",186);
     }
     m_searchBar->setProperty("optionCount",n);
     return 0;
@@ -2108,6 +2125,7 @@ int Body::matchString(QString s, QString input)
 
 void Body::clearSearch()
 {
+    m_searchBar->findChild<QObject*>("rectangle")->setProperty("width",m_searchBar_defaultWidth);
     m_searchBar->setProperty("optionCount",0);
     m_searchBar->setProperty("optionHighlighted",-1);
     m_searchBar->findChild<QObject*>("textInput")->setProperty("text","");
@@ -2115,6 +2133,12 @@ void Body::clearSearch()
         QString t = "option" + QString::number(i);
         m_searchBar->findChild<QObject*>(t)->setProperty("text","");
     }
+}
+
+void Body::cycleSearchBarSelection()
+{
+    int n = m_searchBar->property("optionHighlighted").toInt();
+    m_searchBar->setProperty("optionHighlighted",n+1);
 }
 
 

@@ -84,6 +84,7 @@ ApplicationWindow {
             onReleased: {
                 mouseReleased()
             }
+
             pressAndHoldInterval: 200
             onPressAndHold: {
                 mouseHeld()
@@ -110,7 +111,6 @@ ApplicationWindow {
             objectName: "debug"
 
         }
-
 
 
         Item {
