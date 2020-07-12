@@ -1,4 +1,5 @@
 import QtQuick 2.12
+import QtQuick 2.15
 import QtQuick.Window 2.12
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls 1.0
@@ -30,6 +31,7 @@ ApplicationWindow {
         signal enterPressed()
         signal closing()
         signal escapePressed()
+        signal scroll(int x,int y,bool ctrl)
 
         focus: true
         Keys.onTabPressed: {
@@ -89,7 +91,7 @@ ApplicationWindow {
             onPressAndHold: {
                 mouseHeld()
             }
-
+            /*
             onWheel: {
 
                 if(wheel.modifiers == Qt.ControlModifier){
@@ -97,13 +99,39 @@ ApplicationWindow {
                 }else{
                     scroll(wheel.angleDelta.x,wheel.angleDelta.y,false)
                 }
-            }
+            }*/
 
             onDoubleClicked: {
 
             }
-
         }
+        WheelHandler {
+            id:trackpad
+            acceptedDevices: PointerDevice.TouchPad
+            onWheel: {
+                if(wheel.modifiers == Qt.ControlModifier){
+                    myItem.scroll(wheel.angleDelta.x,wheel.angleDelta.y,true)
+                }else{
+                    myItem.scroll(wheel.angleDelta.x,wheelAngleDelta.y,false)
+                }
+
+
+
+            }
+        }
+
+        WheelHandler {
+            id:wheel
+            acceptedDevices: PointerDevice.Mouse
+            property int rotationOld: 0
+            onWheel: {
+
+                myItem.scroll(0,(rotation-rotationOld) * 10,true)
+
+                rotationOld = rotation
+            }
+        }
+
 
         TextInput{
             x:0

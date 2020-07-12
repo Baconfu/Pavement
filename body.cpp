@@ -41,6 +41,7 @@ void Body::initialize()
     connect(getRoot(),SIGNAL(enterPressed()),this,SLOT(enterPressed()));
     connect(getRoot(),SIGNAL(closing()),this,SLOT(closeWindow()));
     connect(getRoot(),SIGNAL(escapePressed()),this,SLOT(escapePressed()));
+    connect(getRoot(),SIGNAL(scroll(int,int,bool)),this,SLOT(scroll(int,int,bool)));
 
     QDir dir = QDir(QDir::currentPath());
     QStringList contents = dir.entryList();
@@ -65,7 +66,7 @@ void Body::initialize()
     connect(m,SIGNAL(mousePressed(int,int)),this,SLOT(mousePressed(int,int)));
     connect(m,SIGNAL(mouseReleased()),this,SLOT(mouseReleased()));
     connect(m,SIGNAL(mouseHeld()),this,SLOT(mouseHeld()));
-    connect(m,SIGNAL(scroll(int,int,bool)),this,SLOT(scroll(int,int,bool)));
+
 
     function f;
     f.name = "exit application";

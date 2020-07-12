@@ -299,6 +299,7 @@ private:
     void removeNodes(QVector<BaseNode*> nodes);
 
 
+    BaseNode * m_currently_hovering = nullptr
     BaseNode * m_selectedNode = nullptr;
     QVector<BaseNode*> m_batchSelected;
     QVector<BaseNode*> batchSelected(){
