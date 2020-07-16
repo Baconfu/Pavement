@@ -42,6 +42,7 @@ public:
         c.y = m_absolutePosition.y + m_height/2;
         return c;
     }
+    Body::coordinate getLocalCenterPosition(){Body::coordinate c; c.x = width()/2; c.y = height()/2; return c;}
     Body::coordinate getAbsolutePosition(){updateAbsolutePosition(); return m_absolutePosition;}
     int getX(){return getPosition().x;}
     int getY(){return getPosition().y;}
@@ -92,8 +93,8 @@ public:
     void setUnderMap(QVector<BaseNode*> nodes);
     void underMapAppendNode(QVector<BaseNode*> nodes);
     void underMapAppendNode(BaseNode * node);
-    void appendToUnderMap(BaseNode * b);
-    void syncGhosts(BaseNode * b);
+    void appendToUnderMap(BaseNode * b,BaseNode * caller);
+    void syncGhosts(BaseNode * b,BaseNode * caller);
     QVector<BaseNode*> getUnderMap(){return m_underMap;}
     bool underMapContains(BaseNode * b);
     void removeSubNode(BaseNode * b);
@@ -117,7 +118,7 @@ public:
 
 
     void cycleExpandState(int state);
-    int isExpanded(){return m_expanded;}
+    bool isExpanded(){return m_expanded;}
     void abstract();
     void exude(BaseNode * b);
 
@@ -220,7 +221,7 @@ private:
     bool m_visible = true;
     bool m_hidden = false;
     bool m_dissolve = false;
-    int m_expanded = -1;
+    int m_expanded = false;
     bool m_moving = false;
 
     bool m_preventFocus = false;

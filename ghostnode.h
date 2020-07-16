@@ -14,6 +14,7 @@ class GhostNode: public BaseNode
 public:
     GhostNode(Node * original = nullptr,QObject * parent = nullptr);
 
+    void qDebugSpecs();
 
     void setID(int id){m_id = id;}
     GhostNode * getGhostPointer(){return this;}
@@ -35,6 +36,7 @@ public:
         c.y = m_absolutePosition.y + m_height/2;
         return c;
     }
+    Body::coordinate getLocalCenterPosition(){Body::coordinate c; c.x = width()/2; c.y = height()/2; return c;}
     QString getName(){m_name = m_original->getName(); return m_name;}
     void setName(QString name);
 
@@ -82,7 +84,7 @@ public:
 
     void abstract();
     void expand();
-    int isExpanded(){return m_expanded;}
+    bool isExpanded(){return m_expanded;}
     void extract();
     void exude(BaseNode * b);
 
@@ -135,7 +137,7 @@ private:
     int m_height = 10;
 
 
-    int m_expanded = -1;
+    int m_expanded = false;
     bool m_batchSelected = false;
     bool m_hoverSelected = false;
     bool m_moving = false;

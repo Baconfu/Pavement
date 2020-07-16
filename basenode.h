@@ -73,7 +73,7 @@ public:
 
     virtual void subNodeMoved(){}
     virtual void reFormatExpandedForm(){}
-    virtual int isExpanded(){return -1;}
+    virtual bool isExpanded(){return false;}
 
     virtual void setAbstraction(BaseNode * b){qDebug()<<"BaseNode virtual function called. "<<b;}
     virtual BaseNode * getAbstraction();
@@ -97,10 +97,12 @@ public:
     virtual QQuickItem * obj(){return m_obj;}
 
 
+    int expandState(){return m_expandState;}
+
 
 protected:
     int m_id;
-    int m_expandState = 0;
+    int m_expandState = -1;
 
     QString m_name;
 

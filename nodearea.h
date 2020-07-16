@@ -62,7 +62,7 @@ public:
     void subNodeMoved();
     void reFormatExpandedForm();
 
-    int isExpanded(){return m_expanded;}
+    bool isExpanded(){return m_expanded;}
 
     void setAbstraction(BaseNode * b){m_abstraction = b;}
     BaseNode * getAbstraction(){return m_abstraction;}
@@ -87,7 +87,7 @@ private:
     int m_width = 0;
     int m_height = 0;
 
-    int m_expanded = -1;
+    int m_expanded = false;
     bool m_visible = true;
     bool m_moving = false;
 

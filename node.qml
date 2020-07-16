@@ -10,8 +10,7 @@ Item {
     property int absY
 
 
-
-
+    visible: true
 
     z:0
 
@@ -35,8 +34,8 @@ Item {
             expandedArea.visible = true
             typeNameContainer.y = expandedArea.y + expandedArea.height
             container.width = expandedArea.width
-            container.height = nameContainer.height + expandedRectangle.height + typeNameContainer.height
 
+            container.height = nameContainer.height + expandedRectangle.height + typeNameContainer.height
 
         }
         else{

@@ -123,6 +123,7 @@ public:
             r.y = y * -1;
             return r;
         }
+        operator QPoint() const {return QPoint(x,y);}
     }coordinate;
 
 
@@ -299,7 +300,7 @@ private:
     void removeNodes(QVector<BaseNode*> nodes);
 
 
-    BaseNode * m_currently_hovering = nullptr
+    BaseNode * m_currently_hovering = nullptr;
     BaseNode * m_selectedNode = nullptr;
     QVector<BaseNode*> m_batchSelected;
     QVector<BaseNode*> batchSelected(){

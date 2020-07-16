@@ -586,7 +586,7 @@ int Body::acceptedSelection(int n)
     }
     if(f == "expand"){
 
-
+        qDebug()<<"EXPAND CALLED -----------------------------------";
         if(contexts.contains(latestContext())){
 
             BaseNode * b = selectedNode();
@@ -796,7 +796,6 @@ void Body::openFile(QString path)
     for(int i=0; i<subPool.length(); i++){
         if(!nodeMap.contains(subPool[i])){
             nodeMap.append(subPool[i]);
-            qDebug()<<subPool[i]->getName();
         }
     }
     nodeMap.append(file.loadNotes());
@@ -818,9 +817,12 @@ QStringList Body::getSaves(QString path)
         struct stat statbuf;
 
         while((entry = readdir(dir)) != nullptr){
+            string name = path.toStdString()+"/"+entry->d_name;
+            if(stat(name.c_str(),&statbuf) == 0){
+                if(statbuf.st_mode & S_IFREG){
 
-            if(stat(entry->d_name,&statbuf) == 0){
-                s.append(QString::fromStdString(entry->d_name));
+                    s.append(QString::fromStdString(entry->d_name));
+                }
             }
 
         }
