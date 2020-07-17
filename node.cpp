@@ -547,8 +547,16 @@ void Node::expandImage()
 
 void Node::expandText()
 {
-    int width = m_obj->findChild<QObject*>("expandedText")->property("contentWidth").toInt() + 20;
-    int height = m_obj->findChild<QObject*>("expandedText")->property("contentHeight").toInt() + 40;
+    QObject * textBox = m_obj->findChild<QObject*>("expandedTextBox");
+    QObject * text = textBox->findChild<QObject*>("expandedText");
+    int width = text->property("contentWidth").toInt() + 20;
+    if(width < textBox->property("minWidth").toInt()){
+        width = textBox->property("minWidth").toInt();
+    }
+    int height = text->property("contentHeight").toInt() + 40;
+    if(height < textBox->property("minHeight").toInt()){
+        height = textBox->property("minHeight").toInt();
+    }
     m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",true);
     m_obj->findChild<QObject*>("expandedArea")->setProperty("width",width);
     m_obj->findChild<QObject*>("expandedArea")->setProperty("height",height);
@@ -789,7 +797,7 @@ BaseNode * Node::isInside(int x, int y)
     }
 
     int wt = width();
-    int ht = height();
+    int ht = m_obj->property("height").toInt();
 
     if(x>position.x && x<position.x + wt && y > position.y && y < position.y + ht){
 

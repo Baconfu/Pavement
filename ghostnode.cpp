@@ -548,7 +548,19 @@ void GhostNode::expandImage()
 
 void GhostNode::expandText()
 {
+    QObject * textBox = m_obj->findChild<QObject*>("expandedTextBox");
+    QObject * text = textBox->findChild<QObject*>("expandedText");
+    int width = text->property("contentWidth").toInt() + 20;
+    if(width < textBox->property("minWidth").toInt()){
+        width = textBox->property("minWidth").toInt();
+    }
+    int height = text->property("contentHeight").toInt() + 40;
+    if(height < textBox->property("minHeight").toInt()){
+        height = textBox->property("minHeight").toInt();
+    }
     m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",true);
+    m_obj->findChild<QObject*>("expandedArea")->setProperty("width",width);
+    m_obj->findChild<QObject*>("expandedArea")->setProperty("height",height);
 }
 
 bool GhostNode::clickAction()

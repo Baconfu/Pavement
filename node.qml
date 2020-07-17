@@ -264,6 +264,8 @@ Item {
             y:nameContainer.height
             x:0
             width:expandedArea.width
+            property int minWidth: 100
+            property int minHeight: 100
 
             height:expandedArea.height-y
             z:-1
@@ -294,14 +296,14 @@ Item {
                 font.pointSize: 9
 
                 onContentWidthChanged: {
-                    if(contentWidth > 80)
+                    if(contentWidth + 20 > expandedTextBox.minWidth)
                         if(expandedTextBox.visible)
                             expandedArea.width = contentWidth + 20
                     else
                         expandedArea.width = 100
                 }
                 onContentHeightChanged: {
-                    if(contentHeight > 60){
+                    if(contentHeight + 40 > expandedTextBox.minHeight){
                         if(expandedTextBox.visible)
                             expandedArea.height = contentHeight + 40
                     }else{

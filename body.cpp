@@ -585,8 +585,6 @@ int Body::acceptedSelection(int n)
 
     }
     if(f == "expand"){
-
-        qDebug()<<"EXPAND CALLED -----------------------------------";
         if(contexts.contains(latestContext())){
 
             BaseNode * b = selectedNode();
@@ -1689,6 +1687,7 @@ QVector<Body::function> Body::functionFromList(QStringList l)
 
 int Body::searching(QString input)
 {
+
     if(input == "" || input == " " || input.length()==0){
         clearSearch();
         return 0;
@@ -1699,7 +1698,7 @@ int Body::searching(QString input)
 
     input = Utility::trimString(input," ");
     m_searchBar->findChild<QObject*>("textInput")->setProperty("text",input);
-
+    input = input.toLower();
     QVector<function> pool;
 
 
@@ -2093,6 +2092,8 @@ int Body::match(function * f,QString input)
 
 int Body::matchString(QString s, QString input)
 {
+    input = input.toLower();
+    s = s.toLower();
     int match = 0;
     QStringList splitInput = input.split("");
 
