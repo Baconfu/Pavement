@@ -116,6 +116,7 @@ Item {
         TextInput {
             id: textInput
             x:5
+            font.pointSize: 12
 
             text: ""
             enabled: !ghost

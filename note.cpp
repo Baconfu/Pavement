@@ -87,6 +87,16 @@ BaseNode * Note::isInside(int x,int y)
     }
 }
 
+void Note::destroy()
+{
+    disconnect();
+    Body * body = Body::getInstance();
+    m_obj->deleteLater();
+    delete(m_obj);
+    m_obj = nullptr;
+    body->removeNode(this);
+}
+
 
 
 void Note::initializeObj()

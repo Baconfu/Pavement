@@ -38,6 +38,7 @@ public:
     }
     Body::coordinate getLocalCenterPosition(){Body::coordinate c; c.x = width()/2; c.y = height()/2; return c;}
     QString getName(){m_name = m_original->getName(); return m_name;}
+    QString getTypeName(){return m_original->getTypeName();}
     void setName(QString name);
 
 
@@ -54,7 +55,7 @@ public:
 
     int width(){return m_width;}
     int height(){return m_height;}
-    int displayWidth(){return m_width;}
+    int displayWidth();
     int displayHeight();
 
     int getID(){return m_id;}
@@ -90,6 +91,8 @@ public:
 
     void setAbstraction(BaseNode * n);
     BaseNode * getAbstraction(){return m_abstraction;}
+    bool abstractionExists(BaseNode * b);
+    BaseNode * getHighestAbstraction();
 
     void shiftSubMap(Body::coordinate vector);
 

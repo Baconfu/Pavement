@@ -153,7 +153,12 @@ Body::coordinate Node::getCenterPosition()
 
 int Node::displayWidth()
 {
-    return m_width;
+    int out = m_width;
+    if(m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt() > m_obj->property("width").toInt()){
+        out = m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt();
+    }
+
+    return out;
 }
 
 int Node::displayHeight()
@@ -270,6 +275,7 @@ void Node::setUnderMap(QVector<BaseNode *> nodes)
         b->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
         b->setPosition(c);
         b->setVisibility(false);
+        /*
         for(int i=0; i<m_ghosts.length(); i++){
             if(typeid (*b) == typeid (GhostNode)){
                 BaseNode * node = b->getGhostPointer()->getOriginal()->newGhostNode();
@@ -277,7 +283,7 @@ void Node::setUnderMap(QVector<BaseNode *> nodes)
                 node->setPosition(m_ghosts[i]->getAbsolutePosition());
                 //m_ghosts[i]->underMapAppendNode(node);
             }
-        }
+        }*/
 
     }
     if(!nodes.isEmpty()){
@@ -304,12 +310,13 @@ void Node::underMapAppendNode(BaseNode *node)
         GhostNode * g = n->newGhostNode();
         append = g;
     }
-    appendToUnderMap(append,nullptr);
+    appendToUnderMap(append);
+    syncGhosts(append,nullptr);
 
 
 }
 
-void Node::appendToUnderMap(BaseNode *node,BaseNode * caller)
+void Node::appendToUnderMap(BaseNode *node)
 {
     m_underMap.append(node);
 
@@ -321,7 +328,7 @@ void Node::appendToUnderMap(BaseNode *node,BaseNode * caller)
 
     //node->setVisibility(false);
     node->setAbstraction(this);
-    syncGhosts(node,caller);
+
     reFormatExpandedForm();
 
 }
@@ -394,8 +401,14 @@ void Node::reFormatExpandedForm()
 
             int padding = 5;
             int x;
-            if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
-                x = b->getPosition().x + b->obj()->findChild<QObject*>("typeNameContainer")->property("x").toInt();
+            int width = b->displayWidth();
+
+            if(typeid (*b) == typeid (GhostNode) || typeid (*b) == typeid (Node)){
+                if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
+                    x = b->getPosition().x + b->obj()->findChild<QObject*>("typeNameContainer")->property("x").toInt();
+                }else{
+                    x = b->getPosition().x;
+                }
             }else{
                 x = b->getPosition().x;
             }
@@ -404,15 +417,9 @@ void Node::reFormatExpandedForm()
 
                 leftMost = x - padding;
             }
+            if(x + width + padding> rightMost){
 
-            if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
-                x += b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt();
-            }else{
-                x += b->width();
-            }
-            if(x + padding> rightMost){
-
-                rightMost = x + padding;
+                rightMost = x + width + padding;
             }
             int y = b->getPosition().y;
             if(y - padding< topMost){
@@ -627,13 +634,9 @@ void Node::destroy()
 
     }
     if(m_abstraction){
-        if(typeid (*m_abstraction) == typeid (GhostNode)){
-            m_abstraction->getGhostPointer()->removeSubNode(this);
-        }
-        if(typeid (*m_abstraction) == typeid (Node)){
-            m_abstraction->getNodePointer()->removeSubNode(this);
-        }
+        m_abstraction->removeSubNode(this);
     }
+
 
     QVector<GhostNode*> temp2 = m_ghosts;
     for(int i=0; i<temp2.length(); i++){

@@ -27,6 +27,7 @@ public:
     virtual int getY();
 
     virtual QString getName(){QString s; return s;}
+    virtual QString getTypeName(){return "NULL";}
 
     virtual void transform(Body::coordinate){}
     virtual void transformIgnoreSubMap(Body::coordinate){}
@@ -68,7 +69,7 @@ public:
     virtual QVector<BaseNode*> getUnderMap(){QVector<BaseNode*> null; return null;}
     virtual void underMapAppendNode(BaseNode*){}
     virtual void setUnderMap(QVector<BaseNode*>){}
-    virtual void removeSubNode(BaseNode * b){qDebug()<<b;}
+    virtual void removeSubNode(BaseNode *){}
     virtual bool underMapContains(BaseNode*){return false;}
 
     virtual void subNodeMoved(){}
@@ -90,7 +91,8 @@ public:
     virtual void moving(bool){}
     virtual bool isMoving(){return false;}
 
-
+    virtual bool abstractionExists(BaseNode *){return false;}
+    virtual BaseNode * getHighestAbstraction(){return this;}
 
     virtual void initializeObj(){}
     virtual void destroy(){}

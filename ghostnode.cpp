@@ -6,6 +6,7 @@ using namespace std;
 GhostNode::GhostNode(Node * original,QObject * parent)
 {
     m_original = original;
+
 }
 
 void GhostNode::qDebugSpecs()
@@ -113,6 +114,7 @@ void GhostNode::adoptOriginal()
     m_obj->findChild<QObject*>("typeName")->setProperty("text",m_original->typeName());
     m_obj->setProperty("ghost",true);
     setName(m_original->getName());
+
     heightChanged();
 
 
@@ -300,6 +302,16 @@ Body::coordinate GhostNode::getCenterPosition()
     return c;
 }
 
+int GhostNode::displayWidth()
+{
+    int out = width();
+    if(m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt() > width()){
+        out = m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt();
+    }
+
+    return out;
+}
+
 int GhostNode::displayHeight()
 {
     int out = m_height;
@@ -368,8 +380,8 @@ void GhostNode::syncOriginal(BaseNode * b)
 
         g->setPosition(m_original->getAbsolutePosition().add(vector));
 
-        m_original->appendToUnderMap(g,this);
-
+        m_original->appendToUnderMap(g);
+        m_original->syncGhosts(g,this);
     }
 
 }
@@ -596,6 +608,7 @@ void GhostNode::exude(BaseNode * b)
         b->extract();
         m_underMap.removeOne(b);
     }
+    reFormatExpandedForm();
 }
 
 void GhostNode::reFormatExpandedForm()
@@ -613,8 +626,14 @@ void GhostNode::reFormatExpandedForm()
 
             int padding = 5;
             int x;
-            if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
-                x = b->getPosition().x + b->obj()->findChild<QObject*>("typeNameContainer")->property("x").toInt();
+            int width = b->displayWidth();
+
+            if(typeid (*b) == typeid (GhostNode) || typeid (*b) == typeid (Node)){
+                if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
+                    x = b->getPosition().x + b->obj()->findChild<QObject*>("typeNameContainer")->property("x").toInt();
+                }else{
+                    x = b->getPosition().x;
+                }
             }else{
                 x = b->getPosition().x;
             }
@@ -622,18 +641,11 @@ void GhostNode::reFormatExpandedForm()
 
                 leftMost = x - padding;
             }
+            if(x + width + padding> rightMost){
 
-
-            if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
-                x += b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt();
-            }else{
-                x += b->width();
-
+                rightMost = x + width + padding;
             }
-            if(x + padding> rightMost){
 
-                rightMost = x + padding;
-            }
             int y = b->getPosition().y;
             if(y - padding< topMost){
 
@@ -685,6 +697,31 @@ void GhostNode::reFormatExpandedForm()
 void GhostNode::setAbstraction(BaseNode *n)
 {
     m_abstraction = n;
+}
+
+bool GhostNode::abstractionExists(BaseNode * b)
+{
+    BaseNode * abstraction = m_abstraction;
+    while(abstraction){
+        if(abstraction == b){
+            return true;
+        }else{
+            abstraction = abstraction->getAbstraction();
+        }
+    }
+    return false;
+}
+
+BaseNode *GhostNode::getHighestAbstraction()
+{
+    BaseNode * abstraction = m_abstraction;
+    while(abstraction){
+        if(!abstraction->getAbstraction()){
+            return abstraction;
+        }
+        abstraction = abstraction->getAbstraction();
+    }
+    return this;
 }
 
 void GhostNode::shiftSubMap(Body::coordinate vector)

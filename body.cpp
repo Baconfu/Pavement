@@ -1002,12 +1002,29 @@ void Body::removeRelation(Relation *r)
 
 void Body::removeNode(BaseNode *b)
 {
-    if(typeid (*b) == typeid (Node)){
-        removeNode(b->getNodePointer());
+    int i = nodeMap.indexOf(b);
+    delete(nodeMap[i]);
+    nodeMap[i] = nullptr;
+}
+
+BaseNode *Body::getCommonAbstraction(QVector<BaseNode *> nodes)
+{
+    BaseNode * abstraction = nodes[0]->getAbstraction();
+    while(abstraction){
+        bool strike = false;
+        for(int i=0; i<nodes.length(); i++){
+            if(!nodes[i]->abstractionExists(abstraction)){
+                strike = true;
+                break;
+            }
+        }
+        if(strike){
+            abstraction = abstraction->getAbstraction();
+        }else{
+            return abstraction;
+        }
     }
-    if(typeid (*b) == typeid (GhostNode)){
-        removeGhost(b->getGhostPointer());
-    }
+    return nullptr;
 }
 
 Relation *Body::getRelationPointerByID(int id)
@@ -1046,10 +1063,12 @@ Body::coordinate Body::getDisplayDimensions()
 void Body::abstract(QVector<BaseNode *> nodes)
 {
     coordinate c = medianPosition(nodes);
+    BaseNode * buffer = getCommonAbstraction(nodes);
     Node * n = newNode(allocateNewID("node"),"abstraction",c.x,c.y,nullptr,nullptr);
 
-
-
+    for(int i=0; i<nodes.length(); i++){
+        nodes[i]->getAbstraction()->exude(nodes[i]);
+    }
     n->setPositionByCenter(c);
 
 
@@ -1059,6 +1078,19 @@ void Body::abstract(QVector<BaseNode *> nodes)
     n->setUnderMap(nodes);
     n->expand();
     n->abstract();
+
+    if(buffer){
+        BaseNode * highestAbstraction = buffer->getHighestAbstraction();
+        coordinate pos = highestAbstraction->getPosition();
+        pos.x += highestAbstraction->width() + 5;
+        n->setPosition(pos);
+        BaseNode * b = n->newGhostNode();
+        b->setPosition(c.add(buffer->getAbsolutePosition()));
+        b->setAbstraction(buffer);
+        buffer->underMapAppendNode(b);
+
+    }
+
 
 
 }
@@ -1950,10 +1982,24 @@ GhostNode *Body::newGhostNode(Node *original,int x,int y)
 
 NodeArea *Body::newNodeArea(QVector<BaseNode *> nodes)
 {
+    coordinate c = medianPosition(nodes);
+
+    BaseNode * buffer = getCommonAbstraction(nodes);
     NodeArea * n = new NodeArea;
     n->initializeObj();
+    for(int i=0; i<nodes.length(); i++){
+        nodes[i]->getAbstraction()->exude(nodes[i]);
+    }
     n->setUnderMap(nodes);
     n->reFormatExpandedForm();
+    if(buffer){
+        coordinate dimensions;
+        dimensions.x = n->width()/2;
+        dimensions.y = n->height()/2;
+        n->setPosition(c.subtract(dimensions).add(buffer->getAbsolutePosition()));
+        n->setAbstraction(buffer);
+        buffer->underMapAppendNode(n);
+    }
     nodeMap.append(n);
     return n;
 }

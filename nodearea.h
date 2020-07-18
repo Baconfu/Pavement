@@ -77,6 +77,7 @@ public:
     void moving(bool b){m_moving = b;}
     bool isMoving(){return m_moving;}
 
+
     bool isVisible(){return m_visible;}
     void setVisibility(bool b){m_visible = b; m_obj->setProperty("visible",b);}
     void initializeObj();

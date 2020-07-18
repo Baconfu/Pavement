@@ -51,6 +51,7 @@ public:
     void zoom(double deltaFactor);
 
 
+
     void initialize();
     void saveFile(QString path);
     void openFile(QString path);
@@ -166,6 +167,8 @@ public:
     void removeGhost(GhostNode * g);
     void removeRelation(Relation * r);
     void removeNode(BaseNode * b);
+
+    BaseNode * getCommonAbstraction(QVector<BaseNode*> nodes);
 
 
     Relation * getRelationPointerByID(int id);

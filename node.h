@@ -93,7 +93,7 @@ public:
     void setUnderMap(QVector<BaseNode*> nodes);
     void underMapAppendNode(QVector<BaseNode*> nodes);
     void underMapAppendNode(BaseNode * node);
-    void appendToUnderMap(BaseNode * b,BaseNode * caller);
+    void appendToUnderMap(BaseNode * b);
     void syncGhosts(BaseNode * b,BaseNode * caller);
     QVector<BaseNode*> getUnderMap(){return m_underMap;}
     bool underMapContains(BaseNode * b);

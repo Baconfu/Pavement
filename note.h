@@ -38,6 +38,8 @@ public:
 
     //void hover(bool b);
 
+    void destroy();
+
     QQuickItem * obj(){return m_obj;}
     void initializeObj();
 private:

@@ -259,9 +259,6 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
         Node * originalNode = findNodeByID(nodePool,original)->getNodePointer();
         n = new GhostNode(originalNode);
         originalNode->registerGhost(n->getGhostPointer());
-        if(originalNode->getName() == "hahaha"){
-            qDebug()<<"hi";
-        }
 
     }
 
