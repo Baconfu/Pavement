@@ -26,14 +26,15 @@ public:
 
     void hover(bool b);
     void highlight(bool b);
-    bool textBoxSelected();
+    void selectExpandedTextBox(bool);
+    bool expandedTextBoxSelected(){return m_expandedTextBox_selected;}
 
     bool clickAction();
 
     QString getText();
     void setText(QString s);
 
-    BaseNode * isInside(int x,int y);
+    Body::response isInside(int x,int y);
 
     void moving(bool b);
     bool isMoving(){return m_moving;}
@@ -46,6 +47,8 @@ public:
     void initializeObj();
 private:
     bool m_preventFocus = false;
+
+    bool m_expandedTextBox_selected = false;
 
     int m_width;
     int m_height;

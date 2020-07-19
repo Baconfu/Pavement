@@ -102,20 +102,21 @@ public:
     bool isMoving(){return m_moving;}
     void moving(bool b);
 
-    void selectTextBox();
+    void selectExpandedTextBox(bool b);
+    bool expandedTextBoxSelected(){return m_expandedTextBox_selected;}
 
     void destroy();
     void initializeObj();
     void adoptOriginal();
 
 
-    BaseNode * isInside(int x,int y);
+    Body::response isInside(int x,int y);
 
 
-    void select(bool b);
+    void select(bool b,int x,int y);
     bool selected(){return m_batchSelected;}
 
-    void hover(bool b);
+    void hover(bool b,int x,int y);
     bool hoverSelected(){return m_hoverSelected;}
 
     void preventFocus(bool b){
@@ -132,12 +133,10 @@ public:
 
 
 private:
-    void selectTextBox(bool b);
-    bool textBoxSelected(){return m_obj->findChild<QObject*>("expandedText")->property("focus").toBool();}
+
     int tally = 0;
     Node * m_original;
 
-    bool m_preventFocus = false;
 
     int m_width = 10;
     int m_height = 10;
@@ -147,6 +146,8 @@ private:
     bool m_batchSelected = false;
     bool m_hoverSelected = false;
     bool m_moving = false;
+
+    bool m_expandedTextBox_selected false;
 
     Body::coordinate m_localVector;
 

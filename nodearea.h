@@ -39,7 +39,7 @@ public:
     int displayWidth(){return m_width;}
     int displayHeight(){return m_height;}
 
-    BaseNode * isInside(int x,int y);
+    Body::response isInside(int x,int y);
 
     //NODE INFORMATION: GETTING FUNCTIONS
 

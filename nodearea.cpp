@@ -33,7 +33,7 @@ void NodeArea::updateAbsolutePosition()
 
 }
 
-BaseNode *NodeArea::isInside(int x, int y)
+Body::response NodeArea::isInside(int x, int y)
 {
 
     Body::coordinate position = getPosition();

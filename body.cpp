@@ -1505,81 +1505,33 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
         for(int i=0; i<nodeMap.length(); i++){
             if(nodeMap[i]){
                 if(nodeMap[i]->getAbstraction() == nullptr){
-                    BaseNode * b = nodeMap[i]->isInside(mousePosition().x,mousePosition().y);
+                    response nodeResponse = nodeMap[i]->isInside(mousePosition().x,mousePosition().y);
 
-                    if(b){
+                    if(nodeResponse.isInside){
                         control = true;
-                        if(typeid (*b) == typeid (Node)){
-                            if(!b->getNodePointer()->preventingFocus()){
-                                if(!b->isMoving()){
-                                    QVector<int> contexts = {parenting,including,creating_relation,moving_node};
-
-                                    if(contexts.contains(latestContext())){
-                                        setHighlightedNode(b);
 
 
-                                        highlighted = true;
-                                    }else{
-                                        if(b->getNodePointer()->clickAction()){
-                                            b->getNodePointer()->hoverSelect(mousePosition().y);
 
-                                            highlighted = true;
-                                            setSelected(b);
-                                        }
+                        QVector<int> contexts = {parenting,including,creating_relation,moving_node};
+                        if(contexts.contains(latestContext())){
+                            setHighlightedNode(nodeResponse.node);
 
-                                    }
-                                }
+                        }else{
+                            if(nodeResponse.action == select_name){
+                                nodeResponse.node->hover(true);
+
                             }
-                        }
-                        if(typeid (*b) == typeid (GhostNode)){
-                            GhostNode * g = b->getGhostPointer();
-
-                            if(!g->preventingFocus()){
-                                if(!g->isMoving()){
-
-                                    QVector<int> contexts = {including,creating_relation,moving_node};
-                                    if(contexts.contains(latestContext())){
-                                        setHighlightedNode(g);
-
-                                        highlighted = true;
-
-                                    }else{
-
-                                        highlighted = true;
-                                        setSelected(g);
-                                        g->hover(true);
-                                    }
-                                }
+                            if(nodeResponse.action == select_expandedText){
+                                nodeResponse.node->selectExpandedTextBox(true);
                             }
-                            else{
-                                g->hover(false);
-                                g->preventFocus(false);
-                            }
-
-
+                            setSelected(nodeResponse.node);
 
                         }
-                        if(typeid (*b) == typeid (NodeArea)){
-                            NodeArea * a = b->getAreaPointer();
-                            if(!a->isMoving()){
-                                QVector<int> contexts = {including,creating_relation,moving_node};
-                                if(contexts.contains(latestContext())){
-                                    setHighlightedNode(a);
 
-                                    highlighted = true;
-
-                                }
-                                else{
-                                    highlighted = true;
-                                    setSelected(a);
-                                    a->hover(true);
-                                }
-                            }
-
-                        }
-                        if(typeid (*b) == typeid (Note)){
-                            setSelected(b);
-
+                        BaseNode * abstraction = nodeResponse.node->getAbstraction();
+                        while(abstraction){
+                            abstraction->hover(false);
+                            abstraction = abstraction->getAbstraction();
                         }
 
                     }

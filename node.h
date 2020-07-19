@@ -147,6 +147,9 @@ public:
     void highlight(bool visible);
     void hover(bool b);
     void select(bool b);
+    void selectExpandedTextBox(bool b);
+    bool expandedTextBoxSelected(){return m_expandedTextBox_selected;}
+
     //Implement highlight state controllers
     void preventFocus(bool b);
     bool preventingFocus(){return m_preventFocus;}
@@ -204,8 +207,7 @@ private:
     }
 
 
-    void selectTextBox(bool b);
-    bool textBoxSelected(){return m_obj->findChild<QObject*>("expandedText")->property("focus").toBool();}
+
 
     //Domestic policy
     void setStyle();
@@ -225,13 +227,11 @@ private:
     int m_expanded = false;
     bool m_moving = false;
 
-    bool m_preventFocus = false;
-
-
+    bool m_expandedTextBox_selected = false;
 
 
 public:
-    BaseNode * isInside(int x, int y);
+    Body::response isInside(int x, int y);
 
     void updateAbsolutePosition();
 

@@ -20,11 +20,8 @@ void Note::transform(Body::coordinate c)
 void Note::hover(bool b)
 {
     if(b != m_obj->findChild<QObject*>("textArea")->property("focus").toBool()){
+        m_expandedTextBox_selected = b;
         m_obj->findChild<QObject*>("textArea")->setProperty("focus",b);
-        if(!b){
-            Body * b = Body::getInstance();
-            b->setFocusWindow();
-        }
     }
 }
 
@@ -33,14 +30,15 @@ void Note::highlight(bool b)
     m_obj->setProperty("highlighted",b);
 }
 
-bool Note::textBoxSelected()
+void Note::selectExpandedTextBox(bool b)
 {
-    return m_obj->findChild<QObject*>("textArea")->property("focus").toBool();
+    hover(b);
+    m_expandedTextBox_selected = b;
 }
 
 bool Note::clickAction()
 {
-    if(textBoxSelected()){
+    if(expandedTextBoxSelected()){
         return false;
     }
     return true;
@@ -56,7 +54,7 @@ void Note::setText(QString s)
     m_obj->findChild<QObject*>("textArea")->setProperty("text",s);
 }
 
-BaseNode * Note::isInside(int x,int y)
+Body::response Note::isInside(int x,int y)
 {
     Body::coordinate position = getPosition();
 

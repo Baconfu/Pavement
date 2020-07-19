@@ -100,6 +100,9 @@ public:
     };
 
     typedef struct response{
+        response(){
+
+        }
         bool isInside = false;
         int action = do_nothing;
         BaseNode * node = nullptr;

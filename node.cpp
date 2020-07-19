@@ -71,6 +71,11 @@ void Node::select(bool b)
     m_batchSelected = b;
 }
 
+void Node::selectExpandedTextBox(bool b)
+{
+    m_obj->findChild<QObject*>("expandedText")->setProperty("focus",b);
+}
+
 void Node::preventFocus(bool b)
 {
     m_preventFocus = b;
@@ -587,8 +592,7 @@ void Node::expandText()
 
 bool Node::clickAction()
 {
-    if(textBoxSelected()){
-
+    if(expandedTextBoxSelected()){
         return false;
     }
     return true;
@@ -798,56 +802,59 @@ void Node::initializeObj()
 
 
 
-BaseNode * Node::isInside(int x, int y)
+Body::response Node::isInside(int x, int y)
 {
     Body::coordinate position = m_position;
-    heightChanged();
-    if(m_obj->property("expanded").toBool()){
-        BaseNode * move = nullptr;
-        for(int i=0; i<m_underMap.length(); i++){
-            BaseNode * b = m_underMap[i]->isInside(x-position.x,y-position.y);
-            if(b){
-                if(!b->isMoving()){
-                    preventFocus(false);
-                    hover(false);
-                    return b;
-                }else{
-                    move = b;
-                }
 
+
+    int width = m_width;
+    int height = m_height;
+    Body::response response;
+    if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
+
+        response.isInside = true;
+        if(isMoving() || preventingFocus()){
+            response.action = Body::responseAction::do_nothing;
+        }else{
+            if(hoveringOverType(y - position.y)){
+                response.action = Body::responseAction::select_type;
+            }else{
+                response.action = Body::responseAction::select_name;
             }
         }
-        if(move){
-            return move;
+
+        response.node = this;
+
+        if(isExpanded() && expandState() == 0){
+            for(int i=0; i<m_underMap.length(); i++){
+                Body::response subResponse = m_underMap[i]->isInside(x-position.x,y-position.y);
+                if(subResponse.isInside){
+                    if(subResponse.action != Body::responseAction::do_nothing){
+                        response = subResponse;
+                    }
+                }else{
+                    subResponse.node->hover(false);
+                }
+            }
         }
-    }
 
-    int wt = width();
-    int ht = m_obj->property("height").toInt();
-
-    if(x>position.x && x<position.x + wt && y > position.y && y < position.y + ht){
 
         QObject * rect = m_obj->findChild<QObject*>("expandedTextBox");
         if(rect->property("visible").toBool()){
             y-=m_position.y;
             if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
-
-                selectTextBox(true);
-            }else{
-                selectTextBox(false);
+                response.action = Body::responseAction::select_expandedText;
             }
         }
-        return this;
     }else{
-        if(textBoxSelected()){
-            selectTextBox(false);
+        if(expandedTextBoxSelected()){
+            selectExpandedTextBox(false);
 
-            hoverSelect(10);
         }
-        preventFocus(false);
-        hover(false);
-        return nullptr;
+        response.isInside = false;
+        response.node = this;
     }
+    return response;
 }
 
 
@@ -864,15 +871,15 @@ void Node::updateAbsolutePosition()
 }
 
 
-void Node::hoverSelect(int y)
+bool Node::hoveringOverType(int y)
 {
     int divider = obj()->findChild<QObject*>("typeNameContainer")->property("y").toInt();
 
     int localY = y - m_position.y;
     if(localY<=divider){
-        giveInputFocus();
+        return false;
     }else{
-        giveTypeInputFocus();
+        return true;
     }
 
 }
