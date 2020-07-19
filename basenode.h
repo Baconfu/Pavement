@@ -55,7 +55,7 @@ public:
 
     virtual void hover(bool b){qDebug()<<b;}
     virtual void select(bool){}
-    virtual void highlight(bool b);
+    virtual void highlight(bool){}
 
 
     virtual QString derivedType(){return "base";}
