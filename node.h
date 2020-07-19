@@ -47,6 +47,8 @@ public:
     int getX(){return getPosition().x;}
     int getY(){return getPosition().y;}
 
+    int displayX();
+    int displayY();
 
     //NODE DIMENSIONS: GETTING FUNCTIONS
     int width(){return m_width;}
@@ -127,7 +129,6 @@ public:
     void giveTypeInputFocus();
 
     //NODE STATE VARIABLES
-    Body::coordinate positionBeforeDragged;
     void moving(bool b);
     bool isMoving(){return m_moving;}
 

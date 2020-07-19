@@ -21,6 +21,8 @@ public:
     void setPosition(Body::coordinate c);
     void transform(Body::coordinate c);
     Body::coordinate getPosition(){return m_position;}
+    int getX(){return getPosition().x;}
+    int getY(){return getPosition().y;}
 
     void hover(bool b);
     void highlight(bool b);
@@ -33,7 +35,7 @@ public:
 
     BaseNode * isInside(int x,int y);
 
-    void moving(bool b){m_moving = b;}
+    void moving(bool b);
     bool isMoving(){return m_moving;}
 
     //void hover(bool b);

@@ -91,6 +91,20 @@ public:
         return s;
     }
 
+    enum responseAction {
+        do_nothing = 0,
+        hover_select = 1,
+        hover_deselect = 2,
+        select_expandedText = 3
+
+    };
+
+    typedef struct response{
+        bool isInside = false;
+        int action = do_nothing;
+        BaseNode * node = nullptr;
+    }response;
+
 
     typedef struct coordinate{
         int x;
@@ -118,6 +132,18 @@ public:
             r.y = y + c.y;
             return r;
         }
+        coordinate addX(int a){
+            coordinate r;
+            r.x = x + a;
+            r.y = y;
+            return r;
+        }
+        coordinate addY(int a){
+            coordinate r;
+            r.x = x;
+            r.y = y + a;
+            return r;
+        }
         coordinate invert(){
             coordinate r;
             r.x = x * -1;
@@ -137,6 +163,7 @@ public:
     coordinate mouseVector(){
         return m_mouseVector;
     }
+    bool mouseInWindow(){return m_mouseInWindow;}
     coordinate tabPosition(){return m_tabPosition;}
 
     Node * newNode(int id, QString name,int x, int y,Node * parent, Node * typeNode);
@@ -232,7 +259,8 @@ public:
         node_browsing = 12,
         moving_node = 13,
         structural_selected = 14,
-        mouse_held = 15
+        mouse_held = 15,
+        dragging_camera =16
     };
 
     int allocateNewID(QString type);
@@ -260,6 +288,8 @@ private:
     coordinate padding(int screenWidth, int screenHeight);
     coordinate padding(coordinate c);
     bool inBounds(int x,int y);
+    bool draggingCamera(){return m_draggingCamera;}
+    void dragCamera(bool b){m_draggingCamera = b;}
     void pan(int x, int y);
 
 
@@ -284,7 +314,8 @@ private:
 
     double m_zoomFactor = 1;
     double m_zoomVelocity = 0;
-    coordinate m_mouseLocalPosition;
+    coordinate m_mouseScreenSpacePosition;
+    coordinate m_oldMouseScreenSpaceScaledPosition;
     coordinate m_mousePosition;
     coordinate m_oldMousePosition;
     coordinate m_mouseVector;
@@ -292,7 +323,8 @@ private:
     bool m_mouseHeld = false;
     bool m_scrolling = false;
     bool m_scaling = false;
-
+    bool m_mouseInWindow = true;
+    bool m_draggingCamera = false;
 
 
     QVector<BaseNode*> nodeMap;
@@ -401,6 +433,7 @@ public slots:
     void mousePressed(int x,int y);
     void mouseReleased();
     void mouseHeld();
+    void mouseInWindowChanged(bool b);
 
     void closeWindow();
 

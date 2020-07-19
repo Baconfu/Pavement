@@ -1,4 +1,5 @@
 #include "ghostnode.h"
+#include <note.h>
 #include <iostream>
 
 using namespace std;
@@ -123,44 +124,57 @@ void GhostNode::adoptOriginal()
 BaseNode * GhostNode::isInside(int x, int y)
 {
     Body::coordinate position = m_position;
-    if(getName() == "sperm head"){
 
-    }
-    if(m_obj->property("expanded").toBool()){
-        BaseNode * move = nullptr;
-        for(int i=0; i<m_underMap.length(); i++){
-            BaseNode * b = m_underMap[i]->isInside(x-position.x,y-position.y);
-            if(b){
-                if(!b->isMoving()){
-                    hover(false);
-                    return b;
-                }else{
-                    move = b;
-                }
-            }
-        }
-        if(move){
-            return move;
-        }
-    }
+
     int width = m_width;
     int height = m_height;
-
+    Body::response response;
     if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
+
+        response.isInside = true;
+        response.action = Body::responseAction::hover_select;
+        response.node = this;
+
+        if(m_obj->property("expanded").toBool()){
+            BaseNode * move = nullptr;
+            for(int i=0; i<m_underMap.length(); i++){
+                BaseNode * b = m_underMap[i]->isInside(x-position.x,y-position.y);
+                if(b){
+                    if(!b->isMoving()){
+                        hover(false);
+                        return b;
+                    }else{
+                        move = b;
+                    }
+                }
+            }
+            if(move){
+                return move;
+            }
+        }
+
+
+
 
 
         QObject * rect = m_obj->findChild<QObject*>("expandedTextBox");
         if(rect->property("visible").toBool()){
             y-=m_position.y;
             if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
+                response.action = Body::responseAction::select_expandedText;
                 selectTextBox();
                 return nullptr;
             }
         }
 
+
+
         hover(true);
         return this;
     }else{
+        response.isInside = false;
+        response.action = Body::responseAction::hover_deselect;
+        response.node = this;
         hover(false);
 
         return nullptr;
@@ -301,12 +315,34 @@ Body::coordinate GhostNode::getCenterPosition()
     m_centerPosition = c;
     return c;
 }
+int GhostNode::displayX()
+{
+    int x = getX();
+    int w = width();
+    if(obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > w){
+        x = getPosition().x + obj()->findChild<QObject*>("typeNameContainer")->property("x").toInt();
+        w = obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt();
+    }
+    if(obj()->findChild<QObject*>("nameContainer")->property("width").toInt() > w){
+        x = getPosition().x + obj()->findChild<QObject*>("nameContainer")->property("x").toInt();
+    }
+    return x;
+}
+
+int GhostNode::displayY()
+{
+    int y = getY();
+    return y;
+}
 
 int GhostNode::displayWidth()
 {
     int out = width();
     if(m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt() > width()){
         out = m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt();
+    }
+    if(m_obj->findChild<QObject*>("textInput")->property("contentWidth").toInt()+10 > out){
+        out = m_obj->findChild<QObject*>("textInput")->property("contentWidth").toInt()+10 ;
     }
 
     return out;
@@ -344,15 +380,24 @@ void GhostNode::underMapAppendNode(BaseNode *b)
     if(m_underMap.contains(b)){
         return;
     }
+    BaseNode * append = b;
+    if(typeid (*b) == typeid (Note)){
+        return;
+    }
+    if(typeid (*b) == typeid (Node)){
+        Node * n = b->getNodePointer();
+        GhostNode * g = n->newGhostNode();
+        append = g;
 
-    if(!m_obj->property("expanded").toBool()){
-        b->setVisibility(false);
 
     }
-    appendToUnderMap(b);
+    if(!m_obj->property("expanded").toBool()){
+        append->setVisibility(false);
 
-    syncOriginal(b);
+    }
+    appendToUnderMap(append);
 
+    syncOriginal(append);
 }
 
 void GhostNode::appendToUnderMap(BaseNode *b)
@@ -363,10 +408,10 @@ void GhostNode::appendToUnderMap(BaseNode *b)
     b->setPosition(c);
     b->setAbstraction(this);
 
-    if(!m_underMap.isEmpty()){
-        reFormatExpandedForm();
-        updateAbsolutePosition();
-    }
+    reFormatExpandedForm();
+    updateAbsolutePosition();
+
+
 }
 
 void GhostNode::syncOriginal(BaseNode * b)
@@ -417,6 +462,7 @@ void GhostNode::abstract()
     m_obj->setProperty("expanded",false);
     m_expanded = false;
     setPositionByCenterIgnoreSubMap(center);
+    reFormatExpandedForm();
 
 }
 
@@ -613,7 +659,7 @@ void GhostNode::exude(BaseNode * b)
 
 void GhostNode::reFormatExpandedForm()
 {
-
+    Body::coordinate pos = getPosition();
     if(!m_underMap.isEmpty()){
 
         int leftMost = 10000000;
@@ -627,16 +673,8 @@ void GhostNode::reFormatExpandedForm()
             int padding = 5;
             int x;
             int width = b->displayWidth();
+            x = b->displayX();
 
-            if(typeid (*b) == typeid (GhostNode) || typeid (*b) == typeid (Node)){
-                if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
-                    x = b->getPosition().x + b->obj()->findChild<QObject*>("typeNameContainer")->property("x").toInt();
-                }else{
-                    x = b->getPosition().x;
-                }
-            }else{
-                x = b->getPosition().x;
-            }
             if(x - padding< leftMost){
 
                 leftMost = x - padding;
@@ -683,11 +721,12 @@ void GhostNode::reFormatExpandedForm()
         //qDebug()<<"median: "<<median;
         //qDebug()<<"Transformed: "<<median.subtract(geometry);
         transformIgnoreSubMap(median.subtract(geometry));
-
-
-        if(m_abstraction){
-            m_abstraction->reFormatExpandedForm();
-        }
+    }
+    if(!isExpanded()){
+        setPosition(pos);
+    }
+    if(m_abstraction){
+        m_abstraction->reFormatExpandedForm();
     }
 
     updateRelation();
@@ -733,6 +772,19 @@ void GhostNode::shiftSubMap(Body::coordinate vector)
             g->setPosition(g->getPosition().add(vector));
         }
 
+    }
+}
+
+void GhostNode::moving(bool b)
+{
+    if(m_moving!=b){
+        m_moving = b;
+        if(b){
+            m_obj->setProperty("z",1);
+            m_positionBeforeDragged = getPosition();
+        }else{
+            m_obj->setProperty("z",0);
+        }
     }
 }
 void GhostNode::destroy()

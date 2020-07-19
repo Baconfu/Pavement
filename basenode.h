@@ -25,6 +25,11 @@ public:
     virtual Body::coordinate getLocalCenterPosition();
     virtual int getX();
     virtual int getY();
+    virtual int displayX(){return getX();}
+    virtual int displayY(){return getY();}
+    virtual void setPositionBeforeDragged(Body::coordinate c){m_positionBeforeDragged = c;}
+    virtual Body::coordinate getPositionBeforeDragged(){return m_positionBeforeDragged;}
+    virtual void returnToPositionBeforeDragged(){setPosition(m_positionBeforeDragged);}
 
     virtual QString getName(){QString s; return s;}
     virtual QString getTypeName(){return "NULL";}
@@ -113,6 +118,8 @@ protected:
     Body::coordinate m_position;
     Body::coordinate m_absolutePosition;
     Body::coordinate m_centerPosition;
+    Body::coordinate m_positionBeforeDragged;
+
 
     QQuickItem * m_obj;
 };

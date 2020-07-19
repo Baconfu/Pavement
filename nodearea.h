@@ -74,7 +74,7 @@ public:
     void select(bool b);
     void highlight(bool b);
 
-    void moving(bool b){m_moving = b;}
+    void moving(bool b);
     bool isMoving(){return m_moving;}
 
 

@@ -21,6 +21,7 @@ Item {
     property bool faded: false
     property bool ghost:false
 
+
     signal typeAccepted(string s)
     signal typePassivelyAccepted(string s)
     signal update()
@@ -276,6 +277,7 @@ Item {
             TextArea {
                 MouseArea{
                     anchors.fill:parent
+                    propagateComposedEvents: false
                     onPressed: {
                         expandedText.cursorPosition = expandedText.positionAt(mouseX,mouseY)
                         mouse.accepted = true

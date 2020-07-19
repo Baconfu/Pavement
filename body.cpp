@@ -66,6 +66,7 @@ void Body::initialize()
     connect(m,SIGNAL(mousePressed(int,int)),this,SLOT(mousePressed(int,int)));
     connect(m,SIGNAL(mouseReleased()),this,SLOT(mouseReleased()));
     connect(m,SIGNAL(mouseHeld()),this,SLOT(mouseHeld()));
+    connect(m,SIGNAL(mouseInWindowChanged(bool)),this,SLOT(mouseInWindowChanged(bool)));
 
 
     function f;
@@ -1327,6 +1328,9 @@ void Body::mousePressed(int x, int y)
         }
 
 
+    }else{
+        stopTimer();
+        dragCamera(true);
     }
 }
 
@@ -1346,7 +1350,12 @@ void Body::mouseReleased()
                                 if(nodeMap[i]->getAbstraction()){
                                     nodeMap[i]->getAbstraction()->exude(nodeMap[i]);
                                 }
+
                                 highlightedNode()->underMapAppendNode(nodeMap[i]);
+                                BaseNode * b = nodeMap[i];
+                                if(typeid (*b) == typeid (Node)){
+                                    b->returnToPositionBeforeDragged();
+                                }
                             }
                         }
                     }
@@ -1355,6 +1364,9 @@ void Body::mouseReleased()
         }
         contextResolved();
     }
+
+    dragCamera(false);
+
     for(int i=0; i<nodeMap.length(); i++){
         if(nodeMap[i]){
             nodeMap[i]->moving(false);
@@ -1368,6 +1380,21 @@ void Body::mouseReleased()
 void Body::mouseHeld()
 {
     m_mouseHeld = true;
+
+}
+
+void Body::mouseInWindowChanged(bool b)
+{
+    m_mouseInWindow = b;
+    if(!b){
+
+        m_velocity.x = 0;
+
+        m_velocity.y = 0;
+        stopTimer();
+
+    }
+
 }
 
 void Body::closeWindow()
@@ -1389,13 +1416,16 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 {
 
     coordinate c = getDisplayDimensions();
-    m_mouseLocalPosition.x = x - c.x/2;
-    m_mouseLocalPosition.y = y - c.y/2;
+    m_mouseScreenSpacePosition.x = x - c.x/2;
+    m_mouseScreenSpacePosition.y = y - c.y/2;
 
-    int newX = int(m_mouseLocalPosition.x / m_zoomFactor);
-    int newY = int(m_mouseLocalPosition.y / m_zoomFactor);
+    int newX = int(m_mouseScreenSpacePosition.x / m_zoomFactor);
+    int newY = int(m_mouseScreenSpacePosition.y / m_zoomFactor);
     newX = newX + c.x/2;
     newY = newY + c.y/2;
+    coordinate newMouseScreenSpaceScaledPosition;
+    newMouseScreenSpaceScaledPosition.x = newX;
+    newMouseScreenSpaceScaledPosition.y = newY;
 
     m_mousePosition.x = int(newX - offsetX);
     m_mousePosition.y = int(newY - offsetY);
@@ -1409,24 +1439,33 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 */
     m_mouseVector = m_mousePosition.subtract(m_oldMousePosition);
     m_oldMousePosition = m_mousePosition;
-    if(inBounds(x,y)){
-
-
-        double angle = m_mouseLocalPosition.getAngle();
-
-        double magnitude = velocityMagnitude(x,y);
-
-
-        m_velocity.x = int(cos(angle) * magnitude * 10);
-        m_velocity.y = int(sin(angle) * magnitude * 10);
-
-        startTimer();
+    coordinate mouseLocalVector = newMouseScreenSpaceScaledPosition.subtract(m_oldMouseScreenSpaceScaledPosition);
+    m_oldMouseScreenSpaceScaledPosition = newMouseScreenSpaceScaledPosition;
+    if(draggingCamera()){
+        coordinate invert = mouseLocalVector.invert();
+        pan(invert.x,invert.y);
     }else{
-        m_velocity.x = 0;
+        if(inBounds(x,y)){
 
-        m_velocity.y = 0;
-        stopTimer();
+            double angle = m_mouseScreenSpacePosition.getAngle();
+            double magnitude = velocityMagnitude(x,y);
+            m_velocity.x = int(cos(angle) * magnitude * 10);
+            m_velocity.y = int(sin(angle) * magnitude * 10);
+
+            startTimer();
+        }else{
+            m_velocity.x = 0;
+
+            m_velocity.y = 0;
+            if(!m_scaling){
+                stopTimer();
+            }
+
+        }
     }
+
+
+
 
 
 
@@ -1472,24 +1511,24 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
                         control = true;
                         if(typeid (*b) == typeid (Node)){
                             if(!b->getNodePointer()->preventingFocus()){
+                                if(!b->isMoving()){
+                                    QVector<int> contexts = {parenting,including,creating_relation,moving_node};
 
-                                QVector<int> contexts = {parenting,including,creating_relation,moving_node};
+                                    if(contexts.contains(latestContext())){
+                                        setHighlightedNode(b);
 
-                                if(contexts.contains(latestContext())){
-                                    setHighlightedNode(b);
-
-
-                                    highlighted = true;
-                                }else{
-                                    if(b->getNodePointer()->clickAction()){
-                                        b->getNodePointer()->hoverSelect(mousePosition().y);
 
                                         highlighted = true;
-                                        setSelected(b);
+                                    }else{
+                                        if(b->getNodePointer()->clickAction()){
+                                            b->getNodePointer()->hoverSelect(mousePosition().y);
+
+                                            highlighted = true;
+                                            setSelected(b);
+                                        }
+
                                     }
-
                                 }
-
                             }
                         }
                         if(typeid (*b) == typeid (GhostNode)){
@@ -1840,11 +1879,9 @@ void Body::timeOut()
         if(m_velocity.y <= 1 && m_velocity.y >= -1){
             m_velocity.y = 0;
         }
-        if(m_velocity.y == 0  && m_velocity.x == 0){
-            m_scrolling = false;
-            stopTimer();
-        }
+
     }
+
     if(m_scaling){
         zoom(double(m_zoomVelocity));
         if(m_zoomVelocity >10){
@@ -1853,14 +1890,15 @@ void Body::timeOut()
         if(m_zoomVelocity <-10){
             m_zoomVelocity +=20;
         }
-        if(m_zoomVelocity <= 10 && m_zoomVelocity >= -10){
-            m_zoomVelocity = 0;
-            m_scaling = false;
-            stopTimer();
-        }
+
 
     }
-
+    if(m_velocity.y == 0  && m_velocity.x == 0 && m_zoomVelocity <= 10 && m_zoomVelocity >= -10){
+        m_scrolling = false;
+        m_zoomVelocity = 0;
+        m_scaling = false;
+        stopTimer();
+    }
 }
 void Body::pan(int x, int y)
 {

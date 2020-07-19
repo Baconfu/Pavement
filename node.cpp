@@ -1,5 +1,6 @@
 #include "node.h"
 #include <ghostnode.h>
+#include <note.h>
 #include <QMetaObject>
 #include <QGenericArgument>
 #include <QNetworkAccessManager>
@@ -151,6 +152,25 @@ Body::coordinate Node::getCenterPosition()
     return c;
 }
 
+int Node::displayX()
+{
+    int x = getX();
+    int w = width();
+    if(obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > w){
+        x = getPosition().x + obj()->findChild<QObject*>("typeNameContainer")->property("x").toInt();
+        w = obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt();
+    }
+    if(obj()->findChild<QObject*>("nameContainer")->property("width").toInt() > w){
+        x = getPosition().x + obj()->findChild<QObject*>("nameContainer")->property("x").toInt();
+    }
+    return x;
+}
+
+int Node::displayY()
+{
+    int y = getY();
+    return y;
+}
 int Node::displayWidth()
 {
     int out = m_width;
@@ -300,12 +320,16 @@ void Node::underMapAppendNode(BaseNode *node)
         return;
     }
     BaseNode * append = node;
+    if(typeid (*node) == typeid (Note)){
+        return;
+    }
     if(typeid (*node) == typeid (GhostNode)){
         if(node->getGhostPointer()->getOriginal() == this){
             return;
         }
     }
     if(typeid (*node) == typeid (Node)){
+
         Node * n = node->getNodePointer();
         GhostNode * g = n->newGhostNode();
         append = g;
@@ -403,15 +427,7 @@ void Node::reFormatExpandedForm()
             int x;
             int width = b->displayWidth();
 
-            if(typeid (*b) == typeid (GhostNode) || typeid (*b) == typeid (Node)){
-                if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
-                    x = b->getPosition().x + b->obj()->findChild<QObject*>("typeNameContainer")->property("x").toInt();
-                }else{
-                    x = b->getPosition().x;
-                }
-            }else{
-                x = b->getPosition().x;
-            }
+            x = b->displayX();
 
             if(x - padding< leftMost){
 
@@ -601,7 +617,10 @@ void Node::abstract()
         m_obj->setProperty("expanded",false);
 
         setPositionByCenterIgnoreSubMap(center);
-
+        if(m_expandState == 2){
+            m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",false);
+        }
+        reFormatExpandedForm();
     }
 }
 
@@ -736,7 +755,10 @@ void Node::moving(bool b)
     if(m_moving!=b){
         m_moving = b;
         if(b){
-            positionBeforeDragged = getPosition();
+            m_obj->setProperty("z",1);
+            m_positionBeforeDragged = getPosition();
+        }else{
+            m_obj->setProperty("z",0);
         }
     }
 }
@@ -769,6 +791,7 @@ void Node::initializeObj()
     connect(object,SIGNAL(update()),this,SLOT(geometryChanged()));
 
     m_obj = object;
+    m_obj->setProperty("opacity",0.7);
     widthChanged();
     heightChanged();
 }

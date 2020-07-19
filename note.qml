@@ -54,10 +54,10 @@ Item{
         wrapMode: TextEdit.NoWrap
 
         onImplicitWidthChanged: {
-
+            //override default handler, do not remove
         }
         onImplicitHeightChanged: {
-
+            //override default handler, do not remove
         }
 
         onContentWidthChanged: {
@@ -65,7 +65,7 @@ Item{
 
         }
         onContentHeightChanged: {
-            implicitHeight = contentHeight + 20
+            implicitHeight = contentHeight + 10
         }
 
 

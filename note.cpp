@@ -87,6 +87,19 @@ BaseNode * Note::isInside(int x,int y)
     }
 }
 
+void Note::moving(bool b)
+{
+    if(m_moving!=b){
+        m_moving = b;
+        if(b){
+            m_obj->setProperty("z",1);
+            m_positionBeforeDragged = getPosition();
+        }else{
+            m_obj->setProperty("z",0);
+        }
+    }
+}
+
 void Note::destroy()
 {
     disconnect();

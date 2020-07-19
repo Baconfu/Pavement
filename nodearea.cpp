@@ -129,9 +129,6 @@ void NodeArea::underMapAppendNode(BaseNode *b)
         reFormatExpandedForm();
         updateAbsolutePosition();
     }
-
-
-
 }
 
 bool NodeArea::underMapContains(BaseNode *b)
@@ -253,6 +250,19 @@ void NodeArea::select(bool b)
 void NodeArea::highlight(bool b)
 {
     m_obj->setProperty("highlighted",b);
+}
+
+void NodeArea::moving(bool b)
+{
+    if(m_moving!=b){
+        m_moving = b;
+        if(b){
+            m_obj->setProperty("z",1);
+            m_positionBeforeDragged = getPosition();
+        }else{
+            m_obj->setProperty("z",0);
+        }
+    }
 }
 
 void NodeArea::initializeObj()

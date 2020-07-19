@@ -27,6 +27,9 @@ public:
     void setPosition(Body::coordinate c);
     void setPositionByCenter(Body::coordinate c);
     void setPositionByCenterIgnoreSubMap(Body::coordinate c);
+    int displayX();
+    int displayY();
+
     Body::coordinate getPosition();
     Body::coordinate getAbsolutePosition(){updateAbsolutePosition();return m_absolutePosition;}
     Body::coordinate getCenterAbsolutePosition(){
@@ -48,8 +51,8 @@ public:
     QString getText();
 
     Body::coordinate getCenterPosition();
-    int getX(){return m_position.x;}
-    int getY(){return m_position.y;}
+    int getX(){return getPosition().x;}
+    int getY(){return getPosition().y;}
 
 
 
@@ -97,7 +100,7 @@ public:
     void shiftSubMap(Body::coordinate vector);
 
     bool isMoving(){return m_moving;}
-    void moving(bool b){m_moving = b;}
+    void moving(bool b);
 
     void selectTextBox();
 
