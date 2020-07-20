@@ -116,7 +116,7 @@ public:
     void expandText();
 
 
-    bool clickAction();
+    bool clickShouldSelect();
 
 
     void cycleExpandState(int state);
@@ -145,7 +145,8 @@ public:
     QString getText();
     void setText(QString s);
     void highlight(bool visible);
-    void hover(bool b);
+    void hover(bool b,Body::coordinate c);
+    void select(bool b,Body::coordinate c);
     void select(bool b);
     //Implement highlight state controllers
     void preventFocus(bool b);
@@ -204,8 +205,6 @@ private:
     }
 
 
-    void selectTextBox(bool b);
-    bool textBoxSelected(){return m_obj->findChild<QObject*>("expandedText")->property("focus").toBool();}
 
     //Domestic policy
     void setStyle();
@@ -231,11 +230,9 @@ private:
 
 
 public:
-    BaseNode * isInside(int x, int y);
+    BaseNode * isInside(Body::coordinate c);
 
     void updateAbsolutePosition();
-
-    void hoverSelect(int y);
 
 signals:
 

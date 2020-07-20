@@ -53,7 +53,9 @@ public:
     virtual void setText(QString){}
     virtual QString getText(){return QString("Basenode function called");}
 
-    virtual void hover(bool b){qDebug()<<b;}
+    virtual void hover(bool,Body::coordinate){}
+
+    virtual void select(bool,Body::coordinate){}
     virtual void select(bool){}
     virtual void highlight(bool){}
 
@@ -69,7 +71,7 @@ public:
     virtual void cloneSubMap(BaseNode*){}
     virtual void cycleExpandState(int){}
 
-    virtual bool clickAction(){return true;}
+    virtual bool clickShouldSelect(){return true;}
 
     virtual QVector<BaseNode*> getUnderMap(){QVector<BaseNode*> null; return null;}
     virtual void underMapAppendNode(BaseNode*){}
@@ -89,7 +91,7 @@ public:
     virtual void setVisibility(bool visibility);
     virtual bool isVisible(){return true;}
 
-    virtual BaseNode * isInside(int x,int y){qDebug()<<"BaseNode virtual function called. "<< x<<y; return nullptr;}
+    virtual BaseNode * isInside(Body::coordinate){return nullptr;}
 
     virtual void updateAbsolutePosition(){}
 

@@ -247,7 +247,7 @@ Item {
             x:0
             width:expandedArea.width
             height:expandedArea.height-y
-            z:-1
+            z:0
 
             radius: 10
             border.color: "black"

@@ -1295,9 +1295,11 @@ void Body::scroll(int x, int y, bool ctrl)
 
 void Body::mouseClicked(int x, int y)
 {
-
+    qDebug()<<7;
     if(selectedNode()){
-        if(selectedNode()->clickAction()){
+        qDebug()<<8;
+        if(selectedNode()->clickShouldSelect()){
+            qDebug()<<9;
             batchSelect(selectedNode());
         }
 
@@ -1311,10 +1313,9 @@ void Body::mouseDoubleClicked(int x, int y)
 
 void Body::mousePressed(int x, int y)
 {
-
+    switchvar = true;
     if(selectedNode()){
-        if(selectedNode()->clickAction()){
-
+        if(selectedNode()->clickShouldSelect()){
             selectedNode()->moving(true);
             setContext(moving_node);
 
@@ -1465,11 +1466,6 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
     }
 
 
-
-
-
-
-
     if(hoveringRelation()){
 
         hoveringRelation()->updateSelf();
@@ -1484,7 +1480,6 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
         return;
     }
 
-    bool moving = false;
     for(int i=0; i<nodeMap.length(); i++){
         if(nodeMap[i]){
             if(nodeMap[i]->isMoving()){
@@ -1493,7 +1488,6 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
                 if(nodeMap[i]->getAbstraction()){
                     nodeMap[i]->getAbstraction()->subNodeMoved();
                 }
-                moving  = true;
             }
         }
 
@@ -1504,82 +1498,27 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
     if(latestContext() != relation_selected){
         for(int i=0; i<nodeMap.length(); i++){
             if(nodeMap[i]){
+
                 if(nodeMap[i]->getAbstraction() == nullptr){
-                    BaseNode * b = nodeMap[i]->isInside(mousePosition().x,mousePosition().y);
+
+
+                    BaseNode * b = nodeMap[i]->isInside(mousePosition());
+
+
 
                     if(b){
                         control = true;
-                        if(typeid (*b) == typeid (Node)){
-                            if(!b->getNodePointer()->preventingFocus()){
-                                if(!b->isMoving()){
-                                    QVector<int> contexts = {parenting,including,creating_relation,moving_node};
+                        QVector<int> contexts = {parenting,including,creating_relation,moving_node};
 
-                                    if(contexts.contains(latestContext())){
-                                        setHighlightedNode(b);
+                        if(contexts.contains(latestContext())){
 
+                            setHighlightedNode(b);
+                            highlighted = true;
+                        }else{
+                            b->hover(true,mousePosition());
 
-                                        highlighted = true;
-                                    }else{
-                                        if(b->getNodePointer()->clickAction()){
-                                            b->getNodePointer()->hoverSelect(mousePosition().y);
-
-                                            highlighted = true;
-                                            setSelected(b);
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
-                        if(typeid (*b) == typeid (GhostNode)){
-                            GhostNode * g = b->getGhostPointer();
-
-                            if(!g->preventingFocus()){
-                                if(!g->isMoving()){
-
-                                    QVector<int> contexts = {including,creating_relation,moving_node};
-                                    if(contexts.contains(latestContext())){
-                                        setHighlightedNode(g);
-
-                                        highlighted = true;
-
-                                    }else{
-
-                                        highlighted = true;
-                                        setSelected(g);
-                                        g->hover(true);
-                                    }
-                                }
-                            }
-                            else{
-                                g->hover(false);
-                                g->preventFocus(false);
-                            }
-
-
-
-                        }
-                        if(typeid (*b) == typeid (NodeArea)){
-                            NodeArea * a = b->getAreaPointer();
-                            if(!a->isMoving()){
-                                QVector<int> contexts = {including,creating_relation,moving_node};
-                                if(contexts.contains(latestContext())){
-                                    setHighlightedNode(a);
-
-                                    highlighted = true;
-
-                                }
-                                else{
-                                    highlighted = true;
-                                    setSelected(a);
-                                    a->hover(true);
-                                }
-                            }
-
-                        }
-                        if(typeid (*b) == typeid (Note)){
                             setSelected(b);
-
+                            highlighted = true;
                         }
 
                     }
@@ -1658,25 +1597,18 @@ void Body::removeNodes(QVector<BaseNode *> nodes){
 
 
 void Body::batchSelect(BaseNode *n){
+    qDebug()<<10;
     setContext(batch_selecting);
 
     if(m_batchSelected.contains(n)){
         m_batchSelected.removeOne(n);
-        if(typeid (*n) == typeid (GhostNode)){
-            n->getGhostPointer()->select(false);
-            contextResolved();
-        }else{
-            n->select(false);
-            contextResolved();
-        }
+        n->select(false);
+        contextResolved();
 
     }else{
+        qDebug()<<11;
         m_batchSelected.append(n);
-        if(typeid (*n) == typeid (GhostNode)){
-            n->getGhostPointer()->select(true);
-        }else{
-            n->select(true);
-        }
+        n->select(true);
     }
 
 }
@@ -1689,15 +1621,8 @@ void Body::batchSelect(QVector<BaseNode *> n){
 
 void Body::batchDeselect(BaseNode *n){
     if(m_batchSelected.contains(n)){
-        if(typeid (*n) == typeid (GhostNode)){
-            n->getGhostPointer()->select(false);
-        }
-        if(typeid (*n) == typeid (NodeArea)){
-            n->select(false);
-        }
-        if(typeid (*n) == typeid (Node)){
-            n->highlight(false);
-        }
+        n->select(false);
+
         m_batchSelected.removeOne(n);
     }
 }
@@ -1706,9 +1631,14 @@ void Body::setSelected(BaseNode *n)
 {
 
     m_selectedNode = n;
-
+    /*
+    if(switchvar){
+        qDebug()<<"set selected: "<<n;
+        switchvar = false;
+    }*/
 
     if(n){
+
         m_selectedRelation = nullptr;
 
         setContext(node_selected);
@@ -1719,25 +1649,15 @@ void Body::setSelected(BaseNode *n)
 void Body::setHighlightedNode(BaseNode *n)
 {
     if(n){
-
+        n->highlight(true);
         m_highlightedNode = n;
-        if(typeid (*n) == typeid (GhostNode)){
-            n->getGhostPointer()->hover(true);
-        }else{
-            n->hover(true);
-        }
-
     }
 }
 
 void Body::setHighlightedNode()
 {
     if(m_highlightedNode){
-        if(typeid (*m_highlightedNode) == typeid (GhostNode)){
-            m_highlightedNode->getGhostPointer()->hover(false);
-        }else{
-            m_highlightedNode->hover(false);
-        }
+        m_highlightedNode->highlight(false);
         m_highlightedNode = nullptr;
     }
 }

@@ -39,7 +39,7 @@ public:
     int displayWidth(){return m_width;}
     int displayHeight(){return m_height;}
 
-    BaseNode * isInside(int x,int y);
+    BaseNode * isInside(Body::coordinate c);
 
     //NODE INFORMATION: GETTING FUNCTIONS
 
@@ -70,8 +70,8 @@ public:
     void extract();
     void exude(BaseNode * b);
 
-    void hover(bool b);
-    void select(bool b);
+    void hover(bool b,Body::coordinate c);
+    void select(bool b,Body::coordinate c);
     void highlight(bool b);
 
     void moving(bool b);

@@ -24,16 +24,16 @@ public:
     int getX(){return getPosition().x;}
     int getY(){return getPosition().y;}
 
-    void hover(bool b);
+    void hover(bool b,Body::coordinate c);
     void highlight(bool b);
     bool textBoxSelected();
 
-    bool clickAction();
+    bool clickShouldSelect();
 
     QString getText();
     void setText(QString s);
 
-    BaseNode * isInside(int x,int y);
+    BaseNode * isInside(Body::coordinate c);
 
     void moving(bool b);
     bool isMoving(){return m_moving;}

@@ -81,7 +81,7 @@ public:
     void expandImage();
     void expandText();
 
-    bool clickAction();
+    bool clickShouldSelect();
 
 
     void cycleExpandState(int state);
@@ -102,20 +102,19 @@ public:
     bool isMoving(){return m_moving;}
     void moving(bool b);
 
-    void selectTextBox();
-
     void destroy();
     void initializeObj();
     void adoptOriginal();
 
 
-    BaseNode * isInside(int x,int y);
+    BaseNode * isInside(Body::coordinate c);
 
 
+    void select(bool b,Body::coordinate c);
     void select(bool b);
     bool selected(){return m_batchSelected;}
 
-    void hover(bool b);
+    void hover(bool b,Body::coordinate c);
     bool hoverSelected(){return m_hoverSelected;}
 
     void preventFocus(bool b){
@@ -132,8 +131,6 @@ public:
 
 
 private:
-    void selectTextBox(bool b);
-    bool textBoxSelected(){return m_obj->findChild<QObject*>("expandedText")->property("focus").toBool();}
     int tally = 0;
     Node * m_original;
 

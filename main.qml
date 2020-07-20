@@ -108,7 +108,7 @@ ApplicationWindow {
             }*/
 
             onDoubleClicked: {
-
+                console.log("hey");
             }
 
 

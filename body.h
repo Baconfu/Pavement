@@ -36,6 +36,7 @@ class Body: public QObject
 
 public:
 
+
     Body(QObject * parent = nullptr);
 
     QString os(){return QSysInfo::productType();}
@@ -50,7 +51,7 @@ public:
 
     void zoom(double deltaFactor);
 
-
+    bool switchvar = false;
 
     void initialize();
     void saveFile(QString path);

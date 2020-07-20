@@ -196,7 +196,13 @@ QVector<BaseNode*> PavementFile::loadNodes()
 
         nodePool[i]->getNodePointer()->setUnderMap(sub);
         if(node["expanded"].toBool()){
-            nodePool[i]->cycleExpandState(node["expandState"].toInt());
+            if(node["expandState"].toInt() == -1){
+                nodePool[i]->cycleExpandState(0);
+            }else{
+                nodePool[i]->cycleExpandState(node["expandState"].toInt());
+            }
+
+
         }
 
         Body::coordinate c;
@@ -296,7 +302,11 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
     if(type == "ghost"){
         n->getGhostPointer()->adoptOriginal();
         if(node["expanded"].toBool()){
-            n->cycleExpandState(node["expandState"].toInt());
+            if(node["expandState"].toInt() == -1){
+                n->cycleExpandState(0);
+            }else{
+                n->cycleExpandState(node["expandState"].toInt());
+            }
         }
     }
     n->setPosition(c.add(positionOffset));

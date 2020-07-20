@@ -51,10 +51,6 @@ void GhostNode::setPosition(Body::coordinate c)
 
     updateRelation();
 }
-void GhostNode::selectTextBox()
-{
-    m_obj->findChild<QObject*>("expandedText")->setProperty("focus",true);
-}
 
 
 void GhostNode::setPositionByCenter(Body::coordinate c)
@@ -121,42 +117,29 @@ void GhostNode::adoptOriginal()
 
 }
 
-BaseNode * GhostNode::isInside(int x, int y)
+BaseNode * GhostNode::isInside(Body::coordinate c)
 {
-    Body::coordinate position = m_position;
-
-
+    int x = c.x;
+    int y = c.y;
     int width = m_width;
     int height = m_height;
-    Body::response response;
-    if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
+    if(preventingFocus()){
+        hover(false,Body::coordinate());
+        return nullptr;
+    }
+    if(x>m_position.x && x<m_position.x + width && y > m_position.y && y < m_position.y + height){
 
-        response.isInside = true;
-        response.action = Body::responseAction::hover_select;
-        response.node = this;
-
-        if(m_obj->property("expanded").toBool()){
-            BaseNode * move = nullptr;
+        if(isExpanded() && expandState() == 0){
             for(int i=0; i<m_underMap.length(); i++){
-                BaseNode * b = m_underMap[i]->isInside(x-position.x,y-position.y);
+                BaseNode * b = m_underMap[i]->isInside(c.subtract(m_position));
                 if(b){
-                    if(!b->isMoving()){
-                        hover(false);
-                        return b;
-                    }else{
-                        move = b;
-                    }
+                    hover(false,Body::coordinate());
+                    return b;
                 }
-            }
-            if(move){
-                return move;
             }
         }
 
-
-
-
-
+        /*
         QObject * rect = m_obj->findChild<QObject*>("expandedTextBox");
         if(rect->property("visible").toBool()){
             y-=m_position.y;
@@ -166,56 +149,82 @@ BaseNode * GhostNode::isInside(int x, int y)
                 return nullptr;
             }
         }
-
-
-
-        hover(true);
+        */
         return this;
     }else{
-        response.isInside = false;
-        response.action = Body::responseAction::hover_deselect;
-        response.node = this;
-        hover(false);
-
+        hover(false,Body::coordinate());
         return nullptr;
+    }
+}
+
+void GhostNode::select(bool b,Body::coordinate c)
+{
+    if(b){
+        Body::coordinate local = c.subtract(m_position);
+
+        int divider1 = m_obj->findChild<QObject*>("nameContainer")->property("height").toInt();
+        int divider2 = m_obj->findChild<QObject*>("typeNameContainer")->property("y").toInt();
+
+        if(isExpanded() && expandState() == 2){
+            if(local.y > divider1 && local.y < divider2){
+                return;
+            }else{
+                m_batchSelected = b;
+                highlight(true);
+            }
+        }else{
+            m_batchSelected = b;
+            highlight(true);
+        }
+
+
     }
 }
 
 void GhostNode::select(bool b)
 {
-    if(b){
-        m_batchSelected = true;
-        highlight(true);
-        preventFocus(true);
-    }else{
-        m_batchSelected = false;
-
-        highlight(false);
-
-    }
+    highlight(b);
+    m_batchSelected = b;
 }
 
-void GhostNode::hover(bool b)
+void GhostNode::hover(bool b,Body::coordinate c)
 {
-
-    if(b){
-        m_hoverSelected = true;
-        highlight(true);
-
-
+    Body::coordinate local = c.subtract(m_position);
+    if(selected()){
+        return;
     }else{
-        m_hoverSelected = false;
-        if(!selected()){
-            highlight(false);
+        if(b){
+            int divider1 = m_obj->findChild<QObject*>("nameContainer")->property("height").toInt();
+            int divider2 = m_obj->findChild<QObject*>("typeNameContainer")->property("y").toInt();
 
+            if(local.y < divider1){
+                highlight(true);
+            }
+            if(local.y > divider1 && local.y < divider2){
+                highlight(false);
+                if(expandState() == 2){
+                    m_obj->findChild<QObject*>("expandedText")->setProperty("focus",true);
+                }
+            }
+            if(local.y > divider2){
+                highlight(true);
+            }
+        }else{
+            highlight(false);
         }
     }
+
 }
 
 void GhostNode::highlight(bool b)
 {
-
-    m_obj->setProperty("highlighted",b);
+    if(b){
+        obj()->setProperty("highlighted",b);
+    }else{
+        if(!m_batchSelected){
+            obj()->setProperty("highlighted",b);
+        }
+    }
 }
 
 void GhostNode::setVisibility(bool b)
@@ -224,15 +233,6 @@ void GhostNode::setVisibility(bool b)
         m_visible = b;
         m_obj->setProperty("visible",b);
         updateRelation();
-    }
-}
-
-void GhostNode::selectTextBox(bool b)
-{
-    m_obj->findChild<QObject*>("expandedText")->setProperty("focus",b);
-    if(!b){
-        Body * b = Body::getInstance();
-        b->setFocusWindow();
     }
 }
 
@@ -621,9 +621,9 @@ void GhostNode::expandText()
     m_obj->findChild<QObject*>("expandedArea")->setProperty("height",height);
 }
 
-bool GhostNode::clickAction()
+bool GhostNode::clickShouldSelect()
 {
-    if(textBoxSelected()){
+    if(m_obj->findChild<QObject*>("expandedText")->property("focus").toBool()){
         return false;
     }
     return true;

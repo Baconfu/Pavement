@@ -54,19 +54,61 @@ void Node::typeInputPassivelyAccepted(QString s)
 
 void Node::highlight(bool visible)
 {
-    obj()->setProperty("highlighted",visible);
+    if(visible){
+        obj()->setProperty("highlighted",visible);
+    }else{
+        if(!m_batchSelected){
+            obj()->setProperty("highlighted",visible);
+        }
+    }
 
 }
 
-void Node::hover(bool b)
+void Node::hover(bool b,Body::coordinate c)
 {
-    if(!m_batchSelected){
+    Body::coordinate local = c.subtract(m_position);
+    if(b){
+        int divider1 = m_obj->findChild<QObject*>("nameContainer")->property("height").toInt();
+        int divider2 = m_obj->findChild<QObject*>("typeNameContainer")->property("y").toInt();
+
+        if(local.y < divider1){
+            m_obj->findChild<QObject*>("textInput")->setProperty("focus",true);
+        }
+        if(local.y > divider1 && local.y < divider2){
+            if(expandState() == 2){
+                m_obj->findChild<QObject*>("expandedText")->setProperty("focus",true);
+            }
+        }
+        if(local.y > divider2){
+            m_obj->findChild<QObject*>("typeName")->setProperty("focus",true);
+        }
+    }
+}
+
+void Node::select(bool b,Body::coordinate c)
+{
+
+    Body::coordinate local = c.subtract(m_position);
+
+    int divider1 = m_obj->findChild<QObject*>("nameContainer")->property("height").toInt();
+    int divider2 = m_obj->findChild<QObject*>("typeNameContainer")->property("y").toInt();
+
+    if(local.y < divider1){
         highlight(b);
+        m_batchSelected = b;
+    }
+    if(local.y > divider1 && local.y < divider2){
+        return;
+    }
+    if(local.y > divider2){
+        highlight(b);
+        m_batchSelected = b;
     }
 }
 
 void Node::select(bool b)
 {
+
     highlight(b);
     m_batchSelected = b;
 }
@@ -585,10 +627,9 @@ void Node::expandText()
     m_obj->findChild<QObject*>("expandedArea")->setProperty("height",height);
 }
 
-bool Node::clickAction()
+bool Node::clickShouldSelect()
 {
-    if(textBoxSelected()){
-
+    if(m_obj->findChild<QObject*>("expandedText")->property("focus").toBool()){
         return false;
     }
     return true;
@@ -677,11 +718,6 @@ void Node::destroy()
     m_obj = nullptr;
     b->removeNode(this);
 
-}
-
-void Node::selectTextBox(bool b)
-{
-    m_obj->findChild<QObject*>("expandedText")->setProperty("focus",b);
 }
 
 void Node::setVisibility(bool visibility)
@@ -798,54 +834,46 @@ void Node::initializeObj()
 
 
 
-BaseNode * Node::isInside(int x, int y)
+BaseNode * Node::isInside(Body::coordinate c)
 {
-    Body::coordinate position = m_position;
-    heightChanged();
-    if(m_obj->property("expanded").toBool()){
-        BaseNode * move = nullptr;
-        for(int i=0; i<m_underMap.length(); i++){
-            BaseNode * b = m_underMap[i]->isInside(x-position.x,y-position.y);
-            if(b){
-                if(!b->isMoving()){
-                    preventFocus(false);
-                    hover(false);
-                    return b;
-                }else{
-                    move = b;
-                }
+    Body * body = Body::getInstance();
 
+    int x = c.x;
+    int y = c.y;
+    int width = m_width;
+    int height = m_height;
+    if(preventingFocus()){
+        return nullptr;
+    }
+    if(x>m_position.x && x<m_position.x + width && y > m_position.y && y < m_position.y + height){
+        if(isExpanded() && expandState() == 0){
+            for(int i=0; i<m_underMap.length(); i++){
+                BaseNode * b = m_underMap[i]->isInside(c.subtract(m_position));
+
+                if(b){
+                    return b;
+                }
+                if(m_underMap[i]->isMoving()){
+                    qDebug()<<"FOUND MOVING";
+                }
             }
         }
-        if(move){
-            return move;
-        }
-    }
 
-    int wt = width();
-    int ht = m_obj->property("height").toInt();
-
-    if(x>position.x && x<position.x + wt && y > position.y && y < position.y + ht){
-
+        /*
         QObject * rect = m_obj->findChild<QObject*>("expandedTextBox");
         if(rect->property("visible").toBool()){
             y-=m_position.y;
             if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
-
-                selectTextBox(true);
-            }else{
-                selectTextBox(false);
+                response.action = Body::responseAction:: select_expandedText;
+                selectTextBox();
+                return nullptr;
             }
         }
+        */
+
+        hover(true,c);
         return this;
     }else{
-        if(textBoxSelected()){
-            selectTextBox(false);
-
-            hoverSelect(10);
-        }
-        preventFocus(false);
-        hover(false);
         return nullptr;
     }
 }
@@ -864,18 +892,6 @@ void Node::updateAbsolutePosition()
 }
 
 
-void Node::hoverSelect(int y)
-{
-    int divider = obj()->findChild<QObject*>("typeNameContainer")->property("y").toInt();
-
-    int localY = y - m_position.y;
-    if(localY<=divider){
-        giveInputFocus();
-    }else{
-        giveTypeInputFocus();
-    }
-
-}
 
 void Node::widthChanged()
 {
