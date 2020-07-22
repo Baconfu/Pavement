@@ -1,5 +1,6 @@
 #include "node.h"
 #include <ghostnode.h>
+#include <note.h>
 #include <QMetaObject>
 #include <QGenericArgument>
 #include <QNetworkAccessManager>
@@ -23,13 +24,26 @@ void Node::inputAccepted()
     if(b->latestContext() == Body::node_selected){
         b->contextResolved();
     }
+    QString name = m_obj->findChild<QObject*>("textInput")->property("text").toString();
+    if(b->nameAlreadyExists(m_name,this)){
+        m_obj->findChild<QObject*>("paintNode")->setProperty("color","red");
+    }else{
+        m_obj->findChild<QObject*>("paintNode")->setProperty("color","grey");
+    }
+    m_name = name;
 
-    m_name = m_obj->findChild<QObject*>("textInput")->property("text").toString();
 }
 
 void Node::inputPassivelyAccepted()
 {
-    m_name = m_obj->findChild<QObject*>("textInput")->property("text").toString();
+    Body * b = Body::getInstance();
+    QString name = m_obj->findChild<QObject*>("textInput")->property("text").toString();
+    if(b->nameAlreadyExists(m_name,this)){
+        m_obj->findChild<QObject*>("paintNode")->setProperty("color","red");
+    }else{
+        m_obj->findChild<QObject*>("paintNode")->setProperty("color","grey");
+    }
+    m_name = name;
 }
 
 void Node::typeInputAccepted(QString s)
@@ -53,21 +67,64 @@ void Node::typeInputPassivelyAccepted(QString s)
 
 void Node::highlight(bool visible)
 {
-    obj()->setProperty("highlighted",visible);
+    if(visible){
+        obj()->setProperty("highlighted",visible);
+    }else{
+        if(!m_batchSelected){
+            obj()->setProperty("highlighted",visible);
+        }
+    }
 
 }
 
-void Node::hover(bool b)
+void Node::hover(bool b,Body::coordinate c)
 {
-    if(!m_batchSelected){
+    Body::coordinate local = c.subtract(m_position);
+    if(b){
+        int divider1 = m_obj->findChild<QObject*>("nameContainer")->property("height").toInt();
+        int divider2 = m_obj->findChild<QObject*>("typeNameContainer")->property("y").toInt();
+
+        if(local.y < divider1){
+            m_obj->findChild<QObject*>("textInput")->setProperty("focus",true);
+        }
+        if(local.y > divider1 && local.y < divider2){
+            if(expandState() == 2){
+                m_obj->findChild<QObject*>("expandedText")->setProperty("focus",true);
+            }
+            highlight(false);
+        }
+        if(local.y > divider2){
+            m_obj->findChild<QObject*>("typeName")->setProperty("focus",true);
+        }
+    }
+}
+
+void Node::select(bool b,Body::coordinate c)
+{
+
+    Body::coordinate local = c.subtract(m_position);
+
+    int divider1 = m_obj->findChild<QObject*>("nameContainer")->property("height").toInt();
+    int divider2 = m_obj->findChild<QObject*>("typeNameContainer")->property("y").toInt();
+
+    if(local.y < divider1){
         highlight(b);
+        m_batchSelected = b;
+    }
+    if(local.y > divider1 && local.y < divider2){
+        return;
+    }
+    if(local.y > divider2){
+        highlight(b);
+        m_batchSelected = b;
     }
 }
 
 void Node::select(bool b)
 {
-    highlight(b);
     m_batchSelected = b;
+    highlight(b);
+
 }
 
 void Node::preventFocus(bool b)
@@ -151,9 +208,33 @@ Body::coordinate Node::getCenterPosition()
     return c;
 }
 
+int Node::displayX()
+{
+    int x = getX();
+    int w = width();
+    if(obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > w){
+        x = getPosition().x + obj()->findChild<QObject*>("typeNameContainer")->property("x").toInt();
+        w = obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt();
+    }
+    if(obj()->findChild<QObject*>("nameContainer")->property("width").toInt() > w){
+        x = getPosition().x + obj()->findChild<QObject*>("nameContainer")->property("x").toInt();
+    }
+    return x;
+}
+
+int Node::displayY()
+{
+    int y = getY();
+    return y;
+}
 int Node::displayWidth()
 {
-    return m_width;
+    int out = m_width;
+    if(m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt() > m_obj->property("width").toInt()){
+        out = m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt();
+    }
+
+    return out;
 }
 
 int Node::displayHeight()
@@ -270,16 +351,15 @@ void Node::setUnderMap(QVector<BaseNode *> nodes)
         b->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
         b->setPosition(c);
         b->setVisibility(false);
+        /*
         for(int i=0; i<m_ghosts.length(); i++){
             if(typeid (*b) == typeid (GhostNode)){
                 BaseNode * node = b->getGhostPointer()->getOriginal()->newGhostNode();
-                Body::coordinate d;
-                d.x = 5;
-                d.y = 30;
-                node->setPosition(m_ghosts[i]->getAbsolutePosition().add(d));
+
+                node->setPosition(m_ghosts[i]->getAbsolutePosition());
                 //m_ghosts[i]->underMapAppendNode(node);
             }
-        }
+        }*/
 
     }
     if(!nodes.isEmpty()){
@@ -296,17 +376,22 @@ void Node::underMapAppendNode(BaseNode *node)
         return;
     }
     BaseNode * append = node;
+    if(typeid (*node) == typeid (Note)){
+        return;
+    }
     if(typeid (*node) == typeid (GhostNode)){
         if(node->getGhostPointer()->getOriginal() == this){
             return;
         }
     }
     if(typeid (*node) == typeid (Node)){
+
         Node * n = node->getNodePointer();
         GhostNode * g = n->newGhostNode();
         append = g;
     }
     appendToUnderMap(append);
+    syncGhosts(append,nullptr);
 
 
 }
@@ -316,25 +401,34 @@ void Node::appendToUnderMap(BaseNode *node)
     m_underMap.append(node);
 
     Body::coordinate c = node->getPosition().subtract(this->getPosition());
+
     node->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
+
     node->setPosition(c);
+
     //node->setVisibility(false);
     node->setAbstraction(this);
 
-    syncGhosts(node);
     reFormatExpandedForm();
+
 }
 
-void Node::syncGhosts(BaseNode *node)
+void Node::syncGhosts(BaseNode *node,BaseNode * caller)
 {
     for(int i=0; i<m_ghosts.length(); i++){
         if(typeid (*node) == typeid (GhostNode)){
-            BaseNode * b = node->getGhostPointer()->getOriginal()->newGhostNode();
-            Body::coordinate d;
-            d.x = 5;
-            d.y = 30;
-            b->setPosition(m_ghosts[i]->getAbsolutePosition().add(d));
-            m_ghosts[i]->appendToUnderMap(b);
+            if(m_ghosts[i]!=caller){
+                BaseNode * b = node->getGhostPointer()->getOriginal()->newGhostNode();
+
+                b->setPosition(m_ghosts[i]->getAbsolutePosition());
+                if(!m_ghosts[i]->isExpanded()){
+
+                    b->setVisibility(false);
+                }
+
+                m_ghosts[i]->appendToUnderMap(b);
+            }
+
         }
     }
 }
@@ -364,6 +458,13 @@ void Node::transformSubMap(Body::coordinate vector)
     }
 }
 
+void Node::removeUnderMapFocus()
+{
+    for(int i=0; i<m_underMap.length(); i++){
+        m_underMap[i]->removeUnderMapFocus();
+    }
+}
+
 void Node::subNodeMoved()
 {
     reFormatExpandedForm();
@@ -387,25 +488,17 @@ void Node::reFormatExpandedForm()
 
             int padding = 5;
             int x;
-            if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
-                x = b->getPosition().x + b->obj()->findChild<QObject*>("typeNameContainer")->property("x").toInt();
-            }else{
-                x = b->getPosition().x;
-            }
+            int width = b->displayWidth();
+
+            x = b->displayX();
 
             if(x - padding< leftMost){
 
                 leftMost = x - padding;
             }
+            if(x + width + padding> rightMost){
 
-            if(b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt() > b->width()){
-                x += b->obj()->findChild<QObject*>("typeNameContainer")->property("width").toInt();
-            }else{
-                x += b->width();
-            }
-            if(x + padding> rightMost){
-
-                rightMost = x + padding;
+                rightMost = x + width + padding;
             }
             int y = b->getPosition().y;
             if(y - padding< topMost){
@@ -462,13 +555,11 @@ void Node::cloneSubMap(BaseNode *b)
 
                 GhostNode * g = b->getGhostPointer();
                 GhostNode * clone = g->getOriginal()->newGhostNode();
-                clone->setAbstraction(this);
                 Body::coordinate geometry;
                 geometry.x = g->getAbstraction()->width()/2;
                 geometry.y = g->getAbstraction()->height()/2;
-                Body::coordinate vector = g->getPosition().subtract(geometry);
-
-                clone->setPosition(vector.add(this->getCenterAbsolutePosition()));
+                Body::coordinate vector = g->getCenterPosition();
+                clone->setPositionByCenter(getAbsolutePosition().subtract(geometry).add(vector));
 
                 mySubMap.append(clone);
 
@@ -482,10 +573,11 @@ void Node::cloneSubMap(BaseNode *b)
 
 void Node::expand()
 {
-    Body::coordinate pos = getCenterPosition();
+    if(m_expandState == -1){
+        return;
+    }
     m_obj->setProperty("expanded",true);
-
-    m_expanded = m_expandState;
+    m_expanded = true;
 
     if(m_expandState == 0){
         expandMap();
@@ -496,7 +588,9 @@ void Node::expand()
     if(m_expandState == 2){
         expandText();
     }
-    setPositionByCenter(pos);
+    for(int i=0; i<m_underMap.length(); i++){
+        m_underMap[i]->expand();
+    }
 
 }
 
@@ -512,20 +606,19 @@ void Node::expandMap()
     m_obj->findChild<QObject*>("expandedRectangle")->setProperty("visible",true);
 
     if(!m_underMap.isEmpty()){
-        m_expanded = 0;
         for(int i=0; i<m_underMap.length(); i++){
             m_underMap[i]->setVisibility(true);
         }
-        Body::coordinate center = getCenterPosition();
+        //Body::coordinate center = getCenterPosition();
         m_obj->setProperty("expanded",true);
 
 
-        setPositionByCenterIgnoreSubMap(center);
+        //setPositionByCenterIgnoreSubMap(center);
 
         reFormatExpandedForm();
     }else{
-        m_expanded = 0;
-        m_obj->setProperty("expanded",true);
+        m_expanded = false;
+        m_obj->setProperty("expanded",false);
 
     }
 
@@ -544,17 +637,24 @@ void Node::expandImage()
 
 void Node::expandText()
 {
-    int width = m_obj->findChild<QObject*>("expandedText")->property("contentWidth").toInt() + 20;
-    int height = m_obj->findChild<QObject*>("expandedText")->property("contentHeight").toInt() + 40;
+    QObject * textBox = m_obj->findChild<QObject*>("expandedTextBox");
+    QObject * text = textBox->findChild<QObject*>("expandedText");
+    int width = text->property("contentWidth").toInt() + 20;
+    if(width < textBox->property("minWidth").toInt()){
+        width = textBox->property("minWidth").toInt();
+    }
+    int height = text->property("contentHeight").toInt() + 40;
+    if(height < textBox->property("minHeight").toInt()){
+        height = textBox->property("minHeight").toInt();
+    }
     m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",true);
     m_obj->findChild<QObject*>("expandedArea")->setProperty("width",width);
     m_obj->findChild<QObject*>("expandedArea")->setProperty("height",height);
 }
 
-bool Node::clickAction()
+bool Node::clickShouldSelect()
 {
-    if(textBoxSelected()){
-
+    if(m_obj->findChild<QObject*>("expandedText")->property("focus").toBool()){
         return false;
     }
     return true;
@@ -562,8 +662,7 @@ bool Node::clickAction()
 
 void Node::cycleExpandState(int state)
 {
-    m_expandState = state;
-    m_expanded = state;
+    setExpandState(state);
     abstract();
     expand();
 }
@@ -571,9 +670,9 @@ void Node::cycleExpandState(int state)
 void Node::abstract()
 {
 
-    if(m_expanded != -1){
+    if(m_expanded){
 
-        m_expanded = -1;
+        m_expanded = false;
 
         for(int i=0; i<m_underMap.length(); i++){
             m_underMap[i]->abstract();
@@ -584,7 +683,10 @@ void Node::abstract()
         m_obj->setProperty("expanded",false);
 
         setPositionByCenterIgnoreSubMap(center);
-
+        if(m_expandState == 2){
+            m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",false);
+        }
+        reFormatExpandedForm();
     }
 }
 
@@ -617,13 +719,9 @@ void Node::destroy()
 
     }
     if(m_abstraction){
-        if(typeid (*m_abstraction) == typeid (GhostNode)){
-            m_abstraction->getGhostPointer()->removeSubNode(this);
-        }
-        if(typeid (*m_abstraction) == typeid (Node)){
-            m_abstraction->getNodePointer()->removeSubNode(this);
-        }
+        m_abstraction->removeSubNode(this);
     }
+
 
     QVector<GhostNode*> temp2 = m_ghosts;
     for(int i=0; i<temp2.length(); i++){
@@ -645,11 +743,6 @@ void Node::destroy()
     m_obj = nullptr;
     b->removeNode(this);
 
-}
-
-void Node::selectTextBox(bool b)
-{
-    m_obj->findChild<QObject*>("expandedText")->setProperty("focus",b);
 }
 
 void Node::setVisibility(bool visibility)
@@ -723,7 +816,10 @@ void Node::moving(bool b)
     if(m_moving!=b){
         m_moving = b;
         if(b){
-            positionBeforeDragged = getPosition();
+            m_obj->setProperty("z",1);
+            m_positionBeforeDragged = getPosition();
+        }else{
+            m_obj->setProperty("z",0);
         }
     }
 }
@@ -756,60 +852,61 @@ void Node::initializeObj()
     connect(object,SIGNAL(update()),this,SLOT(geometryChanged()));
 
     m_obj = object;
+    m_obj->setProperty("opacity",0.7);
     widthChanged();
     heightChanged();
 }
 
 
 
-BaseNode * Node::isInside(int x, int y)
+BaseNode * Node::isInside(Body::coordinate c)
 {
-    Body::coordinate position = m_position;
-    heightChanged();
-    if(m_obj->property("expanded").toBool()){
-        BaseNode * move = nullptr;
-        for(int i=0; i<m_underMap.length(); i++){
-            BaseNode * b = m_underMap[i]->isInside(x-position.x,y-position.y);
-            if(b){
-                if(!b->isMoving()){
-                    preventFocus(false);
-                    hover(false);
-                    return b;
-                }else{
-                    move = b;
-                }
 
+    int x = c.x;
+    int y = c.y;
+    int width = m_width;
+    int height = m_height;
+
+    if(x>m_position.x && x<m_position.x + width && y > m_position.y && y < m_position.y + height){
+        m_hoverSelected = true;
+        if(preventingFocus()){
+            return nullptr;
+        }
+        if(isExpanded() && expandState() == 0){
+            BaseNode * moving = nullptr;
+            for(int i=0; i<m_underMap.length(); i++){
+                BaseNode * b = m_underMap[i]->isInside(c.subtract(m_position));
+                if(b){
+                    if(b->isMoving()){
+                        moving = b;
+                    }
+                    else{
+                        return b;
+                    }
+                }
+            }
+            if(moving){
+                return moving;
             }
         }
-        if(move){
-            return move;
-        }
-    }
 
-    int wt = width();
-    int ht = height();
-
-    if(x>position.x && x<position.x + wt && y > position.y && y < position.y + ht){
-
+        /*
         QObject * rect = m_obj->findChild<QObject*>("expandedTextBox");
         if(rect->property("visible").toBool()){
             y-=m_position.y;
             if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
-
-                selectTextBox(true);
-            }else{
-                selectTextBox(false);
+                response.action = Body::responseAction:: select_expandedText;
+                selectTextBox();
+                return nullptr;
             }
         }
+        */
+
+        hover(true,c);
         return this;
     }else{
-        if(textBoxSelected()){
-            selectTextBox(false);
-
-            hoverSelect(10);
-        }
+        removeUnderMapFocus();
         preventFocus(false);
-        hover(false);
         return nullptr;
     }
 }
@@ -828,18 +925,6 @@ void Node::updateAbsolutePosition()
 }
 
 
-void Node::hoverSelect(int y)
-{
-    int divider = obj()->findChild<QObject*>("typeNameContainer")->property("y").toInt();
-
-    int localY = y - m_position.y;
-    if(localY<=divider){
-        giveInputFocus();
-    }else{
-        giveTypeInputFocus();
-    }
-
-}
 
 void Node::widthChanged()
 {
@@ -848,7 +933,11 @@ void Node::widthChanged()
 }
 void Node::heightChanged()
 {
-    m_height = m_obj->property("height").toInt();
+    if(m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt() == 0){
+        m_height = m_obj->property("height").toInt();
+    }else{
+        m_height = m_obj->property("height").toInt();
+    }
 }
 
 void Node::requestFinished(QNetworkReply *reply)

@@ -21,22 +21,26 @@ public:
     void setPosition(Body::coordinate c);
     void transform(Body::coordinate c);
     Body::coordinate getPosition(){return m_position;}
+    int getX(){return getPosition().x;}
+    int getY(){return getPosition().y;}
 
-    void hover(bool b);
+    void hover(bool b,Body::coordinate c);
     void highlight(bool b);
     bool textBoxSelected();
 
-    bool clickAction();
+    bool clickShouldSelect();
 
     QString getText();
     void setText(QString s);
 
-    BaseNode * isInside(int x,int y);
+    BaseNode * isInside(Body::coordinate c);
 
-    void moving(bool b){m_moving = b;}
+    void moving(bool b);
     bool isMoving(){return m_moving;}
 
     //void hover(bool b);
+
+    void destroy();
 
     QQuickItem * obj(){return m_obj;}
     void initializeObj();

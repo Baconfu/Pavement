@@ -1,4 +1,5 @@
 #include "nodearea.h"
+#include <ghostnode.h>
 
 NodeArea::NodeArea(QObject * parent)
 {
@@ -33,33 +34,42 @@ void NodeArea::updateAbsolutePosition()
 
 }
 
-BaseNode *NodeArea::isInside(int x, int y)
+BaseNode *NodeArea::isInside(Body::coordinate c)
 {
-
-    Body::coordinate position = getPosition();
-    for(int i=0; i<m_underMap.length(); i++){
-        BaseNode * b = m_underMap[i]->isInside(x-position.x,y-position.y);
-        if(b){
-
-            hover(false);
-            return b;
-        }
-    }
+    int x = c.x;
+    int y = c.y;
     int width = m_width;
     int height = m_height;
+    Body::coordinate pos = m_position;
 
-    int s = 15;
-    bool horizontalbound = ((x>position.x-s && x<position.x) || (x>position.x+width && x<position.x + width + s)) &&
-            (y>position.y-s && y<position.y+height+s);
-    bool verticalbound = ((y>position.y - s && y<position.y) || (y>position.y+height && y<position.y + height + s)) &&
-            (x > position.x-s && x<position.x + width + s);
+    BaseNode * moving = nullptr;
+    for(int i=0; i<m_underMap.length(); i++){
+        BaseNode * b = m_underMap[i]->isInside(c.subtract(m_position));
+        if(b){
+            hover(false,Body::coordinate());
+            if(b->isMoving()){
+                moving  = b;
+            }else{
+                return b;
+            }
+        }
+    }
+    if(moving){
+        return moving;
+    }
+
+
+
+    int padding = 15;
+    bool horizontalbound = ((x>pos.x-padding && x<pos.x) || (x>pos.x+width && x<pos.x + width + padding)) &&
+            (y>pos.y-padding && y<pos.y+height+padding);
+    bool verticalbound = ((y>pos.y - padding && y<pos.y) || (y>pos.y+height && y<pos.y + height + padding)) &&
+            (x > pos.x-padding && x<pos.x + width + padding);
     if(horizontalbound || verticalbound){
-        hover(true);
-
+        hover(true,c);
         return this;
     }else{
-
-        hover(false);
+        removeUnderMapFocus();
         return nullptr;
     }
 }
@@ -129,9 +139,6 @@ void NodeArea::underMapAppendNode(BaseNode *b)
         reFormatExpandedForm();
         updateAbsolutePosition();
     }
-
-
-
 }
 
 bool NodeArea::underMapContains(BaseNode *b)
@@ -145,6 +152,39 @@ bool NodeArea::underMapContains(BaseNode *b)
         }
     }
     return false;
+}
+
+void NodeArea::cloneSubMap(BaseNode *b)
+{
+    QVector<BaseNode*> subMap = b->getUnderMap();
+    if(!subMap.isEmpty()){
+        QVector<BaseNode*> mySubMap;
+        for(int i=0; i<subMap.length(); i++){
+            BaseNode * b = subMap[i];
+            if(typeid (*b) == typeid (GhostNode)){
+
+                GhostNode * g = b->getGhostPointer();
+                GhostNode * clone = g->getOriginal()->newGhostNode();
+                Body::coordinate geometry;
+                geometry.x = g->getAbstraction()->width()/2;
+                geometry.y = g->getAbstraction()->height()/2;
+                Body::coordinate vector = g->getCenterPosition();
+                clone->setPositionByCenter(getAbsolutePosition().add(vector));
+
+                mySubMap.append(clone);
+
+            }
+        }
+        setUnderMap(mySubMap);
+    }
+}
+
+void NodeArea::removeUnderMapFocus()
+{
+    hover(false,Body::coordinate());
+    for(int i=0; i<m_underMap.length(); i++){
+        m_underMap[i]->removeUnderMapFocus();
+    }
 }
 
 void NodeArea::subNodeMoved()
@@ -232,18 +272,17 @@ void NodeArea::exude(BaseNode * b)
     reFormatExpandedForm();
 }
 
-void NodeArea::hover(bool b)
+void NodeArea::hover(bool b,Body::coordinate c)
 {
-    if(b){
-        highlight(b);
+    if(m_batchSelected){
+        return;
     }else{
-        if(!m_batchSelected){
-            highlight(b);
-        }
+        highlight(b);
     }
+
 }
 
-void NodeArea::select(bool b)
+void NodeArea::select(bool b,Body::coordinate c)
 {
     m_batchSelected = b;
     highlight(b);
@@ -253,6 +292,28 @@ void NodeArea::select(bool b)
 void NodeArea::highlight(bool b)
 {
     m_obj->setProperty("highlighted",b);
+}
+
+void NodeArea::moving(bool b)
+{
+    if(m_moving!=b){
+        m_moving = b;
+        if(b){
+            m_obj->setProperty("z",1);
+            m_positionBeforeDragged = getPosition();
+        }else{
+            m_obj->setProperty("z",0);
+        }
+    }
+}
+
+void NodeArea::geometryChanged()
+{
+    updateRelation();
+
+    for(int i=0; i<m_underMap.length(); i++){
+        m_underMap[i]->geometryChanged();
+    }
 }
 
 void NodeArea::initializeObj()
@@ -268,7 +329,7 @@ void NodeArea::initializeObj()
     object->setParent(body->engine());
     connect(object,SIGNAL(widthChanged()),this,SLOT(widthChanged()));
     connect(object,SIGNAL(heightChanged()),this,SLOT(heightChanged()));
-
+    connect(object,SIGNAL(update()),this,SLOT(geometryChanged()));
     setID(body->allocateNewID("node"));
 
     m_obj = object;

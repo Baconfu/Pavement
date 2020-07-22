@@ -42,10 +42,13 @@ public:
         c.y = m_absolutePosition.y + m_height/2;
         return c;
     }
+    Body::coordinate getLocalCenterPosition(){Body::coordinate c; c.x = width()/2; c.y = height()/2; return c;}
     Body::coordinate getAbsolutePosition(){updateAbsolutePosition(); return m_absolutePosition;}
     int getX(){return getPosition().x;}
     int getY(){return getPosition().y;}
 
+    int displayX();
+    int displayY();
 
     //NODE DIMENSIONS: GETTING FUNCTIONS
     int width(){return m_width;}
@@ -93,11 +96,13 @@ public:
     void underMapAppendNode(QVector<BaseNode*> nodes);
     void underMapAppendNode(BaseNode * node);
     void appendToUnderMap(BaseNode * b);
-    void syncGhosts(BaseNode * b);
+    void syncGhosts(BaseNode * b,BaseNode * caller);
     QVector<BaseNode*> getUnderMap(){return m_underMap;}
     bool underMapContains(BaseNode * b);
     void removeSubNode(BaseNode * b);
     void transformSubMap(Body::coordinate vector);
+
+    void removeUnderMapFocus();
 
     void subNodeMoved();
     void reFormatExpandedForm();
@@ -113,11 +118,11 @@ public:
     void expandText();
 
 
-    bool clickAction();
+    bool clickShouldSelect();
 
 
     void cycleExpandState(int state);
-    int isExpanded(){return m_expanded;}
+    bool isExpanded(){return m_expanded;}
     void abstract();
     void exude(BaseNode * b);
 
@@ -126,7 +131,6 @@ public:
     void giveTypeInputFocus();
 
     //NODE STATE VARIABLES
-    Body::coordinate positionBeforeDragged;
     void moving(bool b);
     bool isMoving(){return m_moving;}
 
@@ -143,7 +147,8 @@ public:
     QString getText();
     void setText(QString s);
     void highlight(bool visible);
-    void hover(bool b);
+    void hover(bool b,Body::coordinate c);
+    void select(bool b,Body::coordinate c);
     void select(bool b);
     //Implement highlight state controllers
     void preventFocus(bool b);
@@ -202,8 +207,6 @@ private:
     }
 
 
-    void selectTextBox(bool b);
-    bool textBoxSelected(){return m_obj->findChild<QObject*>("expandedText")->property("focus").toBool();}
 
     //Domestic policy
     void setStyle();
@@ -216,11 +219,11 @@ private:
     //STATE VARIABLES
 
     bool m_batchSelected = false;
-    bool m_hover = false;
+    bool m_hoverSelected = false;
     bool m_visible = true;
     bool m_hidden = false;
     bool m_dissolve = false;
-    int m_expanded = -1;
+    int m_expanded = false;
     bool m_moving = false;
 
     bool m_preventFocus = false;
@@ -229,11 +232,9 @@ private:
 
 
 public:
-    BaseNode * isInside(int x, int y);
+    BaseNode * isInside(Body::coordinate c);
 
     void updateAbsolutePosition();
-
-    void hoverSelect(int y);
 
 signals:
 

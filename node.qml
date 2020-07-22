@@ -10,8 +10,7 @@ Item {
     property int absY
 
 
-
-
+    visible: true
 
     z:0
 
@@ -21,6 +20,7 @@ Item {
     property bool highlighted: false
     property bool faded: false
     property bool ghost:false
+
 
     signal typeAccepted(string s)
     signal typePassivelyAccepted(string s)
@@ -35,8 +35,8 @@ Item {
             expandedArea.visible = true
             typeNameContainer.y = expandedArea.y + expandedArea.height
             container.width = expandedArea.width
-            container.height = nameContainer.height + expandedRectangle.height + typeNameContainer.height
 
+            container.height = nameContainer.height + expandedRectangle.height + typeNameContainer.height
 
         }
         else{
@@ -117,6 +117,7 @@ Item {
         TextInput {
             id: textInput
             x:5
+            font.pointSize: 12
 
             text: ""
             enabled: !ghost
@@ -154,6 +155,7 @@ Item {
         }
         PaintNode {
             id: standard
+            objectName: "paintNode"
             mode: "standard"
             anchors.fill: parent
             lineWidth: 2
@@ -180,7 +182,7 @@ Item {
             anchors.fill:parent
             font.pointSize: 9
             text: ""
-            visible: false
+            visible: true
             font.italic: false
             onContentWidthChanged: {
                 typeNameContainer.x = container.width/2 - contentWidth/2
@@ -195,6 +197,9 @@ Item {
                 if(focus == false){
                     typePassivelyAccepted(typeInput.text)
                 }
+                if(focus){
+                    visible = focus
+                }
             }
             onVisibleChanged: {
 
@@ -208,6 +213,7 @@ Item {
             onAccepted: {
                 typeAccepted(typeInput.text)
             }
+
         }
     }
     ExpandIcon {
@@ -246,7 +252,7 @@ Item {
             x:0
             width:expandedArea.width
             height:expandedArea.height-y
-            z:-1
+            z:0
 
             radius: 10
             border.color: "black"
@@ -265,6 +271,8 @@ Item {
             y:nameContainer.height
             x:0
             width:expandedArea.width
+            property int minWidth: 100
+            property int minHeight: 100
 
             height:expandedArea.height-y
             z:-1
@@ -274,6 +282,7 @@ Item {
             TextArea {
                 MouseArea{
                     anchors.fill:parent
+                    propagateComposedEvents: false
                     onPressed: {
                         expandedText.cursorPosition = expandedText.positionAt(mouseX,mouseY)
                         mouse.accepted = true
@@ -295,14 +304,14 @@ Item {
                 font.pointSize: 9
 
                 onContentWidthChanged: {
-                    if(contentWidth > 80)
+                    if(contentWidth + 20 > expandedTextBox.minWidth)
                         if(expandedTextBox.visible)
                             expandedArea.width = contentWidth + 20
                     else
                         expandedArea.width = 100
                 }
                 onContentHeightChanged: {
-                    if(contentHeight > 60){
+                    if(contentHeight + 40 > expandedTextBox.minHeight){
                         if(expandedTextBox.visible)
                             expandedArea.height = contentHeight + 40
                     }else{

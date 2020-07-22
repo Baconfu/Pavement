@@ -24,7 +24,7 @@ public:
     void setLineWidth(int pixels){m_lineWidth = pixels;}
 
     QColor color(){return m_color;}
-    void setColor(QColor c){m_color = c;}
+    void setColor(QColor c){m_color = c; update();}
 
     QString mode(){return m_mode;}
     void setMode(QString m){m_mode = m;}

@@ -17,15 +17,9 @@ void Note::transform(Body::coordinate c)
     setPosition(m_position.add(c));
 }
 
-void Note::hover(bool b)
+void Note::hover(bool b,Body::coordinate c)
 {
-    if(b != m_obj->findChild<QObject*>("textArea")->property("focus").toBool()){
-        m_obj->findChild<QObject*>("textArea")->setProperty("focus",b);
-        if(!b){
-            Body * b = Body::getInstance();
-            b->setFocusWindow();
-        }
-    }
+    m_obj->findChild<QObject*>("textArea")->setProperty("focus",b);
 }
 
 void Note::highlight(bool b)
@@ -38,7 +32,7 @@ bool Note::textBoxSelected()
     return m_obj->findChild<QObject*>("textArea")->property("focus").toBool();
 }
 
-bool Note::clickAction()
+bool Note::clickShouldSelect()
 {
     if(textBoxSelected()){
         return false;
@@ -56,35 +50,56 @@ void Note::setText(QString s)
     m_obj->findChild<QObject*>("textArea")->setProperty("text",s);
 }
 
-BaseNode * Note::isInside(int x,int y)
+BaseNode * Note::isInside(Body::coordinate c)
 {
     Body::coordinate position = getPosition();
-
+    int x = c.x;
+    int y = c.y;
     int width = m_width;
     int height = m_height;
-    int s = 15;
-    bool horizontalbound = ((x>position.x-s && x<position.x) || (x>position.x+width && x<position.x + width + s)) &&
-            (y>position.y-s && y<position.y+height+s);
-    bool verticalbound = ((y>position.y - s && y<position.y) || (y>position.y+height && y<position.y + height + s)) &&
-            (x > position.x-s && x<position.x + width + s);
+    int padding = 15;
+    bool horizontalbound = ((x>position.x-padding && x<position.x) || (x>position.x+width && x<position.x + width + padding)) &&
+            (y>position.y-padding && y<position.y+height+padding);
+    bool verticalbound = ((y>position.y - padding && y<position.y) || (y>position.y+height && y<position.y + height + padding)) &&
+            (x > position.x-padding && x<position.x + width + padding);
     bool highlighted = false;
     if(horizontalbound || verticalbound){
         highlight(true);
         highlighted = true;
-        hover(false);
         return this;
     }
     if(x>position.x && x<position.x + width && y > position.y && y < position.y + height){
         highlighted = true;
         highlight(false);
-        hover(true);
         return this;
     }
     if(!highlighted){
         highlight(false);
-        hover(false);
         return nullptr;
     }
+}
+
+void Note::moving(bool b)
+{
+    if(m_moving!=b){
+        m_moving = b;
+        if(b){
+            m_obj->setProperty("z",1);
+            m_positionBeforeDragged = getPosition();
+        }else{
+            m_obj->setProperty("z",0);
+        }
+    }
+}
+
+void Note::destroy()
+{
+    disconnect();
+    Body * body = Body::getInstance();
+    m_obj->deleteLater();
+    delete(m_obj);
+    m_obj = nullptr;
+    body->removeNode(this);
 }
 
 

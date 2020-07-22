@@ -55,6 +55,7 @@ Body::coordinate Relation::calculateRelationCutoff(BaseNode * originNode, BaseNo
 
 
 
+
     if(true){
 
 
@@ -94,12 +95,11 @@ Body::coordinate Relation::calculateRelationCutoff(BaseNode * originNode, BaseNo
         if(targetEdge_gradient){
             intersectionX = int(targetEdge_b);
             intersectionY = int((double(localVector.y) / double(localVector.x)) * targetEdge_b);
-
         }else{
-            intersectionX = int(targetEdge_b / (double(localVector.y) / double(localVector.x)));
+
+            intersectionX = int(targetEdge_b / ( double(localVector.y) / double(localVector.x) ));
             intersectionY = int(targetEdge_b);
         }
-
 
 
         Body::coordinate c;

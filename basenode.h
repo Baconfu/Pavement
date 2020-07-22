@@ -25,8 +25,14 @@ public:
     virtual Body::coordinate getLocalCenterPosition();
     virtual int getX();
     virtual int getY();
+    virtual int displayX(){return getX();}
+    virtual int displayY(){return getY();}
+    virtual void setPositionBeforeDragged(Body::coordinate c){m_positionBeforeDragged = c;}
+    virtual Body::coordinate getPositionBeforeDragged(){return m_positionBeforeDragged;}
+    virtual void returnToPositionBeforeDragged(){setPosition(m_positionBeforeDragged);}
 
     virtual QString getName(){QString s; return s;}
+    virtual QString getTypeName(){return "NULL";}
 
     virtual void transform(Body::coordinate){}
     virtual void transformIgnoreSubMap(Body::coordinate){}
@@ -45,11 +51,13 @@ public:
     virtual int getID();
 
     virtual void setText(QString){}
-    virtual QString getText(){return QString("Basenode function called");}
+    virtual QString getText(){return QString();}
 
-    virtual void hover(bool b){qDebug()<<b;}
+    virtual void hover(bool,Body::coordinate){}
+
+    virtual void select(bool,Body::coordinate){}
     virtual void select(bool){}
-    virtual void highlight(bool b);
+    virtual void highlight(bool){}
 
 
     virtual QString derivedType(){return "base";}
@@ -62,18 +70,23 @@ public:
     virtual void expand(){}
     virtual void cloneSubMap(BaseNode*){}
     virtual void cycleExpandState(int){}
+    virtual void setExpandState(int n){m_expandState = n;}
 
-    virtual bool clickAction(){return true;}
+    virtual bool clickShouldSelect(){return true;}
 
     virtual QVector<BaseNode*> getUnderMap(){QVector<BaseNode*> null; return null;}
     virtual void underMapAppendNode(BaseNode*){}
     virtual void setUnderMap(QVector<BaseNode*>){}
-    virtual void removeSubNode(BaseNode * b){qDebug()<<b;}
+    virtual void removeSubNode(BaseNode *){}
     virtual bool underMapContains(BaseNode*){return false;}
+
+    virtual void clearUnderMap(){}
+
+    virtual void removeUnderMapFocus(){}
 
     virtual void subNodeMoved(){}
     virtual void reFormatExpandedForm(){}
-    virtual int isExpanded(){return -1;}
+    virtual bool isExpanded(){return false;}
 
     virtual void setAbstraction(BaseNode * b){qDebug()<<"BaseNode virtual function called. "<<b;}
     virtual BaseNode * getAbstraction();
@@ -83,32 +96,35 @@ public:
     virtual void setVisibility(bool visibility);
     virtual bool isVisible(){return true;}
 
-    virtual BaseNode * isInside(int x,int y){qDebug()<<"BaseNode virtual function called. "<< x<<y; return nullptr;}
+    virtual BaseNode * isInside(Body::coordinate){return nullptr;}
 
     virtual void updateAbsolutePosition(){}
 
     virtual void moving(bool){}
     virtual bool isMoving(){return false;}
 
-
+    virtual bool abstractionExists(BaseNode *){return false;}
+    virtual BaseNode * getHighestAbstraction(){return this;}
 
     virtual void initializeObj(){}
     virtual void destroy(){}
     virtual QQuickItem * obj(){return m_obj;}
 
 
+    int expandState(){return m_expandState;}
+
 
 protected:
     int m_id;
-    int m_expandState = 0;
+    int m_expandState = -1;
 
     QString m_name;
-
-
 
     Body::coordinate m_position;
     Body::coordinate m_absolutePosition;
     Body::coordinate m_centerPosition;
+    Body::coordinate m_positionBeforeDragged;
+
 
     QQuickItem * m_obj;
 };

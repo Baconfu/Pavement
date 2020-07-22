@@ -39,7 +39,7 @@ public:
     int displayWidth(){return m_width;}
     int displayHeight(){return m_height;}
 
-    BaseNode * isInside(int x,int y);
+    BaseNode * isInside(Body::coordinate c);
 
     //NODE INFORMATION: GETTING FUNCTIONS
 
@@ -59,10 +59,14 @@ public:
     }
     bool underMapContains(BaseNode * b);
 
+    void cloneSubMap(BaseNode * b);
+
+    void removeUnderMapFocus();
+
     void subNodeMoved();
     void reFormatExpandedForm();
 
-    int isExpanded(){return m_expanded;}
+    bool isExpanded(){return m_expanded;}
 
     void setAbstraction(BaseNode * b){m_abstraction = b;}
     BaseNode * getAbstraction(){return m_abstraction;}
@@ -70,12 +74,15 @@ public:
     void extract();
     void exude(BaseNode * b);
 
-    void hover(bool b);
-    void select(bool b);
+    void hover(bool b,Body::coordinate c);
+    void select(bool b,Body::coordinate c);
     void highlight(bool b);
 
-    void moving(bool b){m_moving = b;}
+    void moving(bool b);
     bool isMoving(){return m_moving;}
+
+
+
 
     bool isVisible(){return m_visible;}
     void setVisibility(bool b){m_visible = b; m_obj->setProperty("visible",b);}
@@ -83,11 +90,12 @@ public:
     QQuickItem * obj(){return m_obj;}
 
 private:
+    int tally = 0;
 
     int m_width = 0;
     int m_height = 0;
 
-    int m_expanded = -1;
+    int m_expanded = false;
     bool m_visible = true;
     bool m_moving = false;
 
@@ -103,6 +111,7 @@ signals:
 public slots:
     void widthChanged();
     void heightChanged();
+    void geometryChanged();
 };
 
 #endif // NODEAREA_H

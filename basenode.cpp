@@ -83,11 +83,6 @@ int BaseNode::getID()
     return 0;
 }
 
-void BaseNode::highlight(bool b)
-{
-    qDebug()<<"BaseNode virtual function called. "<<b;
-}
-
 BaseNode *BaseNode::getAbstraction()
 {
     return nullptr;

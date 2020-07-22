@@ -62,7 +62,8 @@ ApplicationWindow {
             signal mouseDoubleClicked(int x,int y)
             signal mousePressed(int x,int y)
             signal mouseHeld()
-            signal scroll(int x,int y,bool ctrl)
+
+            signal mouseInWindowChanged(bool b)
 
             signal mouseReleased();
             hoverEnabled: true
@@ -85,6 +86,11 @@ ApplicationWindow {
 
             onReleased: {
                 mouseReleased()
+
+            }
+
+            onContainsMouseChanged: {
+                mouseInWindowChanged(containsMouse)
             }
 
             pressAndHoldInterval: 200
@@ -102,14 +108,16 @@ ApplicationWindow {
             }*/
 
             onDoubleClicked: {
-
+                console.log("hey");
             }
+
+
         }
         WheelHandler {
             id:trackpad
             acceptedDevices: PointerDevice.TouchPad
             onWheel: {
-                if(wheel.modifiers == Qt.ControlModifier){
+                if(wheel.modifiers === Qt.ControlModifier){
                     myItem.scroll(wheel.angleDelta.x,wheel.angleDelta.y,true)
                 }else{
                     myItem.scroll(wheel.angleDelta.x,wheelAngleDelta.y,false)
@@ -119,18 +127,21 @@ ApplicationWindow {
 
             }
         }
-
         WheelHandler {
             id:wheel
             acceptedDevices: PointerDevice.Mouse
             property int rotationOld: 0
+
             onWheel: {
 
                 myItem.scroll(0,(rotation-rotationOld) * 10,true)
 
                 rotationOld = rotation
+
             }
         }
+
+
 
 
         TextInput{
