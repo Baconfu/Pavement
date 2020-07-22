@@ -44,8 +44,12 @@ QSGNode * PaintRelation::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData *
     const double pi = 3.1415;
     QSizeF s = size();
 
+
     double gradient = s.height() / s.width();
     double angle = atan(gradient);
+    if(s.width() == 0){
+        angle *= -1;
+    }
 
     //quartiles
     bool top = false;
@@ -62,6 +66,7 @@ QSGNode * PaintRelation::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData *
 
     double arm = angle + (pi/6) ;
     double arm2 = angle - (pi/6);
+
 
     QPointF origin = p0();
     QPointF destination = p1();

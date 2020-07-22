@@ -280,6 +280,23 @@ void Body::initialize()
     f.match = -2;
     functions.append(f);
 
+    f.name = "get node";
+    f.alias = QStringList{};
+    f.commonShorthand = "NULL";
+    f.match = 0;
+    functions.append(f);
+
+    f.name = "connection mode";
+    f.alias = QStringList{};
+    f.commonShorthand = "NULL";
+    f.match = 0;
+    functions.append(f);
+
+    f.name = "copy submap";
+    f.alias = QStringList{};
+    f.commonShorthand = "NULL";
+    f.match = 0;
+    functions.append(f);
 
 }
 
@@ -338,18 +355,48 @@ int Body::acceptedSelection(int n)
 
         }else{
             QString s = displayFunctions[n].name;
-            if(s.split("-").length() > 2){
+            QStringList split = s.split("-");
+            if(split.length() > 2){
                 qDebug()<<"error: your node name has symbol '-' in it";
             }
-            Node * n = getNodeByName(s.split("-")[0]);
-
-            GhostNode * g = newGhostNode(n,tabPosition().x,tabPosition().y);
-            if(m_selectedNode){
-                m_selectedNode->underMapAppendNode(g);
-
+            Node * n = nullptr;
+            if(split.length() == 2){
+                n = getNodeByInfo(s.split("-")[0],split[1]);
             }
+            if(split.length() == 1){
+                n = getNodeByName(split[0]);
+            }
+
+            if(n){
+                GhostNode * g = newGhostNode(n,tabPosition().x,tabPosition().y);
+                if(selectedNode()){
+                    selectedNode()->underMapAppendNode(g);
+                }
+            }
+
         }
 
+    }
+    if(latestContext() == getting_node){
+        if(n == -1){
+
+        }else{
+            QString s = displayFunctions[n].name;
+            QStringList split = s.split("-");
+            if(split.length() > 2){
+                qDebug()<<"error: your node name has symbol '-' in it";
+            }
+            Node * n = nullptr;
+            if(split.length() == 2){
+                n = getNodeByInfo(s.split("-")[0],split[1]);
+            }
+            if(split.length() == 1){
+                n = getNodeByName(split[0]);
+            }
+            if(n){
+                n->setPosition(mousePosition());
+            }
+        }
     }
 
 
@@ -391,7 +438,7 @@ int Body::acceptedSelection(int n)
     }
 
 
-    if(f== "new node"){
+    if(f == "new node"){
         int id = allocateNewID("node");
         int x = m_tabPosition.x;
         int y = m_tabPosition.y;
@@ -401,7 +448,7 @@ int Body::acceptedSelection(int n)
         }
 
     }
-    if(f=="new relation"){
+    if(f == "new relation"){
         int id = allocateNewID("relation");
 
         if(latestContext() == Context::node_selected && selectedNode()){
@@ -426,6 +473,11 @@ int Body::acceptedSelection(int n)
             setFocusWindow();
         }
     }
+    if(f == "connection mode"){
+        contextReset();
+        setContext(connection_mode);
+
+    }
     if(f == "parent"){
         if(latestContext() == Context::node_selected){
             BaseNode * n = nullptr;
@@ -441,7 +493,10 @@ int Body::acceptedSelection(int n)
     }
     if(f == "remove node"){
         if(contexts.contains(latestContext())){
-            selectedNode()->destroy();
+            if(selectedNode()){
+                selectedNode()->destroy();
+            }
+
         }
     }
     if(f == "remove from"){
@@ -525,6 +580,9 @@ int Body::acceptedSelection(int n)
 
         }
     }
+    if(f == "get node"){
+        autoTab(getting_node);
+    }
     if(f == "clear batch selection"){
         if(contexts.contains(latestContext())){
             batchDeselect();
@@ -550,11 +608,14 @@ int Body::acceptedSelection(int n)
         if(contexts.contains(latestContext())){
 
             BaseNode * selected = selectedNode();
-            if(typeid (*selected) == typeid (Node)){
+            if(selected){
+                if(typeid (*selected) == typeid (Node)){
 
-                Node * node = selectedNode()->getNodePointer();
-                newGhostNode(node,mousePosition().x,mousePosition().y);
+                    Node * node = selectedNode()->getNodePointer();
+                    newGhostNode(node,mousePosition().x,mousePosition().y);
+                }
             }
+
         }
     }
     if(f == "create ghost"){
@@ -589,13 +650,15 @@ int Body::acceptedSelection(int n)
         if(contexts.contains(latestContext())){
 
             BaseNode * b = selectedNode();
-            if(b->isExpanded() != 0){
-                b->cycleExpandState(0);
-            }else{
-                b->expand();
-            }
+            b->cycleExpandState(0);
 
 
+        }
+    }
+    if(f == "copy submap"){
+        if(selectedNode()){
+            setContext(copying_submap);
+            target_node = selectedNode();
         }
     }
     if(f == "show text"){
@@ -609,8 +672,11 @@ int Body::acceptedSelection(int n)
 
         if(contexts.contains(latestContext())){
             BaseNode * b = selectedNode();
-            b->moving(true);
-            setContext(moving_node);
+            if(b){
+                b->moving(true);
+                setContext(moving_node);
+            }
+
         }
     }
     if(f == "create area"){
@@ -974,6 +1040,38 @@ Node *Body::getNodeByName(QString name)
     return nullptr;
 }
 
+Node *Body::getNodeByInfo(QString name, QString type)
+{
+    BaseNode * n = nullptr;
+    for(int i=0; i<nodeMap.length(); i++){
+        if(nodeMap[i]){
+            n = nodeMap[i];
+            if(typeid (*n) == typeid (Node)){
+                if(n->getName() == name && n->getTypeName() == type){
+                    return n->getNodePointer();
+                }
+            }
+
+        }
+
+    }
+    return nullptr;
+}
+
+bool Body::nameAlreadyExists(QString name,BaseNode * asker)
+{
+    for(int i=0; i<nodeMap.length(); i++){
+        BaseNode * b = nodeMap[i];
+        if(b){
+            if(b != asker && b->getName() == name && typeid (*b) == typeid (Node)){
+                return true;
+            }
+        }
+
+    }
+    return false;
+}
+
 void Body::registerGhost(GhostNode *g){
     if(!nodeMap.contains(g)){
         nodeMap.append(g);
@@ -1237,6 +1335,16 @@ void Body::enterPressed()
         }
         contextReset();
     }
+    if(latestContext() == copying_submap){
+
+        if(highlightedNode()){
+
+            target_node->clearUnderMap();
+            target_node->cloneSubMap(highlightedNode());
+            target_node = nullptr;
+        }
+        contextReset();
+    }
 
     m_searchBar->setProperty("selectFirst",true);
 }
@@ -1295,14 +1403,57 @@ void Body::scroll(int x, int y, bool ctrl)
 
 void Body::mouseClicked(int x, int y)
 {
-    qDebug()<<7;
-    if(selectedNode()){
-        qDebug()<<8;
-        if(selectedNode()->clickShouldSelect()){
-            qDebug()<<9;
-            batchSelect(selectedNode());
+    bool ctrl = true;
+    if(highlightedNode() && latestContext() == creating_relation && context().contains(connection_mode)){
+
+        if(hoveringRelation()->originNode()!=highlightedNode()){
+
+            if(!hoveringRelation()->originNode()->abstractionExists(highlightedNode())){
+                hoveringRelation()->setDestinationObject(highlightedNode());
+                hoveringRelation()->finalizeSelf();
+                hoveringRelation()->updateSelf();
+
+                Relation * r = nullptr;
+                setHoveringRelation(r);
+                contextReset();
+                setHighlightedNode();
+                setContext(connection_mode);
+                ctrl = false;
+            }
         }
 
+
+
+    }
+    if(selectedNode()){
+        if(context().contains(connection_mode)){
+            if(latestContext() != creating_relation){
+                int id = allocateNewID("relation");
+
+                if(latestContext() == Context::node_selected){
+                    Node * n = nullptr;
+
+                    newLine(id,selectedNode(),n);
+                    setSelected(n);
+                    setFocusWindow();
+                }
+            }
+        }else{
+            if(selectedNode()->clickShouldSelect()){
+                batchSelect(selectedNode());
+            }
+        }
+        ctrl = false;
+    }
+    if(ctrl){
+
+        if(context().contains(connection_mode)){
+            qDebug()<<"stopped";
+            hoveringRelation()->destroy();
+            Relation * r = nullptr;
+            setHoveringRelation(r);
+            contextReset();
+        }
     }
 }
 
@@ -1331,7 +1482,11 @@ void Body::mousePressed(int x, int y)
 
     }else{
         stopTimer();
-        dragCamera(true);
+        if(draggingCamera()){
+            dragCamera((false));
+        }else{
+            dragCamera(true);
+        }
     }
 }
 
@@ -1342,16 +1497,15 @@ void Body::mouseReleased()
     if(latestContext() == moving_node){
 
         if(m_mouseHeld){
-
             if(highlightedNode()){
                 if(!m_batchSelected.contains(highlightedNode())){
                     for(int i=0; i<nodeMap.length(); i++){
                         if(nodeMap[i]){
+
                             if(nodeMap[i]->isMoving() && nodeMap[i] != highlightedNode() && !highlightedNode()->underMapContains(nodeMap[i])){
                                 if(nodeMap[i]->getAbstraction()){
                                     nodeMap[i]->getAbstraction()->exude(nodeMap[i]);
                                 }
-
                                 highlightedNode()->underMapAppendNode(nodeMap[i]);
                                 BaseNode * b = nodeMap[i];
                                 if(typeid (*b) == typeid (Node)){
@@ -1476,7 +1630,7 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
 
     bool highlighted = false;
     if(latestContext() == tab_searching){
-        //setHighlightedNode(selectedNode());
+
         return;
     }
 
@@ -1498,22 +1652,20 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
     if(latestContext() != relation_selected){
         for(int i=0; i<nodeMap.length(); i++){
             if(nodeMap[i]){
-
                 if(nodeMap[i]->getAbstraction() == nullptr){
 
 
                     BaseNode * b = nodeMap[i]->isInside(mousePosition());
-
-
-
                     if(b){
+
                         control = true;
-                        QVector<int> contexts = {parenting,including,creating_relation,moving_node};
+                        QVector<int> contexts = {parenting,including,creating_relation,moving_node,copying_submap};
 
                         if(contexts.contains(latestContext())){
-
-                            setHighlightedNode(b);
-                            highlighted = true;
+                            if(!b->isMoving()){
+                                setHighlightedNode(b);
+                                highlighted = true;
+                            }
                         }else{
                             b->hover(true,mousePosition());
 
@@ -1541,14 +1693,16 @@ void Body::mouseTransform(int x,int y,int offsetX,int offsetY)
     bool relationSelected = false;
     for(int i=0; i<relationArchive.length(); i++){
         if(relationArchive[i]){
-            if(relationArchive[i]->isInside(mousePosition().x,mousePosition().y)){
-
-                relationArchive[i]->setSelected(true);
-                setSelected(relationArchive[i]);
-                relationSelected = true;
-            }else{
-                relationArchive[i]->setSelected(false);
+            if(relationArchive[i]!=hoveringRelation()){
+                if(relationArchive[i]->isInside(mousePosition().x,mousePosition().y)){
+                    relationArchive[i]->setSelected(true);
+                    setSelected(relationArchive[i]);
+                    relationSelected = true;
+                }else{
+                    relationArchive[i]->setSelected(false);
+                }
             }
+
         }
 
     }
@@ -1597,7 +1751,6 @@ void Body::removeNodes(QVector<BaseNode *> nodes){
 
 
 void Body::batchSelect(BaseNode *n){
-    qDebug()<<10;
     setContext(batch_selecting);
 
     if(m_batchSelected.contains(n)){
@@ -1606,7 +1759,6 @@ void Body::batchSelect(BaseNode *n){
         contextResolved();
 
     }else{
-        qDebug()<<11;
         m_batchSelected.append(n);
         n->select(true);
     }
@@ -1629,6 +1781,7 @@ void Body::batchDeselect(BaseNode *n){
 
 void Body::setSelected(BaseNode *n)
 {
+
 
     m_selectedNode = n;
     /*
@@ -1709,7 +1862,7 @@ int Body::searching(QString input)
         QStringList saves = getSaves(defaultPath);
         pool = functionFromList(saves);
     }
-    if(latestContext() == node_browsing){
+    if(latestContext() == node_browsing || latestContext() == getting_node){
         pool.clear();
         QStringList nodes;
         for(int i=0; i<nodeMap.length(); i++){
@@ -1943,10 +2096,13 @@ NodeArea *Body::newNodeArea(QVector<BaseNode *> nodes)
     coordinate c = medianPosition(nodes);
 
     BaseNode * buffer = getCommonAbstraction(nodes);
+
     NodeArea * n = new NodeArea;
     n->initializeObj();
     for(int i=0; i<nodes.length(); i++){
-        nodes[i]->getAbstraction()->exude(nodes[i]);
+        if(nodes[i]->getAbstraction()){
+            nodes[i]->getAbstraction()->exude(nodes[i]);
+        }
     }
     n->setUnderMap(nodes);
     n->reFormatExpandedForm();
@@ -1955,9 +2111,21 @@ NodeArea *Body::newNodeArea(QVector<BaseNode *> nodes)
         dimensions.x = n->width()/2;
         dimensions.y = n->height()/2;
         n->setPosition(c.subtract(dimensions).add(buffer->getAbsolutePosition()));
-        n->setAbstraction(buffer);
+
         buffer->underMapAppendNode(n);
+
+        qDebug()<<"oh joy";
     }
+    nodeMap.append(n);
+    return n;
+}
+
+NodeArea *Body::newNodeArea(BaseNode * node)
+{
+    NodeArea * n = new NodeArea;
+    n->initializeObj();
+    n->cloneSubMap(node);
+    n->reFormatExpandedForm();
     nodeMap.append(n);
     return n;
 }
@@ -2048,7 +2216,7 @@ void Body::autoTab(int context)
 
     setContext(context);
 
-    if(context == 8){
+    if(context == saving_file){
         m_searchBar->setProperty("selectFirst",false);
     }else{
         m_searchBar->setProperty("selectFirst",true);

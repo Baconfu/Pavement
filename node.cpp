@@ -24,13 +24,26 @@ void Node::inputAccepted()
     if(b->latestContext() == Body::node_selected){
         b->contextResolved();
     }
+    QString name = m_obj->findChild<QObject*>("textInput")->property("text").toString();
+    if(b->nameAlreadyExists(m_name,this)){
+        m_obj->findChild<QObject*>("paintNode")->setProperty("color","red");
+    }else{
+        m_obj->findChild<QObject*>("paintNode")->setProperty("color","grey");
+    }
+    m_name = name;
 
-    m_name = m_obj->findChild<QObject*>("textInput")->property("text").toString();
 }
 
 void Node::inputPassivelyAccepted()
 {
-    m_name = m_obj->findChild<QObject*>("textInput")->property("text").toString();
+    Body * b = Body::getInstance();
+    QString name = m_obj->findChild<QObject*>("textInput")->property("text").toString();
+    if(b->nameAlreadyExists(m_name,this)){
+        m_obj->findChild<QObject*>("paintNode")->setProperty("color","red");
+    }else{
+        m_obj->findChild<QObject*>("paintNode")->setProperty("color","grey");
+    }
+    m_name = name;
 }
 
 void Node::typeInputAccepted(QString s)
@@ -78,6 +91,7 @@ void Node::hover(bool b,Body::coordinate c)
             if(expandState() == 2){
                 m_obj->findChild<QObject*>("expandedText")->setProperty("focus",true);
             }
+            highlight(false);
         }
         if(local.y > divider2){
             m_obj->findChild<QObject*>("typeName")->setProperty("focus",true);
@@ -108,9 +122,9 @@ void Node::select(bool b,Body::coordinate c)
 
 void Node::select(bool b)
 {
-
-    highlight(b);
     m_batchSelected = b;
+    highlight(b);
+
 }
 
 void Node::preventFocus(bool b)
@@ -444,6 +458,13 @@ void Node::transformSubMap(Body::coordinate vector)
     }
 }
 
+void Node::removeUnderMapFocus()
+{
+    for(int i=0; i<m_underMap.length(); i++){
+        m_underMap[i]->removeUnderMapFocus();
+    }
+}
+
 void Node::subNodeMoved()
 {
     reFormatExpandedForm();
@@ -534,13 +555,11 @@ void Node::cloneSubMap(BaseNode *b)
 
                 GhostNode * g = b->getGhostPointer();
                 GhostNode * clone = g->getOriginal()->newGhostNode();
-                clone->setAbstraction(this);
                 Body::coordinate geometry;
                 geometry.x = g->getAbstraction()->width()/2;
                 geometry.y = g->getAbstraction()->height()/2;
-                Body::coordinate vector = g->getPosition().subtract(geometry);
-
-                clone->setPosition(vector.add(this->getCenterAbsolutePosition()));
+                Body::coordinate vector = g->getCenterPosition();
+                clone->setPositionByCenter(getAbsolutePosition().subtract(geometry).add(vector));
 
                 mySubMap.append(clone);
 
@@ -554,10 +573,13 @@ void Node::cloneSubMap(BaseNode *b)
 
 void Node::expand()
 {
+    if(m_expandState == -1){
+        return;
+    }
     m_obj->setProperty("expanded",true);
     m_expanded = true;
 
-    if(m_expandState == 0 || m_expandState == -1){
+    if(m_expandState == 0){
         expandMap();
     }
     if(m_expandState == 1){
@@ -565,6 +587,9 @@ void Node::expand()
     }
     if(m_expandState == 2){
         expandText();
+    }
+    for(int i=0; i<m_underMap.length(); i++){
+        m_underMap[i]->expand();
     }
 
 }
@@ -637,7 +662,7 @@ bool Node::clickShouldSelect()
 
 void Node::cycleExpandState(int state)
 {
-    m_expandState = state;
+    setExpandState(state);
     abstract();
     expand();
 }
@@ -836,26 +861,32 @@ void Node::initializeObj()
 
 BaseNode * Node::isInside(Body::coordinate c)
 {
-    Body * body = Body::getInstance();
 
     int x = c.x;
     int y = c.y;
     int width = m_width;
     int height = m_height;
-    if(preventingFocus()){
-        return nullptr;
-    }
+
     if(x>m_position.x && x<m_position.x + width && y > m_position.y && y < m_position.y + height){
+        m_hoverSelected = true;
+        if(preventingFocus()){
+            return nullptr;
+        }
         if(isExpanded() && expandState() == 0){
+            BaseNode * moving = nullptr;
             for(int i=0; i<m_underMap.length(); i++){
                 BaseNode * b = m_underMap[i]->isInside(c.subtract(m_position));
-
                 if(b){
-                    return b;
+                    if(b->isMoving()){
+                        moving = b;
+                    }
+                    else{
+                        return b;
+                    }
                 }
-                if(m_underMap[i]->isMoving()){
-                    qDebug()<<"FOUND MOVING";
-                }
+            }
+            if(moving){
+                return moving;
             }
         }
 
@@ -874,6 +905,8 @@ BaseNode * Node::isInside(Body::coordinate c)
         hover(true,c);
         return this;
     }else{
+        removeUnderMapFocus();
+        preventFocus(false);
         return nullptr;
     }
 }
@@ -901,7 +934,7 @@ void Node::widthChanged()
 void Node::heightChanged()
 {
     if(m_obj->findChild<QObject*>("typeNameContainer")->property("width").toInt() == 0){
-        m_height = m_obj->property("height").toInt() - m_obj->findChild<QObject*>("typeNameContainer")->property("height").toInt();
+        m_height = m_obj->property("height").toInt();
     }else{
         m_height = m_obj->property("height").toInt();
     }

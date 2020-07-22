@@ -125,6 +125,12 @@ public:
             if(x>0 && y<0){
                 angle += 3.1415 * 2;
             }
+            if(x==0){
+                angle = 3.1415 / 2;
+                if(y < 0){
+                    angle = 3 * 3.1415 / 2;
+                }
+            }
             return angle;
         }
         coordinate add(coordinate c){
@@ -178,6 +184,7 @@ public:
     GhostNode * newGhostNode(Node * original,int x,int y);
 
     NodeArea * newNodeArea(QVector<BaseNode*> nodes);
+    NodeArea * newNodeArea(BaseNode * n);
 
     Note * newNote(int id,int x,int y);
 
@@ -186,8 +193,11 @@ public:
     BaseNode * getNodePointerByID(int id);
     BaseNode * getNodePointerByID(int id,QVector<BaseNode*> pool);
     Node * getNodeByName(QString name);
+    Node * getNodeByInfo(QString name,QString type);
     QVector<Node*> getNodeByType(QString type);
     QVector<Node*> getNodeByType(Node * typeNode);
+
+    bool nameAlreadyExists(QString name,BaseNode * asker);
 
     void registerGhost(GhostNode * g);
 
@@ -214,16 +224,17 @@ public:
     }
     void contextResolved(){
         if(true){
-            //qDebug()<<"context resolved:"<<m_context;
+            qDebug()<<"context resolved:"<<m_context;
         }
         m_context.pop_back();
     }
     void contextReset(){
 
-        m_context.clear();
+        while(m_context.length()){
+            contextResolved();
+        }
     }
     void setContext(int c){
-        //qDebug()<<m_context<<"setting context:"<<c;
         if(c == tab_searching){
             if(latestContext() != c){
 
@@ -261,7 +272,10 @@ public:
         moving_node = 13,
         structural_selected = 14,
         mouse_held = 15,
-        dragging_camera =16
+        dragging_camera =16,
+        getting_node = 17,
+        connection_mode = 18,
+        copying_submap = 19
     };
 
     int allocateNewID(QString type);
@@ -336,6 +350,7 @@ private:
     void removeNodes(QVector<BaseNode*> nodes);
 
 
+    BaseNode * target_node = nullptr;
     BaseNode * m_currently_hovering = nullptr;
     BaseNode * m_selectedNode = nullptr;
     QVector<BaseNode*> m_batchSelected;
@@ -372,6 +387,7 @@ private:
 
 
         if(r){
+
             m_selectedNode = nullptr;
             setContext(Context::relation_selected);
         }

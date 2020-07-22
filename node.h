@@ -102,6 +102,8 @@ public:
     void removeSubNode(BaseNode * b);
     void transformSubMap(Body::coordinate vector);
 
+    void removeUnderMapFocus();
+
     void subNodeMoved();
     void reFormatExpandedForm();
 
@@ -217,7 +219,7 @@ private:
     //STATE VARIABLES
 
     bool m_batchSelected = false;
-    bool m_hover = false;
+    bool m_hoverSelected = false;
     bool m_visible = true;
     bool m_hidden = false;
     bool m_dissolve = false;

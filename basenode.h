@@ -51,7 +51,7 @@ public:
     virtual int getID();
 
     virtual void setText(QString){}
-    virtual QString getText(){return QString("Basenode function called");}
+    virtual QString getText(){return QString();}
 
     virtual void hover(bool,Body::coordinate){}
 
@@ -70,6 +70,7 @@ public:
     virtual void expand(){}
     virtual void cloneSubMap(BaseNode*){}
     virtual void cycleExpandState(int){}
+    virtual void setExpandState(int n){m_expandState = n;}
 
     virtual bool clickShouldSelect(){return true;}
 
@@ -78,6 +79,10 @@ public:
     virtual void setUnderMap(QVector<BaseNode*>){}
     virtual void removeSubNode(BaseNode *){}
     virtual bool underMapContains(BaseNode*){return false;}
+
+    virtual void clearUnderMap(){}
+
+    virtual void removeUnderMapFocus(){}
 
     virtual void subNodeMoved(){}
     virtual void reFormatExpandedForm(){}
@@ -114,8 +119,6 @@ protected:
     int m_expandState = -1;
 
     QString m_name;
-
-
 
     Body::coordinate m_position;
     Body::coordinate m_absolutePosition;

@@ -59,6 +59,10 @@ public:
     }
     bool underMapContains(BaseNode * b);
 
+    void cloneSubMap(BaseNode * b);
+
+    void removeUnderMapFocus();
+
     void subNodeMoved();
     void reFormatExpandedForm();
 
@@ -78,12 +82,15 @@ public:
     bool isMoving(){return m_moving;}
 
 
+
+
     bool isVisible(){return m_visible;}
     void setVisibility(bool b){m_visible = b; m_obj->setProperty("visible",b);}
     void initializeObj();
     QQuickItem * obj(){return m_obj;}
 
 private:
+    int tally = 0;
 
     int m_width = 0;
     int m_height = 0;
@@ -104,6 +111,7 @@ signals:
 public slots:
     void widthChanged();
     void heightChanged();
+    void geometryChanged();
 };
 
 #endif // NODEAREA_H

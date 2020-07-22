@@ -43,6 +43,7 @@ private:
     bool m_highlighted = false;
     bool m_selected = false;
 
+    QVector<Relation*> m_underMap;
 
     /*
     QVector<Relation*> toRelation;
@@ -98,6 +99,8 @@ public:
     void setVisibility(bool visibility);
     bool hovering(){return m_hovering;}
 
+    void appendToUnderMap(Relation * r){m_underMap.append(r);}
+    void removeSubRelation(Relation * r){m_underMap.removeOne(r);}
 
     void setOrigin(Body::coordinate c);
     void setOrigin(int x,int y);

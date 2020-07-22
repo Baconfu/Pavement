@@ -211,6 +211,7 @@ QVector<BaseNode*> PavementFile::loadNodes()
         nodePool[i]->setPosition(c);
 
     }
+
     return nodePool;
 }
 
@@ -284,7 +285,7 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
 
     n->setPosition(c.add(positionOffset));
 
-
+    n->setText(node["text"].toString());
 
     QJsonArray subMap = node["subMap"].toArray();
 
@@ -310,7 +311,6 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
         }
     }
     n->setPosition(c.add(positionOffset));
-
 
 
     //n->reFormatExpandedForm();
@@ -417,6 +417,8 @@ QJsonObject PavementFile::writeSubNode(BaseNode *n)
     if(typeid (*n) == typeid (NodeArea)){
         subNode["type"] = "area";
     }
+
+    subNode["text"] = n->getText();
 
     Body::coordinate c = n->getPosition();
     subNode["x"] = c.x;

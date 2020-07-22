@@ -1,6 +1,7 @@
 #include "ghostnode.h"
 #include <note.h>
 #include <iostream>
+#include <nodearea.h>
 
 using namespace std;
 
@@ -130,29 +131,27 @@ BaseNode * GhostNode::isInside(Body::coordinate c)
     if(x>m_position.x && x<m_position.x + width && y > m_position.y && y < m_position.y + height){
 
         if(isExpanded() && expandState() == 0){
+            BaseNode * moving = nullptr;
             for(int i=0; i<m_underMap.length(); i++){
                 BaseNode * b = m_underMap[i]->isInside(c.subtract(m_position));
                 if(b){
                     hover(false,Body::coordinate());
-                    return b;
+                    if(b->isMoving()){
+                        moving  = b;
+                    }else{
+                        return b;
+                    }
                 }
+            }
+            if(moving){
+                return moving;
             }
         }
 
-        /*
-        QObject * rect = m_obj->findChild<QObject*>("expandedTextBox");
-        if(rect->property("visible").toBool()){
-            y-=m_position.y;
-            if(y > rect->property("y").toInt() && y < rect->property("height").toInt() + rect->property("y").toInt()){
-                response.action = Body::responseAction::select_expandedText;
-                selectTextBox();
-                return nullptr;
-            }
-        }
-        */
+
         return this;
     }else{
-        hover(false,Body::coordinate());
+        removeUnderMapFocus();
         return nullptr;
     }
 }
@@ -189,24 +188,29 @@ void GhostNode::select(bool b)
 
 void GhostNode::hover(bool b,Body::coordinate c)
 {
-    Body::coordinate local = c.subtract(m_position);
+    Body::coordinate local = c.subtract(getAbsolutePosition());
+    Body * body = Body::getInstance();
     if(selected()){
         return;
     }else{
         if(b){
+
             int divider1 = m_obj->findChild<QObject*>("nameContainer")->property("height").toInt();
             int divider2 = m_obj->findChild<QObject*>("typeNameContainer")->property("y").toInt();
 
             if(local.y < divider1){
                 highlight(true);
+                body->setFocusWindow();
             }
             if(local.y > divider1 && local.y < divider2){
-                highlight(false);
                 if(expandState() == 2){
                     m_obj->findChild<QObject*>("expandedText")->setProperty("focus",true);
+
                 }
+                highlight(false);
             }
             if(local.y > divider2){
+                body->setFocusWindow();
                 highlight(true);
             }
         }else{
@@ -254,6 +258,7 @@ void GhostNode::mouseReleased()
 void GhostNode::geometryChanged()
 {
     updateRelation();
+
     for(int i=0; i<m_underMap.length(); i++){
         m_underMap[i]->geometryChanged();
     }
@@ -367,6 +372,8 @@ void GhostNode::setUnderMap(QVector<BaseNode *> subMap)
         b->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
         b->setPosition(c);
 
+        b->setAbstraction(this);
+
         b->setVisibility(false);
     }
     if(!m_underMap.isEmpty()){
@@ -444,6 +451,25 @@ bool GhostNode::underMapContains(BaseNode *b)
     return false;
 }
 
+void GhostNode::clearUnderMap()
+{
+    QVector<BaseNode*> temp = m_underMap;
+    for(int i=0; i<temp.length(); i++){
+
+        temp[i]->destroy();
+
+    }
+
+}
+
+void GhostNode::removeUnderMapFocus()
+{
+    hover(false,Body::coordinate());
+    for(int i=0; i<m_underMap.length(); i++){
+        m_underMap[i]->removeUnderMapFocus();
+    }
+}
+
 void GhostNode::subNodeMoved()
 {
     reFormatExpandedForm();
@@ -455,13 +481,13 @@ void GhostNode::subNodeMoved()
 void GhostNode::abstract()
 {
     for(int i=0; i<m_underMap.length(); i++){
-        //m_underMap[i]->abstract();
+        m_underMap[i]->abstract();
         m_underMap[i]->setVisibility(false);
     }
     Body::coordinate center = getCenterPosition();
     m_obj->setProperty("expanded",false);
     m_expanded = false;
-    setPositionByCenterIgnoreSubMap(center);
+    setPositionByCenter(center);
     reFormatExpandedForm();
 
 }
@@ -471,6 +497,7 @@ void GhostNode::abstract()
 void GhostNode::cloneSubMap(BaseNode *b)
 {
     QVector<Relation*> buffer;
+
     if(typeid (*b) == typeid (Node)){
         QVector<Relation*> subRelations = b->getNodePointer()->getUnderRelation();
         for(int i=0; i<subRelations.length(); i++){
@@ -499,18 +526,17 @@ void GhostNode::cloneSubMap(BaseNode *b)
         QVector<BaseNode*> mySubMap;
         for(int i=0; i<subMap.length(); i++){
             BaseNode * n = subMap[i];
+            Body::coordinate geometry;
+            geometry.x = n->getAbstraction()->width()/2;
+            geometry.y = n->getAbstraction()->height()/2;
             if(typeid (*n) == typeid (GhostNode)){
                 GhostNode * g = n->getGhostPointer();
                 GhostNode * clone = g->getOriginal()->newGhostNode();
-                clone->setAbstraction(this);
-                Body::coordinate geometry;
-                geometry.x = g->getAbstraction()->width()/2;
-                geometry.y = g->getAbstraction()->height()/2;
-                Body::coordinate vector = g->getPosition();
 
 
+                Body::coordinate vector = g->getCenterPosition();
 
-                clone->setPosition(vector);
+                clone->setPositionByCenter(getAbsolutePosition().subtract(geometry).add(vector));
 
 
                 mySubMap.append(clone);
@@ -525,13 +551,21 @@ void GhostNode::cloneSubMap(BaseNode *b)
                         buffer[j]->updateSelf();
                     }
                 }
-                for(int j=0; j<buffer.length(); j++){
-                    buffer[j]->finalizeSelf();
-                }
 
             }
-        }
+            if(typeid (*n) == typeid (NodeArea)){
+                Body * body = Body::getInstance();
+                NodeArea * clone = body->newNodeArea(n);
+                Body::coordinate vector = n->getPosition();
+                clone->setPosition(getAbsolutePosition().subtract(geometry).add(vector));
+                mySubMap.append(clone);
+            }
+            for(int j=0; j<buffer.length(); j++){
+                buffer[j]->finalizeSelf();
+            }
 
+        }
+        qDebug()<<"should have worked";
         setUnderMap(mySubMap);
     }
 
@@ -542,9 +576,13 @@ void GhostNode::cloneSubMap(BaseNode *b)
 
 void GhostNode::expand()
 {
+    if(m_expandState == -1){
+        return;
+    }
     m_obj->setProperty("expanded",true);
     m_expanded = true;
-    if(m_expandState == 0 || m_expandState == -1){
+    if(m_expandState == 0){
+
         expandMap();
     }
     if(m_expandState == 1){
@@ -553,7 +591,9 @@ void GhostNode::expand()
     if(m_expandState == 2){
         expandText();
     }
-
+    for(int i=0; i<m_underMap.length(); i++){
+        m_underMap[i]->expand();
+    }
 
 }
 
@@ -578,11 +618,9 @@ void GhostNode::expandMap()
         //setPositionByCenterIgnoreSubMap(center);
 
         reFormatExpandedForm();
-
     }else{
         m_expanded = false;
         m_obj->setProperty("expanded",false);
-
     }
 
 
@@ -631,7 +669,7 @@ bool GhostNode::clickShouldSelect()
 
 void GhostNode::cycleExpandState(int state)
 {
-    m_expandState = state;
+    setExpandState(state);
     abstract();
     expand();
 }
@@ -790,12 +828,7 @@ void GhostNode::moving(bool b)
 void GhostNode::destroy()
 {
     Body * b = Body::getInstance();
-    QVector<BaseNode*> temp = m_underMap;
-    for(int i=0; i<temp.length(); i++){
-
-        temp[i]->destroy();
-
-    }
+    clearUnderMap();
     if(m_abstraction){
 
         m_abstraction->removeSubNode(this);

@@ -39,6 +39,7 @@ public:
     void setLineWidth(int n);
 
 private:
+    int tally = 0;
     QColor m_color;
     QPointF m_p1;
     QPointF m_p0;

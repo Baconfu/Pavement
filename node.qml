@@ -155,6 +155,7 @@ Item {
         }
         PaintNode {
             id: standard
+            objectName: "paintNode"
             mode: "standard"
             anchors.fill: parent
             lineWidth: 2
@@ -181,7 +182,7 @@ Item {
             anchors.fill:parent
             font.pointSize: 9
             text: ""
-            visible: false
+            visible: true
             font.italic: false
             onContentWidthChanged: {
                 typeNameContainer.x = container.width/2 - contentWidth/2
@@ -196,6 +197,9 @@ Item {
                 if(focus == false){
                     typePassivelyAccepted(typeInput.text)
                 }
+                if(focus){
+                    visible = focus
+                }
             }
             onVisibleChanged: {
 
@@ -209,6 +213,7 @@ Item {
             onAccepted: {
                 typeAccepted(typeInput.text)
             }
+
         }
     }
     ExpandIcon {

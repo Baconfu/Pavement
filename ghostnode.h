@@ -71,6 +71,10 @@ public:
     void removeSubNode(BaseNode * b){m_underMap.removeOne(b);}
     bool underMapContains(BaseNode * b);
 
+    void clearUnderMap();
+
+    void removeUnderMapFocus();
+
     void subNodeMoved();
     void reFormatExpandedForm();
 
@@ -138,6 +142,7 @@ private:
 
     int m_width = 10;
     int m_height = 10;
+
 
 
     int m_expanded = false;
