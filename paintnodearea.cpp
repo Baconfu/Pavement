@@ -8,7 +8,7 @@ PaintNodeArea::PaintNodeArea(QQuickItem * parent):
 
 void PaintNodeArea::paint(QPainter * painter)
 {
-    QSizeF s = size();
+    QSizeF s =QSizeF(width(),height());
 
     QVector<QLineF> border;
     int final = 0;

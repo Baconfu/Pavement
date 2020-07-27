@@ -298,6 +298,19 @@ void Body::initialize()
     f.match = 0;
     functions.append(f);
 
+    f.name = "toggle mouse";
+    f.alias = QStringList{};
+    f.commonShorthand = "NULL";
+    f.match = 0;
+    functions.append(f);
+
+    f.name = "toggle trackpad";
+    f.alias = QStringList{};
+    f.commonShorthand = "NULL";
+    f.match = 0;
+    functions.append(f);
+
+
 }
 
 
@@ -435,6 +448,14 @@ int Body::acceptedSelection(int n)
 
     if(f == "exit fullscreen"){
         fullscreen(false);
+    }
+    if(f == "toggle mouse"){
+        getRoot()->findChild<QObject*>("trackpad")->setProperty("enabled",false);
+        getRoot()->findChild<QObject*>("mouseWheel")->setProperty("enabled",true);
+    }
+    if(f == "toggle trackpad"){
+        getRoot()->findChild<QObject*>("trackpad")->setProperty("enabled",true);
+        getRoot()->findChild<QObject*>("mouseWheel")->setProperty("enabled",false);
     }
 
 
@@ -883,6 +904,7 @@ QStringList Body::getSaves(QString path)
 
         while((entry = readdir(dir)) != nullptr){
             string name = path.toStdString()+"/"+entry->d_name;
+
             if(stat(name.c_str(),&statbuf) == 0){
                 if(statbuf.st_mode & S_IFREG){
 
@@ -895,9 +917,9 @@ QStringList Body::getSaves(QString path)
 
     if(os() == "ubuntu" ){
         while((entry = readdir(dir)) != nullptr){
-            /*if(entry->d_type == 8){
+            if(entry->d_type == 8){
                 s.append(QString::fromStdString(entry->d_name));
-            }*/
+            }
         }
     }
     closedir(dir);

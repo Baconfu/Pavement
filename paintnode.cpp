@@ -9,7 +9,7 @@ PaintNode::PaintNode(QQuickItem * parent):
 void PaintNode::paint(QPainter * painter)
 {
     if(m_mode == "standard"){
-        QSizeF mySize = size();
+        QSizeF mySize = QSizeF(width(),height());
         QLineF l;
 
         QPen pen;

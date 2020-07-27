@@ -1,6 +1,5 @@
 import QtQuick 2.12
 import QtQuick 2.15
-import QtQuick.Window 2.12
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls 1.0
 import Paint 1.0
@@ -97,15 +96,18 @@ ApplicationWindow {
             onPressAndHold: {
                 mouseHeld()
             }
-            /*
-            onWheel: {
 
-                if(wheel.modifiers == Qt.ControlModifier){
-                    scroll(wheel.angleDelta.x,wheel.angleDelta.y,true)
-                }else{
-                    scroll(wheel.angleDelta.x,wheel.angleDelta.y,false)
+            onWheel: {
+                if(trackpad.enabled){
+                    if(wheel.modifiers == Qt.ControlModifier){
+                        scroll(wheel.angleDelta.x,wheel.angleDelta.y,true)
+                    }else{
+                        scroll(wheel.angleDelta.x,wheel.angleDelta.y,false)
+                    }
                 }
-            }*/
+
+
+            }
 
             onDoubleClicked: {
                 console.log("hey");
@@ -114,26 +116,21 @@ ApplicationWindow {
 
         }
         WheelHandler {
+            enabled: true
             id:trackpad
-            acceptedDevices: PointerDevice.TouchPad
-            onWheel: {
-                if(wheel.modifiers === Qt.ControlModifier){
-                    myItem.scroll(wheel.angleDelta.x,wheel.angleDelta.y,true)
-                }else{
-                    myItem.scroll(wheel.angleDelta.x,wheelAngleDelta.y,false)
-                }
+            objectName: "trackpad"
 
 
-
-            }
         }
         WheelHandler {
-            id:wheel
+            enabled: false
+            id: mouseWheel
+            objectName: "mouseWheel"
             acceptedDevices: PointerDevice.Mouse
             property int rotationOld: 0
 
             onWheel: {
-
+                console.log("hi")
                 myItem.scroll(0,(rotation-rotationOld) * 10,true)
 
                 rotationOld = rotation

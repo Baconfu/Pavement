@@ -8,7 +8,7 @@ ExpandIcon::ExpandIcon(QQuickItem * parent):
 
 void ExpandIcon::paint(QPainter * painter)
 {
-    QSizeF mySize = size();
+    QSizeF mySize = QSize(width(),height());
     QRectF rect = QRectF(1,1,mySize.width()-2,mySize.height()-2);
 
     QPen pen;

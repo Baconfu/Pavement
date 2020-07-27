@@ -48,7 +48,7 @@ QSGNode * PaintTriangle::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData *
     }
 
     const double pi = 3.1415;
-    QSizeF s = size();
+    QSizeF s = QSizeF(width(),height());
 
     double gradient = s.height() / s.width();
     double angle = atan(gradient);
