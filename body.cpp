@@ -1896,6 +1896,7 @@ int Body::searching(QString input)
             }
 
         }
+
         pool = functionFromList(nodes);
     }
     if(pool.length()==0){
