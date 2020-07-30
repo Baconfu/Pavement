@@ -9,5 +9,6 @@
         <file>line.qml</file>
         <file>triangle.qml</file>
         <file>note.qml</file>
+        <file>tips.qml</file>
     </qresource>
 </RCC>

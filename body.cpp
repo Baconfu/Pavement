@@ -3,6 +3,7 @@
 #include <pavementfile.h>
 #include <ghostnode.h>
 #include <nodearea.h>
+#include <tip.h>
 #include <note.h>
 #include <sync.h>
 #include <sys/stat.h>
@@ -67,6 +68,8 @@ void Body::initialize()
     connect(m,SIGNAL(mouseReleased()),this,SLOT(mouseReleased()));
     connect(m,SIGNAL(mouseHeld()),this,SLOT(mouseHeld()));
     connect(m,SIGNAL(mouseInWindowChanged(bool)),this,SLOT(mouseInWindowChanged(bool)));
+
+    showTip("Press <TAB> to open search bar");
 
 
     function f;
@@ -311,6 +314,7 @@ void Body::initialize()
     functions.append(f);
 
 
+    freshBoot = false;
 }
 
 
@@ -566,8 +570,8 @@ int Body::acceptedSelection(int n)
     if(f == "debug"){
         //getRoot()->findChild<QObject*>("line"+QString::number(debugTally))->setProperty("lineWidth",2);
         //getRoot()->findChild<QObject*>("debug")->setProperty("focus",true);
-        Node * n = new Node;
-        n->initializeObj();
+        tip * t = new tip;
+        t->initializeObj("test tip coming through");
 
     }
     if(f == "select"){
@@ -1126,6 +1130,28 @@ void Body::removeNode(BaseNode *b)
     int i = nodeMap.indexOf(b);
     delete(nodeMap[i]);
     nodeMap[i] = nullptr;
+}
+
+void Body::showTip(QString s)
+{
+    tip * t = new tip;
+    t->initializeObj(s);
+}
+
+void Body::removeTip(tip *t)
+{
+    int i = allTips.indexOf(t);
+    delete(allTips[i]);
+    allTips.remove(i);
+}
+
+void Body::autoRemoveTip(QString s)
+{
+    for(int i=0; i<allTips.length(); i++){
+        if(s == allTips[i]->getText){
+
+        }
+    }
 }
 
 BaseNode *Body::getCommonAbstraction(QVector<BaseNode *> nodes)

@@ -22,6 +22,7 @@
 
 
 
+class tip;
 class BaseNode;
 class Node;
 class NodeArea;
@@ -206,6 +207,10 @@ public:
     void removeRelation(Relation * r);
     void removeNode(BaseNode * b);
 
+    void showTip(QString s);
+    void removeTip(tip * t);
+    void autoRemoveTip(QString s);
+
     BaseNode * getCommonAbstraction(QVector<BaseNode*> nodes);
 
 
@@ -280,6 +285,7 @@ public:
 
     int allocateNewID(QString type);
 private:
+    int freshBoot = true;
     int sessionLength = 0;
 
     QString currentFile = "";
@@ -344,6 +350,10 @@ private:
 
     QVector<BaseNode*> nodeMap;
     QVector<Relation*> relationArchive;
+
+
+    QVector<tip*> allTips;
+
 
 
     void removeGhosts(QVector<GhostNode*> ghosts);

@@ -22,6 +22,7 @@ SOURCES += \
         main.cpp \
         node.cpp \
         nodearea.cpp \
+    paintcross.cpp \
         paintline.cpp \
         paintnode.cpp \
         paintnodearea.cpp \
@@ -29,6 +30,7 @@ SOURCES += \
         pavementfile.cpp \
         relation.cpp \
         sync.cpp \
+    tip.cpp \
         utility.cpp \
     paintstructural.cpp \
     painttriangle.cpp \
@@ -55,6 +57,7 @@ HEADERS += \
     ghostnode.h \
     node.h \
     nodearea.h \
+    paintcross.h \
     paintline.h \
     paintnode.h \
     paintnodearea.h \
@@ -63,6 +66,7 @@ HEADERS += \
     pavementfile.h \
     relation.h \
     sync.h \
+    tip.h \
     utility.h \
     painttriangle.h \
     note.h
