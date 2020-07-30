@@ -21,7 +21,7 @@ Item {
         color: "grey"
         radius: 10
 
-        z:-1
+        z:5
     }
 
     Text {
@@ -38,6 +38,7 @@ Item {
         y: container.height/2 - height/2
         width: 10
         height: 10
+        lineWidth: 1
 
         MouseArea {
             anchors.fill: parent
@@ -45,7 +46,6 @@ Item {
             objectName: "closeDetect"
             propagateComposedEvents: false
             onClicked: {
-                console.log("whatup")
                 close()
             }
         }

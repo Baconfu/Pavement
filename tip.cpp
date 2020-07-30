@@ -8,6 +8,7 @@ tip::tip()
 void tip::setText(QString text)
 {
     m_obj->findChild<QObject*>("tip")->setProperty("text",text);
+    m_text = text;
 }
 
 void tip::initializeObj(QString text)
@@ -30,5 +31,7 @@ void tip::initializeObj(QString text)
 
 void tip::destroy()
 {
-    qDebug()<<"hey";
+    Body * body = Body::getInstance();
+    m_obj->deleteLater();
+    body->removeTip(this);
 }

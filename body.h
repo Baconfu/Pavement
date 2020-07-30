@@ -285,7 +285,16 @@ public:
 
     int allocateNewID(QString type);
 private:
-    int freshBoot = true;
+    QVector<bool> freshBoot;
+    enum freshBootParameter{
+        first_tab=0,
+        first_node=1,
+        first_relation=2,
+        first_batch=3,
+        first_abstraction=4,
+        first_note=5
+    };
+
     int sessionLength = 0;
 
     QString currentFile = "";

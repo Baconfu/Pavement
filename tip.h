@@ -18,7 +18,7 @@ public:
 
 
 private:
-    QString m_text;
+    QString m_text = "";
 
     QQuickItem * m_obj = nullptr;
 public slots:

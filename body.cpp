@@ -31,6 +31,9 @@ Body * Body::getInstance()
 
 void Body::initialize()
 {
+    for(int i=0; i<6; i++){
+        freshBoot.append(true);
+    }
     timer.setInterval(17);
     connect(&timer,SIGNAL(timeout()),this,SLOT(timeOut()));
 
@@ -314,7 +317,7 @@ void Body::initialize()
     functions.append(f);
 
 
-    freshBoot = false;
+
 }
 
 
@@ -471,6 +474,10 @@ int Body::acceptedSelection(int n)
         if(selectedNode()){
             selectedNode()->underMapAppendNode(n);
         }
+        if(freshBoot[first_node]){
+            showTip("Move node by clicking and dragging. Drag node onto other node to create ghost under target.");
+            freshBoot[first_node] = false;
+        }
 
     }
     if(f == "new relation"){
@@ -482,7 +489,10 @@ int Body::acceptedSelection(int n)
             newRelation(id,selectedNode(),n);
             setSelected(n);
             setFocusWindow();
-
+            if(freshBoot[first_relation]){
+                showTip("create relation by hovering over another node and pressing <ENTER>");
+                freshBoot[first_relation] = false;
+            }
         }
         else{
             qDebug()<<"error: no node selected";
@@ -496,6 +506,10 @@ int Body::acceptedSelection(int n)
             newLine(id,selectedNode(),n);
             setSelected(n);
             setFocusWindow();
+        }
+        if(freshBoot[first_relation]){
+            showTip("create relation by hovering over another node and pressing <ENTER>");
+            freshBoot[first_relation] = false;
         }
     }
     if(f == "connection mode"){
@@ -659,6 +673,10 @@ int Body::acceptedSelection(int n)
             abstract(batchSelected());
             batchDeselect();
             contextReset();
+            if(freshBoot[first_abstraction]){
+                showTip("You have abstracted a node. Hover over the node and use 'expand' to expand");
+                freshBoot[first_abstraction] = false;
+            }
         }else{
 
             BaseNode * b = selectedNode();
@@ -921,9 +939,9 @@ QStringList Body::getSaves(QString path)
 
     if(os() == "ubuntu" ){
         while((entry = readdir(dir)) != nullptr){
-            if(entry->d_type == 8){
-                s.append(QString::fromStdString(entry->d_name));
-            }
+            //if(entry->d_type == 8){
+                //s.append(QString::fromStdString(entry->d_name));
+            //}
         }
     }
     closedir(dir);
@@ -1134,22 +1152,28 @@ void Body::removeNode(BaseNode *b)
 
 void Body::showTip(QString s)
 {
+    for(int i=0; i<allTips.length(); i++){
+        allTips[i]->destroy();
+    }
     tip * t = new tip;
+    allTips.append(t);
     t->initializeObj(s);
 }
 
 void Body::removeTip(tip *t)
 {
-    int i = allTips.indexOf(t);
-    delete(allTips[i]);
-    allTips.remove(i);
+    if(allTips.contains(t)){
+        int i = allTips.indexOf(t);
+        delete(allTips[i]);
+        allTips.remove(i);
+    }
 }
 
 void Body::autoRemoveTip(QString s)
 {
     for(int i=0; i<allTips.length(); i++){
         if(s == allTips[i]->getText()){
-
+            allTips[i]->destroy();
         }
     }
 }
@@ -1209,6 +1233,7 @@ Body::coordinate Body::getDisplayDimensions()
 
 void Body::abstract(QVector<BaseNode *> nodes)
 {
+
     coordinate c = medianPosition(nodes);
     BaseNode * buffer = getCommonAbstraction(nodes);
     Node * n = newNode(allocateNewID("node"),"abstraction",c.x,c.y,nullptr,nullptr);
@@ -1313,6 +1338,11 @@ bool Body::inBounds(int x, int y)
 
 void Body::tab()
 {
+    autoRemoveTip("Press <TAB> to open search bar");
+    if(freshBoot[first_tab]){
+        showTip("Refer to 'Guide to using Pavement.txt' for list of usefull actions");
+        freshBoot[first_tab] = false;
+    }
     m_searchBar->setProperty("enabled",true);
     m_searchBar->setProperty("visible",true);
     coordinate p = mousePosition();
@@ -1559,6 +1589,10 @@ void Body::mouseReleased()
                                 if(typeid (*b) == typeid (Node)){
                                     b->returnToPositionBeforeDragged();
                                 }
+                                if(freshBoot[first_abstraction]){
+                                    showTip("You have abstracted a node. Hover over the node and use 'expand' to expand");
+                                    freshBoot[first_abstraction] = false;
+                                }
                             }
                         }
                     }
@@ -1799,6 +1833,10 @@ void Body::removeNodes(QVector<BaseNode *> nodes){
 
 
 void Body::batchSelect(BaseNode *n){
+    if(freshBoot[first_batch]){
+        showTip("You have activated multi select by clicking on a node. See 'Guide to using Pavement.txt' for things you can do");
+        freshBoot[first_batch] = false;
+    }
     setContext(batch_selecting);
 
     if(m_batchSelected.contains(n)){
