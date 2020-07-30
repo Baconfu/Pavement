@@ -1148,7 +1148,7 @@ void Body::removeTip(tip *t)
 void Body::autoRemoveTip(QString s)
 {
     for(int i=0; i<allTips.length(); i++){
-        if(s == allTips[i]->getText){
+        if(s == allTips[i]->getText()){
 
         }
     }
