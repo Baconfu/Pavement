@@ -32,6 +32,12 @@ ApplicationWindow {
         signal escapePressed()
         signal scroll(int x,int y,bool ctrl)
 
+        signal windowChanged()
+
+        onHeightChanged: {
+            windowChanged()
+        }
+
         focus: true
         Keys.onTabPressed: {
             myItem.tabPressed()

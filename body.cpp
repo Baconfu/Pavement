@@ -1341,7 +1341,7 @@ void Body::tab()
 {
     autoRemoveTip("Press <TAB> to open search bar");
     if(freshBoot[first_tab]){
-        showTip("Refer to 'Guide to using Pavement.txt' for list of usefull actions");
+        showTip("Refer to 'Guide to using Pavement.txt' for list of usefull actions.");
         freshBoot[first_tab] = false;
     }
     m_searchBar->setProperty("enabled",true);
