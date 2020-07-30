@@ -50,6 +50,7 @@ public:
     void setFocusWindow();
     void frameView();
 
+
     void zoom(double deltaFactor);
 
     bool switchvar = false;
@@ -458,6 +459,8 @@ public slots:
     void enterPressed();
     void escapePressed();
     void scroll(int x,int y,bool ctrl);
+
+    void windowChanged();
 
     void mouseTransform(int x,int y,int offsetX,int offsetY);
     int searching(QString input);

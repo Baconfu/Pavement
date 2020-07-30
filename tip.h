@@ -10,6 +10,8 @@ class tip: public QObject
 public:
     tip();
 
+    void setY(int y){m_obj->setProperty("y",y);}
+
     void setText(QString text);
     QString getText(){return m_text;}
 

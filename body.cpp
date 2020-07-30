@@ -46,6 +46,7 @@ void Body::initialize()
     connect(getRoot(),SIGNAL(closing()),this,SLOT(closeWindow()));
     connect(getRoot(),SIGNAL(escapePressed()),this,SLOT(escapePressed()));
     connect(getRoot(),SIGNAL(scroll(int,int,bool)),this,SLOT(scroll(int,int,bool)));
+    connect(getRoot(),SIGNAL(windowChanged()),this,SLOT(windowChanged()));
 
     QDir dir = QDir(QDir::currentPath());
     QStringList contents = dir.entryList();
@@ -1475,6 +1476,13 @@ void Body::scroll(int x, int y, bool ctrl)
         startTimer();
     }
 
+}
+
+void Body::windowChanged()
+{
+    for(int i=0; i<allTips.length(); i++){
+        allTips[i]->setY(getRoot()->property("height").toInt()-50);
+    }
 }
 
 
