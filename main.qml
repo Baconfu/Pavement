@@ -110,7 +110,7 @@ ApplicationWindow {
             }*/
 
             onDoubleClicked: {
-                console.log("hey");
+
             }
 
 
@@ -119,19 +119,18 @@ ApplicationWindow {
             enabled: true
             id:trackpad
             objectName: "trackpad"
-            property int rotationXOld: 0
-            property int rotationYOld: 0
-            acceptedDevices: PointerDevice.TouchPad
             onWheel: {
-                console.log("e")
-                if(wheel.modifiers == Qt.ControlModifier){
-                    scroll((rotation - rotationXOld),(rotation),true)
+                console.log("horizontal",rotation)
+                if(event.modifiers == Qt.ControlModifier){
+                    scroll(event.angleDelta.x,event.angleDelta.y,true)
                 }else{
-                    scroll(wheel.angleDelta.x,wheel.angleDelta.y,false)
+                    scroll(event.angleDelta.x,event.angleDelta.y,false)
                 }
             }
 
         }
+
+
         WheelHandler {
             enabled: false
             id: mouseWheel

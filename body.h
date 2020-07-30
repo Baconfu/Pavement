@@ -229,7 +229,7 @@ public:
     }
     void contextResolved(){
         if(true){
-            qDebug()<<"context resolved:"<<m_context;
+            //qDebug()<<"context resolved:"<<m_context;
         }
         m_context.pop_back();
     }
