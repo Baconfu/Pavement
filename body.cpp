@@ -940,9 +940,9 @@ QStringList Body::getSaves(QString path)
 
     if(os() == "ubuntu" ){
         while((entry = readdir(dir)) != nullptr){
-            //if(entry->d_type == 8){
-                //s.append(QString::fromStdString(entry->d_name));
-            //}
+            if(entry->d_type == 8){
+                s.append(QString::fromStdString(entry->d_name));
+            }
         }
     }
     closedir(dir);
