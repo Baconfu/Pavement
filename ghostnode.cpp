@@ -44,6 +44,20 @@ void GhostNode::transformIgnoreSubMap(Body::coordinate c)
 
 void GhostNode::setPosition(Body::coordinate c)
 {
+    /*
+    if(getName() == "sub2"){
+        if(getID() == 20){
+            qDebug()<<"sub2:"<<c;
+            qDebug()<<"check";
+        }
+
+    }
+    if(getName() == "sub3"){
+        if(getID() == 22){
+            qDebug()<<"sub3:"<<c;
+
+        }
+    }*/
     m_position = c;
     m_obj->setProperty("x",c.x);
     m_obj->setProperty("y",c.y);
@@ -370,8 +384,13 @@ void GhostNode::setUnderMap(QVector<BaseNode *> subMap)
         BaseNode * b = subMap[i];
         Body::coordinate c = b->getAbsolutePosition().subtract(this->getAbsolutePosition());
         b->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
+        if(b->getName() == "microtubule"){
+            qDebug()<<"definitive";
+        }
         b->setPosition(c);
-
+        if(b->getName() == "microtubule"){
+            qDebug()<<"definitive end";
+        }
         b->setAbstraction(this);
 
         b->setVisibility(false);
@@ -480,15 +499,24 @@ void GhostNode::subNodeMoved()
 
 void GhostNode::abstract()
 {
+
     for(int i=0; i<m_underMap.length(); i++){
         m_underMap[i]->abstract();
         m_underMap[i]->setVisibility(false);
     }
-    Body::coordinate center = getCenterPosition();
-    m_obj->setProperty("expanded",false);
-    m_expanded = false;
-    setPositionByCenter(center);
+    if(m_obj->property("expanded").toBool()){
+
+        Body::coordinate center = getCenterPosition();
+
+        m_obj->setProperty("expanded",false);
+        m_expanded = false;
+        setPositionByCenter(center);
+
+    }
+
+
     reFormatExpandedForm();
+
 
 }
 
@@ -579,7 +607,7 @@ void GhostNode::expand()
     if(m_expandState == -1){
         return;
     }
-    m_obj->setProperty("expanded",true);
+    //m_obj->setProperty("expanded",true);
     m_expanded = true;
     if(m_expandState == 0){
 
