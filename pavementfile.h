@@ -38,13 +38,14 @@ public:
 
 
     QJsonObject obj(){return m_obj;}
-
-
+    void formatPosition(BaseNode * b);
+    void expandFormat(int index);
 
 private:
     QJsonObject m_obj;
     QJsonDocument m_doc;
 
+    QVector<Body::coordinate> format;
 
     QVector<BaseNode*> nodePool;
 

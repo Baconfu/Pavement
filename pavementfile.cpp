@@ -205,6 +205,7 @@ QVector<BaseNode*> PavementFile::loadNodes()
 
         }
 
+        formatPosition(nodePool[i]);
         Body::coordinate c;
         c.x = nodes[i].toObject()["x"].toInt();
         c.y = nodes[i].toObject()["y"].toInt();
@@ -225,7 +226,8 @@ Node *PavementFile::loadNode(QJsonObject node)
     Body::coordinate c;
     c.x = node["x"].toInt();
     c.y = node["y"].toInt();
-
+    expandFormat(id);
+    format[id] = c;
 
     n->setText(node["text"].toString());
 
@@ -252,6 +254,10 @@ QVector<BaseNode *> PavementFile::loadSubNodes()
         c.y = 0;
 
         pool.append(loadSubNode(areas[i].toObject(),c));
+
+    }
+    for(int i=0; i<pool.length(); i++){
+        formatPosition(pool[i]);
     }
     return pool;
 }
@@ -260,12 +266,22 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
 {
     BaseNode * n = nullptr;
     QString type = node["type"].toString();
-
+    bool debugSwitch =false;
+    QString myName;
     if(type == "ghost"){
         int original = node["original"].toInt();
         Node * originalNode = findNodeByID(nodePool,original)->getNodePointer();
         n = new GhostNode(originalNode);
         originalNode->registerGhost(n->getGhostPointer());
+        if(originalNode->getName()=="microtubule"){
+            Body::coordinate c;
+            c.x = node["x"].toInt();
+            c.y = node["y"].toInt();
+            debugSwitch = true;
+            qDebug()<<c;
+
+        }
+        myName =originalNode->getName();
 
     }
 
@@ -273,6 +289,9 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
         n = new NodeArea;
     }
 
+    if(type == "node"){
+        qDebug()<<"attempted to create area from real nodes.";
+    }
 
 
     n->initializeObj();
@@ -282,10 +301,12 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
     Body::coordinate c;
     c.x = node["x"].toInt();
     c.y = node["y"].toInt();
-
+    expandFormat(node["id"].toInt());
+    format[node["id"].toInt()] = c;
     n->setPosition(c.add(positionOffset));
 
     n->setText(node["text"].toString());
+
 
     QJsonArray subMap = node["subMap"].toArray();
 
@@ -295,7 +316,7 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
         QJsonObject subNode = subMap[i].toObject();
 
         BaseNode * b = loadSubNode(subNode,n->getAbsolutePosition());
-        b->setAbstraction(n);
+
         subNodes.append(b);
     }
 
@@ -310,7 +331,6 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
             }
         }
     }
-    n->setPosition(c.add(positionOffset));
 
 
     //n->reFormatExpandedForm();
@@ -403,6 +423,24 @@ void PavementFile::readJson()
     m_obj = load(m_fileName);
 }
 
+void PavementFile::formatPosition(BaseNode *b)
+{
+    b->setPosition(format[b->getID()]);
+    for(int i=0; i<b->getUnderMap().length(); i++){
+        formatPosition(b->getUnderMap()[i]);
+    }
+    if(b->getUnderMap().length() == 0){
+        b->reFormatExpandedForm();
+    }
+}
+
+void PavementFile::expandFormat(int index)
+{
+    while(format.length() < index + 1){
+        format.append(Body::coordinate());
+    }
+}
+
 QJsonObject PavementFile::writeSubNode(BaseNode *n)
 {
 
@@ -417,13 +455,18 @@ QJsonObject PavementFile::writeSubNode(BaseNode *n)
     if(typeid (*n) == typeid (NodeArea)){
         subNode["type"] = "area";
     }
+    if(typeid (*n) == typeid (Node)){
+        subNode["type"] = "node";
+    }
 
     subNode["text"] = n->getText();
 
     Body::coordinate c = n->getPosition();
+    if(n->getName() == "microtubule"){
+        qDebug()<<c;
+    }
     subNode["x"] = c.x;
     subNode["y"] = c.y;
-
 
     subNode["expanded"] = n->isExpanded();
     subNode["expandState"] = n->expandState();

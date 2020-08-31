@@ -497,12 +497,15 @@ int Body::acceptedSelection(int n)
         }
         else{
             qDebug()<<"error: no node selected";
+            if(latestContext() == batch_selected){
+                contextResolved();
+            }
         }
 
     }
     if(f == "new connection"){
         int id = allocateNewID("relation");
-        if(latestContext() == node_selected){
+        if(selectedNode()){
             Node * n = nullptr;
             newLine(id,selectedNode(),n);
             setSelected(n);
@@ -536,6 +539,8 @@ int Body::acceptedSelection(int n)
             if(selectedNode()){
                 selectedNode()->destroy();
             }
+            BaseNode * b = nullptr;
+            setSelected(b);
 
         }
     }
@@ -707,6 +712,7 @@ int Body::acceptedSelection(int n)
     }
     if(f == "show text"){
         if(selectedNode()){
+            qDebug()<<10;
             selectedNode()->cycleExpandState(2);
 
         }

@@ -260,6 +260,7 @@ void NodeArea::extract()
     Body::coordinate c = getAbsolutePosition();
     m_obj->setParentItem(b->getRoot()->findChild<QQuickItem*>("layer"));
     setPosition(c);
+    setAbstraction(nullptr);
 
 }
 
