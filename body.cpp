@@ -712,7 +712,6 @@ int Body::acceptedSelection(int n)
     }
     if(f == "show text"){
         if(selectedNode()){
-            qDebug()<<10;
             selectedNode()->cycleExpandState(2);
 
         }

@@ -44,20 +44,7 @@ void GhostNode::transformIgnoreSubMap(Body::coordinate c)
 
 void GhostNode::setPosition(Body::coordinate c)
 {
-    /*
-    if(getName() == "sub2"){
-        if(getID() == 20){
-            qDebug()<<"sub2:"<<c;
-            qDebug()<<"check";
-        }
 
-    }
-    if(getName() == "sub3"){
-        if(getID() == 22){
-            qDebug()<<"sub3:"<<c;
-
-        }
-    }*/
     m_position = c;
     m_obj->setProperty("x",c.x);
     m_obj->setProperty("y",c.y);
@@ -384,13 +371,9 @@ void GhostNode::setUnderMap(QVector<BaseNode *> subMap)
         BaseNode * b = subMap[i];
         Body::coordinate c = b->getAbsolutePosition().subtract(this->getAbsolutePosition());
         b->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
-        if(b->getName() == "microtubule"){
-            qDebug()<<"definitive";
-        }
+
         b->setPosition(c);
-        if(b->getName() == "microtubule"){
-            qDebug()<<"definitive end";
-        }
+
         b->setAbstraction(this);
 
         b->setVisibility(false);
@@ -593,7 +576,6 @@ void GhostNode::cloneSubMap(BaseNode *b)
             }
 
         }
-        qDebug()<<"should have worked";
         setUnderMap(mySubMap);
     }
 
@@ -617,6 +599,7 @@ void GhostNode::expand()
         expandTree();
     }
     if(m_expandState == 2){
+
         expandText();
     }
     for(int i=0; i<m_underMap.length(); i++){
@@ -682,6 +665,7 @@ void GhostNode::expandText()
     if(height < textBox->property("minHeight").toInt()){
         height = textBox->property("minHeight").toInt();
     }
+    m_obj->setProperty("expanded",true);
     m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",true);
     m_obj->findChild<QObject*>("expandedArea")->setProperty("width",width);
     m_obj->findChild<QObject*>("expandedArea")->setProperty("height",height);

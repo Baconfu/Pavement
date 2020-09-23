@@ -266,22 +266,12 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
 {
     BaseNode * n = nullptr;
     QString type = node["type"].toString();
-    bool debugSwitch =false;
-    QString myName;
     if(type == "ghost"){
         int original = node["original"].toInt();
         Node * originalNode = findNodeByID(nodePool,original)->getNodePointer();
         n = new GhostNode(originalNode);
         originalNode->registerGhost(n->getGhostPointer());
-        if(originalNode->getName()=="microtubule"){
-            Body::coordinate c;
-            c.x = node["x"].toInt();
-            c.y = node["y"].toInt();
-            debugSwitch = true;
-            qDebug()<<c;
 
-        }
-        myName =originalNode->getName();
 
     }
 
@@ -462,9 +452,7 @@ QJsonObject PavementFile::writeSubNode(BaseNode *n)
     subNode["text"] = n->getText();
 
     Body::coordinate c = n->getPosition();
-    if(n->getName() == "microtubule"){
-        qDebug()<<c;
-    }
+
     subNode["x"] = c.x;
     subNode["y"] = c.y;
 
