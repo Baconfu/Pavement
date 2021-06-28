@@ -21,7 +21,7 @@ QSGNode * PaintLine::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData *)
     QSGGeometry * geometry = nullptr;
 
     if(!oldNode){
-
+        //CREATE
         node = new QSGGeometryNode;
         geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(),2);
         geometry->setLineWidth(m_lineWidth);
@@ -34,6 +34,7 @@ QSGNode * PaintLine::updatePaintNode(QSGNode * oldNode,UpdatePaintNodeData *)
         node->setMaterial(material);
         node->setFlag(QSGNode::OwnsMaterial);
     } else{
+        //UPDATE
         QSGFlatColorMaterial *material = new QSGFlatColorMaterial;
         material->setColor(m_color);
 

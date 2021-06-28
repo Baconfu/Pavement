@@ -398,8 +398,8 @@ void Node::underMapAppendNode(BaseNode *node)
 
 void Node::appendToUnderMap(BaseNode *node)
 {
-    m_underMap.append(node);
-
+    m_underMap.append(node); 
+    
     Body::coordinate c = node->getPosition().subtract(this->getPosition());
 
     node->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
@@ -841,8 +841,11 @@ void Node::initializeObj()
     QQuickItem * item = body->getRoot();
     object->setParentItem(item->findChild<QQuickItem*>("layer"));
     object->setParent(body->engine());
+
+
     connect(object,SIGNAL(widthChanged()),this,SLOT(widthChanged()));
     connect(object,SIGNAL(heightChanged()),this,SLOT(heightChanged()));
+
     QObject * textObj = object->findChild<QObject*>("textInput");
     connect(textObj,SIGNAL(accepted()),this,SLOT(inputAccepted()));
     connect(object,SIGNAL(passivelyAccepted()),this,SLOT(inputPassivelyAccepted()));
