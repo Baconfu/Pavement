@@ -372,6 +372,7 @@ void GhostNode::setUnderMap(QVector<BaseNode *> subMap)
         Body::coordinate c = b->getAbsolutePosition().subtract(this->getAbsolutePosition());
         b->obj()->setParentItem(this->obj()->findChild<QQuickItem*>("expandedArea"));
         b->setPosition(c);
+
         b->setAbstraction(this);
 
         b->setVisibility(false);
@@ -597,6 +598,7 @@ void GhostNode::expand()
         expandTree();
     }
     if(m_expandState == 2){
+
         expandText();
     }
     for(int i=0; i<m_underMap.length(); i++){
@@ -662,6 +664,7 @@ void GhostNode::expandText()
     if(height < textBox->property("minHeight").toInt()){
         height = textBox->property("minHeight").toInt();
     }
+    m_obj->setProperty("expanded",true);
     m_obj->findChild<QObject*>("expandedTextBox")->setProperty("visible",true);
     m_obj->findChild<QObject*>("expandedArea")->setProperty("width",width);
     m_obj->findChild<QObject*>("expandedArea")->setProperty("height",height);

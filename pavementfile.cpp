@@ -266,8 +266,6 @@ BaseNode *PavementFile::loadSubNode(QJsonObject node,Body::coordinate positionOf
 {
     BaseNode * n = nullptr;
     QString type = node["type"].toString();
-    bool debugSwitch =false;
-    QString myName;
     if(type == "ghost"){
         int original = node["original"].toInt();
         Node * originalNode = findNodeByID(nodePool,original)->getNodePointer();
